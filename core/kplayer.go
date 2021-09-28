@@ -23,7 +23,9 @@ func goCallBackMessage(msgRaw *C.char) {
     libKplayerInstance.callbackFn(message)
 }
 
-var libKplayerInstance *libKplayer = &libKplayer{}
+var libKplayerInstance *libKplayer = &libKplayer{
+    callbackFn: func(message *kpproto.KPMessage) {},
+}
 
 // libKplayer
 type libKplayer struct {
@@ -58,7 +60,6 @@ func (lb *libKplayer) SetOptions(protocol string, video_width uint, video_height
     libKplayerInstance.audio_sample_rate = audio_sample_rate
     libKplayerInstance.audio_channel_layout = audio_channel_layout
     libKplayerInstance.audio_channels = audio_channels
-    libKplayerInstance.callbackFn = func(message *kpproto.KPMessage) {}
 
     return nil
 }

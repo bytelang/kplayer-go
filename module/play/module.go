@@ -1,11 +1,11 @@
-package player
+package play
 
 import (
     "encoding/json"
-    "github.com/bytelang/kplayer/client"
-    "github.com/bytelang/kplayer/cmd/module/player/provider"
-    "github.com/bytelang/kplayer/cmd/module/player/types"
+    "github.com/bytelang/kplayer/module/play/provider"
+    "github.com/bytelang/kplayer/module/play/types"
     kpproto "github.com/bytelang/kplayer/proto"
+    types2 "github.com/bytelang/kplayer/types"
     "github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ func (m AppModule) GetCommand() *cobra.Command {
     return provider.GetCommand()
 }
 
-func (m AppModule) InitConfig(ctx client.ClientContext, data json.RawMessage) {
+func (m AppModule) InitConfig(ctx types2.ClientContext, data json.RawMessage) {
     var config types.Config
     if err := json.Unmarshal(data, &config); err != nil {
         panic(err)
@@ -34,6 +34,6 @@ func (m AppModule) InitConfig(ctx client.ClientContext, data json.RawMessage) {
     provider.InitConfig(ctx, m.provider, config)
 }
 
-func (m AppModule) ParseMessage(ctx client.ClientContext, message *kpproto.KPMessage) {
+func (m AppModule) ParseMessage(ctx types2.ClientContext, message *kpproto.KPMessage) {
     m.provider.ParseMessage(ctx, message)
 }

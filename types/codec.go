@@ -1,4 +1,4 @@
-package client
+package types
 
 type Codec interface {
     MarshalJSON() ([]byte, error)

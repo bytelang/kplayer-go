@@ -2,10 +2,10 @@ package cmd
 
 import (
     "github.com/bytelang/kplayer/app"
-    "github.com/bytelang/kplayer/client"
     "github.com/bytelang/kplayer/core"
     kpproto "github.com/bytelang/kplayer/proto"
     "github.com/bytelang/kplayer/proto/prompt"
+    "github.com/bytelang/kplayer/types"
     log "github.com/sirupsen/logrus"
     "github.com/spf13/cobra"
 )
@@ -15,7 +15,8 @@ const (
     DefaultConfigFilePath = "./"
 )
 
-var clientCtx *client.ClientContext
+var clientCtx *types.ClientContext
+var kplayerApp *app.KplayerApp
 
 func NewRootCmd() *cobra.Command {
 
@@ -28,18 +29,22 @@ func NewRootCmd() *cobra.Command {
         Use:   "kplayer",
         Short: "kplayer launch application",
         PreRun: func(cmd *cobra.Command, args []string) {
-            ctx, err := client.GetClientContext(cmd)
+            clientCtx, err := types.GetCommandContext(cmd, types.ClientContextKey)
+            if err != nil {
+                panic(err)
+            }
+            kplayerApp, err := types.GetCommandContext(cmd, types.AppContextKey)
             if err != nil {
                 panic(err)
             }
 
             // assignment global context
-            clientCtx = ctx
+            clientCtx = clientCtx.(*types.ClientContext)
+            kplayerApp = kplayerApp.(*app.KplayerApp)
         },
         PersistentPreRun: func(cmd *cobra.Command, args []string) {
             cmd.SetOut(cmd.OutOrStdout())
             cmd.SetErr(cmd.ErrOrStderr())
-
         },
     }
 
@@ -50,7 +55,7 @@ func NewRootCmd() *cobra.Command {
 
 func initRootCmd(rootCmd *cobra.Command) {
     // add module command
-    app.ModuleBasic.AddCommands(rootCmd)
+    app.ModuleManager.AddCommands(rootCmd)
 }
 
 func messageConsumer(message *kpproto.KPMessage) {
@@ -58,6 +63,10 @@ func messageConsumer(message *kpproto.KPMessage) {
 
     // global core
     coreKplayer := core.GetLibKplayerInstance()
+
+    for _, item := range app.ModuleManager.Manager {
+        log.Info(item.GetModuleName())
+    }
 
     var err error
     switch message.Action {
