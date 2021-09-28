@@ -68,7 +68,12 @@ func (lb *libKplayer) SetCallBackMessage(fn func(message *kpproto.KPMessage)) {
 }
 
 func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body protoiface.MessageV1) error {
-    cs := C.CString(body.String())
+    str,err := proto.Marshal(body)
+    if err != nil {
+        return err
+    }
+
+    cs := C.CString(string(str))
     defer C.free(unsafe.Pointer(cs))
 
     C.PromptMessage(C.int(action), cs)

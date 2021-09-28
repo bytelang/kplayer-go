@@ -1,10 +1,14 @@
 package main
 
 import (
-    "github.com/bytelang/kplayer/core"
-    kpproto "github.com/bytelang/kplayer/proto"
-    "github.com/bytelang/kplayer/proto/prompt"
+    "context"
+    "github.com/bytelang/kplayer/client"
+    "github.com/bytelang/kplayer/cmd"
+    "github.com/bytelang/kplayer/types"
+    "github.com/rs/zerolog"
     log "github.com/sirupsen/logrus"
+    "github.com/spf13/cobra"
+    viper2 "github.com/spf13/viper"
     "os"
 )
 
@@ -15,31 +19,33 @@ func init() {
 }
 
 func main() {
-    coreKplayer := core.GetLibKplayerInstance()
-    if err := coreKplayer.SetOptions("rtmp", 800, 480, 0, 0, 30, 48000, 3, 2); err != nil {
-        log.Fatal(err)
-    }
+    rootCmd := cmd.NewRootCmd()
 
-    coreKplayer.SetCallBackMessage(MessageConsumer)
-    coreKplayer.Run()
+    if err := Execute(rootCmd, cmd.DefaultConfigFilePath); err != nil {
+        switch e := err.(type) {
+        case types.ErrorCode:
+            os.Exit(e.Code)
+        default:
+            os.Exit(1)
+        }
+    }
 }
 
-func MessageConsumer(message *kpproto.KPMessage) {
-    log.Debug("receive broadcast message: ", message.Action)
+func Execute(rootCmd *cobra.Command, defaultHome string) error {
+    ctx := context.Background()
+    ctx = context.WithValue(ctx, client.CommandContextKey, &client.ClientContext{})
 
-    // global core
-    coreKplayer := core.GetLibKplayerInstance()
+    rootCmd.PersistentFlags().String("log_level", zerolog.InfoLevel.String(), "The logging level (trace|debug|info|warn|error|fatal|panic)")
+    rootCmd.PersistentFlags().String("log_format", "plain", "The logging format (json|plain)")
+    rootCmd.PersistentFlags().StringP("home", "", defaultHome, "directory for config and data")
+    rootCmd.PersistentFlags().Bool("trace", false, "print out full stack trace on errors")
+    rootCmd.PersistentPreRunE = types.ConcatCobraCmdFuncs(types.BindFlagsLoadViper, rootCmd.PersistentPreRunE)
 
-    var err error
-    switch message.Action {
-    case kpproto.EventAction_EVENT_MESSAGE_ACTION_PLAYER_STARTED:
-        err = coreKplayer.SendPrompt(kpproto.EventAction_EVENT_PROMPT_ACTION_OUTPUT_ADD, &prompt.EventPromptOutputAdd{
-            Path:   "output.flv",
-            Unique: "test",
-        })
+    clientCtx := &client.ClientContext{
+        Output:        os.Stdout,
+        Viper:         viper2.New(),
+        Config:        client.Config{},
     }
 
-    if err != nil {
-        log.Errorf("send prompt command failed. error: %s", err)
-    }
+    return client.SetClientContextAndExecute(rootCmd, clientCtx)
 }

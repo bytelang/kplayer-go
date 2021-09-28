@@ -1,3 +1,3 @@
 .PHONY: build build-linux
 build:
-	go build -o build/kplayer
+	CGO_ENABLE=1 go build -o build/kplayer
