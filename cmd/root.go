@@ -4,7 +4,6 @@ import (
     "github.com/bytelang/kplayer/app"
     "github.com/bytelang/kplayer/core"
     kpproto "github.com/bytelang/kplayer/proto"
-    "github.com/bytelang/kplayer/proto/prompt"
     "github.com/bytelang/kplayer/types"
     log "github.com/sirupsen/logrus"
     "github.com/spf13/cobra"
@@ -61,36 +60,10 @@ func initRootCmd(rootCmd *cobra.Command) {
 func messageConsumer(message *kpproto.KPMessage) {
     log.Debug("receive broadcast message: ", message.Action)
 
-    // global core
-    coreKplayer := core.GetLibKplayerInstance()
-
-    for _, item := range app.ModuleManager.Manager {
-        log.Info(item.GetModuleName())
-    }
-
     var err error
-    switch message.Action {
-    case kpproto.EventAction_EVENT_MESSAGE_ACTION_PLAYER_STARTED:
-        // add output
-        if err = coreKplayer.SendPrompt(kpproto.EventAction_EVENT_PROMPT_ACTION_OUTPUT_ADD, &prompt.EventPromptOutputAdd{
-            Path:   "output.flv",
-            Unique: "test",
-        }); err != nil {
-            break
+    for _, item := range app.ModuleManager.Manager {
+        if err = item.ParseMessage(message); err != nil {
+            log.Errorf("send prompt command failed. error: %s. module: %s", err, item.GetModuleName())
         }
-
-        // add input
-        if err = coreKplayer.SendPrompt(kpproto.EventAction_EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
-            Path:   "/Users/kangkai/smart/video/short.flv",
-            Unique: "qflasd",
-        }); err != nil {
-            break
-        }
-    case kpproto.EventAction_EVENT_MESSAGE_ACTION_RESOURCE_EMPTY:
-        err = coreKplayer.SendPrompt(kpproto.EventAction_EVENT_PROMPT_ACTION_PLAYER_STOP, &prompt.EventPromptPlayerStop{})
-    }
-
-    if err != nil {
-        log.Errorf("send prompt command failed. error: %s", err)
     }
 }

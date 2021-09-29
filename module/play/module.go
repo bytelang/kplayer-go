@@ -34,6 +34,6 @@ func (m AppModule) InitConfig(ctx types2.ClientContext, data json.RawMessage) {
     provider.InitConfig(ctx, m.provider, config)
 }
 
-func (m AppModule) ParseMessage(ctx types2.ClientContext, message *kpproto.KPMessage) {
-    m.provider.ParseMessage(ctx, message)
+func (m AppModule) ParseMessage(message *kpproto.KPMessage) error {
+    return m.provider.ParseMessage(message)
 }

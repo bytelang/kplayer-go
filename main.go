@@ -15,6 +15,8 @@ func init() {
     log.SetOutput(os.Stdout)
     log.SetReportCaller(true)
     log.SetLevel(log.TraceLevel)
+    logFormat := &log.TextFormatter{}
+    log.SetFormatter(logFormat)
 }
 
 func main() {

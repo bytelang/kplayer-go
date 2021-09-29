@@ -11,7 +11,7 @@ type AppModule interface {
     GetModuleName() string
     GetCommand() *cobra.Command
     InitConfig(ctx types.ClientContext, data json.RawMessage)
-    ParseMessage(ctx types.ClientContext, message *kpproto.KPMessage)
+    ParseMessage(message *kpproto.KPMessage) error
 }
 
 type ModuleManager map[string]AppModule
@@ -24,4 +24,3 @@ func NewModuleManager(modules ...AppModule) ModuleManager {
 
     return moduleMap
 }
-
