@@ -2,14 +2,17 @@ package provider
 
 import (
     "github.com/bytelang/kplayer/core"
+    "github.com/bytelang/kplayer/module/play/types"
+    "github.com/bytelang/kplayer/server"
     log "github.com/sirupsen/logrus"
     "github.com/spf13/cobra"
+    "sync"
 )
 
 func GetCommand() *cobra.Command {
     cmd := &cobra.Command{
-        Use:   "app",
-        Short: "kplayer application command",
+        Use:   types.ModuleName,
+        Short: "play category",
         Long:  `App management commands. control kplayer basic status`,
     }
 
@@ -28,7 +31,24 @@ func StartCommand() *cobra.Command {
             if err := coreKplayer.SetOptions("rtmp", 800, 480, 0, 0, 30, 48000, 3, 2); err != nil {
                 log.Fatal(err)
             }
-            coreKplayer.Run()
+
+            waitGroup := sync.WaitGroup{}
+            waitGroup.Add(2)
+            serverStopChan := make(chan bool)
+
+            go func() {
+                coreKplayer.Run()
+                serverStopChan <- true
+
+                waitGroup.Done()
+            }()
+
+            go func() {
+                server.StartServer(serverStopChan)
+                waitGroup.Done()
+            }()
+
+            waitGroup.Wait()
             return nil
         },
     }

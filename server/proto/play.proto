@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package RPCProto;
+
+option go_package = "github.com/bytelang/kplayer/cmd/proto";
+
+message StopPlayArgs {
+}
+message StopPlayReply {
+}
