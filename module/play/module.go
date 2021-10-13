@@ -10,13 +10,13 @@ import (
 )
 
 type AppModule struct {
-    provider.Provider
+    *provider.Provider
 }
 
 var _ module.AppModule = &AppModule{}
 
 func NewAppModule() AppModule {
-    return AppModule{provider: provider.NewProvider()}
+    return AppModule{provider.NewProvider()}
 }
 
 func (m AppModule) GetModuleName() string {
@@ -33,5 +33,5 @@ func (m AppModule) InitConfig(ctx kptypes.ClientContext, data json.RawMessage) {
         panic(err)
     }
 
-    m.provider.InitConfig(ctx, config)
+    m.InitModuleConfig(ctx, config)
 }

@@ -19,14 +19,31 @@ const (
 // StartServer start rpc server
 func StartServer(stopChan chan bool, mm module.ModuleManager) {
     s := rpc.NewServer()
+    // s.RegisterValidateRequestFunc(func(r *rpc.RequestInfo, i interface{}) error {
+    //     /*
+    //     t := reflect.TypeOf(i)
+    //     if t.Kind() == reflect.Ptr {
+    //         t = t.Elem()
+    //     }
+    //
+    //     newArgs := reflect.New(t)
+    //     for i := 0; i < t.NumField(); i++ {
+    //         newArgs.FieldByName(t.Field(i).Name).Set(reflect.ValueOf(t.Field(i)))
+    //     }
+    //
+    //      */
+    //     validate := validator.New()
+    //     return validate.Struct(i)
+    // })
+
     s.RegisterCodec(json.NewCodec(), "application/json")
     if err := s.RegisterService(kprpc.NewResource(mm), ""); err != nil {
         panic(err)
     }
-    if err := s.RegisterService(&kprpc.Play{}, ""); err != nil {
+    if err := s.RegisterService(kprpc.NewOutput(mm), ""); err != nil {
         panic(err)
     }
-    if err := s.RegisterService(&kprpc.Output{}, ""); err != nil {
+    if err := s.RegisterService(kprpc.NewPlay(mm), ""); err != nil {
         panic(err)
     }
 

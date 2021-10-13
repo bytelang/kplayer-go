@@ -3,6 +3,8 @@ module github.com/bytelang/kplayer
 go 1.16
 
 require (
+	github.com/go-playground/validator/v10 v10.9.0
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/rpc v1.2.0

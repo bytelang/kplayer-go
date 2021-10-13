@@ -5,19 +5,18 @@ import (
     "github.com/bytelang/kplayer/module"
     "github.com/bytelang/kplayer/module/resource/provider"
     "github.com/bytelang/kplayer/module/resource/types"
-    kpproto "github.com/bytelang/kplayer/proto"
     kptypes "github.com/bytelang/kplayer/types"
     "github.com/spf13/cobra"
 )
 
 type AppModule struct {
-    provider provider.Provider
+    *provider.Provider
 }
 
 var _ module.AppModule = &AppModule{}
 
 func NewAppModule() AppModule {
-    return AppModule{provider: provider.NewProvider()}
+    return AppModule{provider.NewProvider()}
 }
 
 func (m AppModule) GetModuleName() string {
@@ -34,9 +33,5 @@ func (m AppModule) InitConfig(ctx kptypes.ClientContext, data json.RawMessage) {
         panic(err)
     }
 
-    m.provider.InitConfig(ctx, config)
-}
-
-func (m AppModule) ParseMessage(message *kpproto.KPMessage) error {
-    return m.provider.ParseMessage(message)
+    m.InitModuleConfig(ctx, config)
 }

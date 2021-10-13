@@ -14,8 +14,8 @@ type Provider struct {
     module.ModuleKeeper
 }
 
-func NewProvider() Provider {
-    return Provider{}
+func NewProvider() *Provider {
+    return &Provider{}
 }
 
 func (p *Provider) SetConfig(config types.Config) {
@@ -24,7 +24,7 @@ func (p *Provider) SetConfig(config types.Config) {
 
 func (p Provider) ParseMessage(message *kpproto.KPMessage) error {
     switch message.Action {
-    case kpproto.EventAction_EVENT_PROMPT_ACTION_OUTPUT_ADD:
+    case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD:
         outputMsg := &msg.EventMessageOutputAdd{}
         if err := proto.Unmarshal([]byte(message.Body), outputMsg); err != nil {
             return err
@@ -35,6 +35,6 @@ func (p Provider) ParseMessage(message *kpproto.KPMessage) error {
     return nil
 }
 
-func (p *Provider) InitConfig(ctx kptypes.ClientContext, config types.Config) {
+func (p *Provider) InitModuleConfig(ctx kptypes.ClientContext, config types.Config) {
     p.SetConfig(config)
 }

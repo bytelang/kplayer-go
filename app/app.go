@@ -2,8 +2,8 @@ package app
 
 import (
     "github.com/bytelang/kplayer/module"
-    playm "github.com/bytelang/kplayer/module/play"
     outputm "github.com/bytelang/kplayer/module/output"
+    playm "github.com/bytelang/kplayer/module/play"
     resourcem "github.com/bytelang/kplayer/module/resource"
     "github.com/spf13/cobra"
 )

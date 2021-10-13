@@ -17,8 +17,8 @@ type Provider struct {
 }
 
 // NewProvider return provider
-func NewProvider() Provider {
-    return Provider{}
+func NewProvider() *Provider {
+    return &Provider{}
 }
 
 func (p *Provider) setConfig(config types.Config) {
@@ -28,9 +28,9 @@ func (p *Provider) setConfig(config types.Config) {
 // ParseMessage handle core message event
 func (p Provider) ParseMessage(message *kpproto.KPMessage) error {
     switch message.Action {
-    case kpproto.EventAction_EVENT_MESSAGE_ACTION_PLAYER_STARTED:
+    case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
         log.Info("Core success run")
-    case kpproto.EventAction_EVENT_MESSAGE_ACTION_RESOURCE_REMOVE:
+    case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_REMOVE:
         resourceMsg := &msg.EventMessageResourceRemove{}
         if err := proto.Unmarshal([]byte(message.Body), resourceMsg); err != nil {
             return err
@@ -43,6 +43,6 @@ func (p Provider) ParseMessage(message *kpproto.KPMessage) error {
 }
 
 // InitConfig set module config on kplayer started
-func (p *Provider) InitConfig(ctx kptypes.ClientContext, config types.Config) {
+func (p *Provider) InitModuleConfig(ctx kptypes.ClientContext, config types.Config) {
     p.setConfig(config)
 }

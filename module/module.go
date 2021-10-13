@@ -70,6 +70,7 @@ func (m *ModuleKeeper) Trigger(action kpproto.EventAction, message proto.Message
 }
 
 type AppModule interface {
+    KeeperModule
     GetModuleName() string
     GetCommand() *cobra.Command
     InitConfig(ctx types.ClientContext, data json.RawMessage)
