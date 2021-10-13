@@ -5,10 +5,12 @@ package core
 import "C"
 
 import (
+    "unsafe"
+
     kpproto "github.com/bytelang/kplayer/proto"
     "github.com/golang/protobuf/proto"
+    log "github.com/sirupsen/logrus"
     "google.golang.org/protobuf/runtime/protoiface"
-    "unsafe"
 )
 
 //export goCallBackMessage
@@ -69,7 +71,7 @@ func (lb *libKplayer) SetCallBackMessage(fn func(message *kpproto.KPMessage)) {
 }
 
 func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body protoiface.MessageV1) error {
-    str,err := proto.Marshal(body)
+    str, err := proto.Marshal(body)
     if err != nil {
         return err
     }
@@ -95,5 +97,14 @@ func (lb *libKplayer) Run() {
     C.ReceiveMessage(C.MessageCallBack(C.goCallBackMessage))
 
     // start
-    C.Run()
+    stopChan := make(chan bool)
+    go func() {
+        C.Run()
+
+        log.Info("Core start up success.")
+        stopChan <- true
+    }()
+
+    <-stopChan
+    log.Info("Core shut down success.")
 }

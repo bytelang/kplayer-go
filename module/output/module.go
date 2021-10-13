@@ -3,14 +3,15 @@ package play
 import (
     "encoding/json"
     "github.com/bytelang/kplayer/module"
-    "github.com/bytelang/kplayer/module/play/provider"
-    "github.com/bytelang/kplayer/module/play/types"
+    "github.com/bytelang/kplayer/module/output/provider"
+    "github.com/bytelang/kplayer/module/output/types"
     kptypes "github.com/bytelang/kplayer/types"
     "github.com/spf13/cobra"
 )
 
 type AppModule struct {
-    provider.Provider
+    config   types.Config
+    provider provider.Provider
 }
 
 var _ module.AppModule = &AppModule{}

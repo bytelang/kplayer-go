@@ -2,25 +2,31 @@ package server
 
 import (
     "context"
+    "github.com/bytelang/kplayer/module"
+    "net/http"
+    "time"
+
     kprpc "github.com/bytelang/kplayer/server/rpc"
     "github.com/gorilla/rpc/v2"
     "github.com/gorilla/rpc/v2/json"
     log "github.com/sirupsen/logrus"
-    "net/http"
-    "time"
 )
 
 const (
     address = "0.0.0.0:4156"
 )
 
-func StartServer(stopChan chan bool) {
+// StartServer start rpc server
+func StartServer(stopChan chan bool, mm module.ModuleManager) {
     s := rpc.NewServer()
     s.RegisterCodec(json.NewCodec(), "application/json")
-    if err := s.RegisterService(&kprpc.Resource{}, ""); err != nil {
+    if err := s.RegisterService(kprpc.NewResource(mm), ""); err != nil {
         panic(err)
     }
     if err := s.RegisterService(&kprpc.Play{}, ""); err != nil {
+        panic(err)
+    }
+    if err := s.RegisterService(&kprpc.Output{}, ""); err != nil {
         panic(err)
     }
 

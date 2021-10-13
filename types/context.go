@@ -3,15 +3,22 @@ package types
 import (
     "context"
     "fmt"
-    "github.com/spf13/cobra"
-    "github.com/spf13/viper"
     "io"
     "os"
+
+    "github.com/spf13/cobra"
+    "github.com/spf13/viper"
 )
 
+type KplayerContextKey string
+
+func (k KplayerContextKey) String() string {
+    return "kplayer_ctx" + string(k)
+}
+
 const (
-    ClientContextKey = "client.context"
-    AppContextKey    = "app.context"
+    ClientContextKey        KplayerContextKey = "client.context"
+    ModuleManagerContextKey KplayerContextKey = "module.manager"
 )
 
 type ClientContext struct {
@@ -33,7 +40,7 @@ func GetCommandContext(cmd *cobra.Command, key string) (interface{}, error) {
         return v, nil
     }
 
-    return nil, fmt.Errorf("get context failed.")
+    return nil, fmt.Errorf("get context failed")
 }
 
 func SetCommandContextAndExecute(cmd *cobra.Command, ctx context.Context) error {

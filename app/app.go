@@ -2,8 +2,9 @@ package app
 
 import (
     "github.com/bytelang/kplayer/module"
-    "github.com/bytelang/kplayer/module/play"
-    "github.com/bytelang/kplayer/module/play/provider"
+    playm "github.com/bytelang/kplayer/module/play"
+    outputm "github.com/bytelang/kplayer/module/output"
+    resourcem "github.com/bytelang/kplayer/module/resource"
     "github.com/spf13/cobra"
 )
 
@@ -11,26 +12,19 @@ const appName = "kplayer"
 
 var (
     DefaultHome   string
-    ModuleManager = newKplayerApp()
+    ModuleManager = newModuleManager()
 )
 
-type KplayerApp struct {
-    Manager module.ModuleManager
-}
-
-func newKplayerApp() *KplayerApp {
-    app := &KplayerApp{}
-
-    playerProvider := provider.NewProvider()
-    app.Manager = module.NewModuleManager(
-        play.NewAppModule(playerProvider),
+func newModuleManager() module.ModuleManager {
+    return module.NewModuleManager(
+        playm.NewAppModule(),
+        outputm.NewAppModule(),
+        resourcem.NewAppModule(),
     )
-
-    return app
 }
 
-func (ka KplayerApp) AddCommands(rootCmd *cobra.Command) {
-    for _, m := range ka.Manager {
+func AddCommands(rootCmd *cobra.Command) {
+    for _, m := range ModuleManager {
         if cmd := m.GetCommand(); cmd != nil {
             rootCmd.AddCommand(cmd)
         }

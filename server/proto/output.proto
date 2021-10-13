@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package RPCProto;
+
+option go_package = "github.com/bytelang/kplayer/cmd/proto";
+
+message AddOutputArgs {
+	string path = 1;
+	string unique = 2;
+}
+message AddOutputReply {
+}

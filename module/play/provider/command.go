@@ -1,12 +1,15 @@
 package provider
 
 import (
+    "github.com/bytelang/kplayer/module"
+    kptypes "github.com/bytelang/kplayer/types"
+    "sync"
+
     "github.com/bytelang/kplayer/core"
     "github.com/bytelang/kplayer/module/play/types"
     "github.com/bytelang/kplayer/server"
     log "github.com/sirupsen/logrus"
     "github.com/spf13/cobra"
-    "sync"
 )
 
 func GetCommand() *cobra.Command {
@@ -31,6 +34,7 @@ func StartCommand() *cobra.Command {
             if err := coreKplayer.SetOptions("rtmp", 800, 480, 0, 0, 30, 48000, 3, 2); err != nil {
                 log.Fatal(err)
             }
+            mm := cmd.Context().Value(kptypes.ModuleManagerContextKey).(module.ModuleManager)
 
             waitGroup := sync.WaitGroup{}
             waitGroup.Add(2)
@@ -44,7 +48,7 @@ func StartCommand() *cobra.Command {
             }()
 
             go func() {
-                server.StartServer(serverStopChan)
+                server.StartServer(serverStopChan, mm)
                 waitGroup.Done()
             }()
 
