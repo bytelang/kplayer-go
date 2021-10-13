@@ -22,7 +22,7 @@ func (p *Provider) SetConfig(config types.Config) {
     p.config = config
 }
 
-func (p Provider) ParseMessage(message *kpproto.KPMessage) error {
+func (p *Provider) ParseMessage(message *kpproto.KPMessage) error {
     switch message.Action {
     case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD:
         outputMsg := &msg.EventMessageOutputAdd{}

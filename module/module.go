@@ -7,6 +7,7 @@ import (
     "github.com/bytelang/kplayer/types"
     "github.com/golang/protobuf/proto"
     "github.com/spf13/cobra"
+    "sync"
 )
 
 type KeeperContext struct {
@@ -33,7 +34,8 @@ func (kc KeeperContext) Wait(scanPtr proto.Message) error {
 }
 
 type ModuleKeeper struct {
-    keeper []KeeperContext
+    keeper       []KeeperContext
+    triggerMutex sync.Mutex
 }
 
 func (m *ModuleKeeper) GetKeeperContext(id string) *KeeperContext {
@@ -56,6 +58,9 @@ func (m *ModuleKeeper) RegisterKeeperChannel(ctx KeeperContext) error {
 }
 
 func (m *ModuleKeeper) Trigger(action kpproto.EventAction, message proto.Message) {
+    m.triggerMutex.Lock()
+    defer m.triggerMutex.Unlock()
+
     for key, item := range m.keeper {
         if item.action == action {
             data, err := proto.Marshal(message)
@@ -64,8 +69,8 @@ func (m *ModuleKeeper) Trigger(action kpproto.EventAction, message proto.Message
             }
 
             item.ch <- data
+            m.keeper = append(m.keeper[:key], m.keeper[key+1:]...)
         }
-        m.keeper = append(m.keeper[:key], m.keeper[key+1:]...)
     }
 }
 
