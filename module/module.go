@@ -7,6 +7,7 @@ import (
     "github.com/bytelang/kplayer/types"
     "github.com/golang/protobuf/proto"
     "github.com/spf13/cobra"
+    "reflect"
     "sync"
 )
 
@@ -29,8 +30,16 @@ func (kc *KeeperContext) Close() {
 }
 
 func (kc KeeperContext) Wait(scanPtr proto.Message) error {
+    if reflect.TypeOf(scanPtr).Kind() != reflect.Ptr {
+        return fmt.Errorf("scan object must be pointer")
+    }
+
     d := <-kc.ch
     return proto.Unmarshal(d, scanPtr)
+}
+
+func (kc KeeperContext) GetId() string {
+    return kc.id
 }
 
 type ModuleKeeper struct {
@@ -68,8 +77,11 @@ func (m *ModuleKeeper) Trigger(action kpproto.EventAction, message proto.Message
                 panic(err)
             }
 
-            item.ch <- data
-            m.keeper = append(m.keeper[:key], m.keeper[key+1:]...)
+            if keeperCtx := m.GetKeeperContext(item.id); keeperCtx != nil {
+                keeperCtx.ch <- data
+                m.keeper = append(m.keeper[:key], m.keeper[key+1:]...)
+                break
+            }
         }
     }
 }

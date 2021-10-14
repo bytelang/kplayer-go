@@ -6,6 +6,7 @@ import (
     outputype "github.com/bytelang/kplayer/module/output/types"
     "github.com/bytelang/kplayer/proto/msg"
     "github.com/google/uuid"
+    log "github.com/sirupsen/logrus"
     "net/http"
 
     "github.com/bytelang/kplayer/core"
@@ -27,8 +28,8 @@ func NewOutput(manager module.ModuleManager) *Output {
 func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrproto.AddOutputReply) error {
     coreKplayer := core.GetLibKplayerInstance()
     if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &prompt.EventPromptOutputAdd{
-        Path:   args.Output.Path,
-        Unique: args.Output.Unique,
+        Path:   []byte(args.Output.Path),
+        Unique: []byte(args.Output.Unique),
     }); err != nil {
         return err
     }
@@ -46,9 +47,13 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
     if err := keeperCtx.Wait(outputAddMsg); err != nil {
         return fmt.Errorf("messge type invalid")
     }
+    if outputAddMsg.Error != nil {
+        log.Errorf("%s", outputAddMsg.Error)
+        return fmt.Errorf("%s", outputAddMsg.Error)
+    }
 
-    reply.Output.Path = outputAddMsg.Path
-    reply.Output.Unique = outputAddMsg.Unique
+    reply.Output.Path = string(outputAddMsg.Path)
+    reply.Output.Unique = string(outputAddMsg.Unique)
 
     return nil
 }

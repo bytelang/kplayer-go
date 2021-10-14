@@ -27,8 +27,8 @@ func NewResource(manager module.ModuleManager) *Resource {
 func (s *Resource) Add(r *http.Request, args *proto.AddResourceArgs, reply *proto.AddResourceReply) error {
     coreKplayer := core.GetLibKplayerInstance()
     if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
-        Path:   args.Res.Path,
-        Unique: args.Res.Unique,
+        Path:   []byte(args.Res.Path),
+        Unique: []byte(args.Res.Unique),
     }); err != nil {
         return err
     }
@@ -47,9 +47,9 @@ func (s *Resource) Add(r *http.Request, args *proto.AddResourceArgs, reply *prot
         return fmt.Errorf("messge type invalid")
     }
 
-    reply.Res = &proto.Resource{
-        Path:   ResourceAddMsg.Path,
-        Unique: ResourceAddMsg.Unique,
+    reply.Res = proto.Resource{
+        Path:   string(ResourceAddMsg.Path),
+        Unique: string(ResourceAddMsg.Unique),
     }
 
     return nil
@@ -59,7 +59,7 @@ func (s *Resource) Add(r *http.Request, args *proto.AddResourceArgs, reply *prot
 func (s *Resource) Remove(r *http.Request, args *proto.RemoveResourceArgs, reply *proto.RemoveResourceReply) error {
     coreKplayer := core.GetLibKplayerInstance()
     if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_REMOVE, &prompt.EventPromptResourceRemove{
-        Unique: args.Unique,
+        Unique: []byte(args.Unique),
     }); err != nil {
         return err
     }
@@ -79,9 +79,9 @@ func (s *Resource) Remove(r *http.Request, args *proto.RemoveResourceArgs, reply
         return fmt.Errorf("messge type invalid")
     }
 
-    reply.Res = &proto.Resource{
-        Path:   ResourceRemoveMsg.Path,
-        Unique: ResourceRemoveMsg.Unique,
+    reply.Res = proto.Resource{
+        Path:   string(ResourceRemoveMsg.Path),
+        Unique: string(ResourceRemoveMsg.Unique),
     }
 
     return nil
