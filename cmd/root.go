@@ -42,10 +42,7 @@ func initRootCmd(rootCmd *cobra.Command) {
 func messageConsumer(message *kpproto.KPMessage) {
     log.Debug("receive broadcast message: ", message.Action)
 
-    var err error
     for _, item := range app.ModuleManager {
-        if err = item.ParseMessage(message); err != nil {
-            log.Errorf("send prompt command failed. error: %s. module: %s", err, item.GetModuleName())
-        }
+        item.Trigger(message)
     }
 }

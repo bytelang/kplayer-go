@@ -3,11 +3,7 @@ package provider
 import (
     "github.com/bytelang/kplayer/module"
     "github.com/bytelang/kplayer/module/play/types"
-    kpproto "github.com/bytelang/kplayer/proto"
-    "github.com/bytelang/kplayer/proto/msg"
     kptypes "github.com/bytelang/kplayer/types"
-    "github.com/golang/protobuf/proto"
-    log "github.com/sirupsen/logrus"
 )
 
 // Provider play module provider
@@ -23,23 +19,6 @@ func NewProvider() *Provider {
 
 func (p *Provider) setConfig(config types.Config) {
     p.config = config
-}
-
-// ParseMessage handle core message event
-func (p Provider) ParseMessage(message *kpproto.KPMessage) error {
-    switch message.Action {
-    case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
-        log.Info("Core success run")
-    case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_REMOVE:
-        resourceMsg := &msg.EventMessageResourceRemove{}
-        if err := proto.Unmarshal([]byte(message.Body), resourceMsg); err != nil {
-            return err
-        }
-
-        p.Trigger(message.Action, resourceMsg)
-    }
-
-    return nil
 }
 
 // InitConfig set module config on kplayer started

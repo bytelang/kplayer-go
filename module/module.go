@@ -66,19 +66,14 @@ func (m *ModuleKeeper) RegisterKeeperChannel(ctx KeeperContext) error {
     return nil
 }
 
-func (m *ModuleKeeper) Trigger(action kpproto.EventAction, message proto.Message) {
+func (m *ModuleKeeper) Trigger(message *kpproto.KPMessage) {
     m.triggerMutex.Lock()
     defer m.triggerMutex.Unlock()
 
     for key, item := range m.keeper {
-        if item.action == action {
-            data, err := proto.Marshal(message)
-            if err != nil {
-                panic(err)
-            }
-
+        if item.action == message.Action {
             if keeperCtx := m.GetKeeperContext(item.id); keeperCtx != nil {
-                keeperCtx.ch <- data
+                keeperCtx.ch <- message.Body
                 m.keeper = append(m.keeper[:key], m.keeper[key+1:]...)
                 break
             }
@@ -96,7 +91,7 @@ type AppModule interface {
 type KeeperModule interface {
     RegisterKeeperChannel(ctx KeeperContext) error
     GetKeeperContext(id string) *KeeperContext
-    ParseMessage(message *kpproto.KPMessage) error
+    Trigger(message *kpproto.KPMessage)
 }
 
 type ModuleManager map[string]AppModule
