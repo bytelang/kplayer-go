@@ -1,0 +1,3 @@
+[submodule "proto/core"]
+	path = proto/core
+	url = ssh://git@gitlab.bytelang.cn:30022/kplayer/proto.git
