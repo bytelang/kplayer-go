@@ -3,6 +3,7 @@ package types
 import (
     "context"
     "fmt"
+    "github.com/bytelang/kplayer/types/config"
     "io"
     "os"
 
@@ -24,14 +25,14 @@ const (
 type ClientContext struct {
     Output io.Writer
     Viper  *viper.Viper
-    Config Config
+    Config config.KPConfig
 }
 
 func DefaultClientContext() *ClientContext {
     return &ClientContext{
         Output: os.Stdout,
         Viper:  viper.New(),
-        Config: Config{},
+        Config: config.KPConfig{},
     }
 }
 

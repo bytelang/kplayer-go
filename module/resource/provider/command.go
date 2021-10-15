@@ -1,13 +1,12 @@
 package provider
 
 import (
-    "github.com/bytelang/kplayer/module/resource/types"
     "github.com/spf13/cobra"
 )
 
 func GetCommand() *cobra.Command {
     cmd := &cobra.Command{
-        Use:   types.ModuleName,
+        Use:   ModuleName,
         Short: "resource category",
         Long:  `Kplayer resource management commands. control kplayer resource add,remove...`,
     }

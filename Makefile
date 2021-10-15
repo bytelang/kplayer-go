@@ -1,4 +1,4 @@
-SUB_DIR = proto server/proto
+SUB_DIR = proto
 
 .PHONY: build subdirs $(SUB_DIR)
 

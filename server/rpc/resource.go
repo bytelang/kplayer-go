@@ -2,16 +2,16 @@ package rpc
 
 import (
     "github.com/bytelang/kplayer/module"
-    resourcetype "github.com/bytelang/kplayer/module/resource/types"
-    "github.com/bytelang/kplayer/proto/msg"
+    "github.com/bytelang/kplayer/module/resource/provider"
+    "github.com/bytelang/kplayer/types/core/msg"
     "github.com/golang/protobuf/proto"
     "github.com/google/uuid"
     "net/http"
 
     "github.com/bytelang/kplayer/core"
-    kpproto "github.com/bytelang/kplayer/proto"
-    kpprompt "github.com/bytelang/kplayer/proto/prompt"
-    svrproto "github.com/bytelang/kplayer/server/proto"
+    kpproto "github.com/bytelang/kplayer/types/core"
+    kpprompt "github.com/bytelang/kplayer/types/core/prompt"
+    svrproto "github.com/bytelang/kplayer/types/server"
     log "github.com/sirupsen/logrus"
 )
 
@@ -34,7 +34,7 @@ func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *s
         return err
     }
 
-    resourceModule := s.mm[resourcetype.ModuleName]
+    resourceModule := s.mm[provider.ModuleName]
     resourceAddMsg := &msg.EventMessageResourceAdd{}
 
     keeperCtx := module.NewKeeperContext(uuid.New().String(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_ADD, func(msg []byte) bool {
@@ -67,7 +67,7 @@ func (s *Resource) Remove(r *http.Request, args *svrproto.RemoveResourceArgs, re
         return err
     }
 
-    ResourceModule := s.mm[resourcetype.ModuleName]
+    ResourceModule := s.mm[provider.ModuleName]
     resourceRemoveMsg := &msg.EventMessageResourceRemove{}
 
     keeperCtx := module.NewKeeperContext(uuid.New().String(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_REMOVE, func(msg []byte) bool {

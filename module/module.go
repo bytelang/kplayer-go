@@ -3,16 +3,16 @@ package module
 import (
     "encoding/json"
     "fmt"
-    kpproto "github.com/bytelang/kplayer/proto"
+    kpproto "github.com/bytelang/kplayer/types/core"
     "github.com/bytelang/kplayer/types"
     "github.com/spf13/cobra"
     "sync"
 )
 
 type KeeperContext struct {
-    id        string
-    action    kpproto.EventAction
-    ch        chan []byte
+    id     string
+    action kpproto.EventAction
+    ch     chan []byte
     validator func(msg []byte) bool
 }
 

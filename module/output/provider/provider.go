@@ -2,12 +2,12 @@ package provider
 
 import (
     "github.com/bytelang/kplayer/module"
-    "github.com/bytelang/kplayer/module/output/types"
     kptypes "github.com/bytelang/kplayer/types"
+    "github.com/bytelang/kplayer/types/config"
 )
 
 type Provider struct {
-    config types.Config
+    config config.Output
     module.ModuleKeeper
 }
 
@@ -15,10 +15,10 @@ func NewProvider() *Provider {
     return &Provider{}
 }
 
-func (p *Provider) SetConfig(config types.Config) {
+func (p *Provider) SetConfig(config config.Output) {
     p.config = config
 }
 
-func (p *Provider) InitModuleConfig(ctx kptypes.ClientContext, config types.Config) {
+func (p *Provider) InitModuleConfig(ctx kptypes.ClientContext, config config.Output) {
     p.SetConfig(config)
 }

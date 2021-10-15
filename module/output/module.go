@@ -4,8 +4,8 @@ import (
     "encoding/json"
     "github.com/bytelang/kplayer/module"
     "github.com/bytelang/kplayer/module/output/provider"
-    "github.com/bytelang/kplayer/module/output/types"
     kptypes "github.com/bytelang/kplayer/types"
+    "github.com/bytelang/kplayer/types/config"
     "github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ func NewAppModule() AppModule {
 }
 
 func (m AppModule) GetModuleName() string {
-    return types.ModuleName
+    return provider.ModuleName
 }
 
 func (m AppModule) GetCommand() *cobra.Command {
@@ -28,10 +28,10 @@ func (m AppModule) GetCommand() *cobra.Command {
 }
 
 func (m AppModule) InitConfig(ctx kptypes.ClientContext, data json.RawMessage) {
-    var config types.Config
-    if err := json.Unmarshal(data, &config); err != nil {
+    var cfg config.Output
+    if err := json.Unmarshal(data, &cfg); err != nil {
         panic(err)
     }
 
-    m.InitModuleConfig(ctx, config)
+    m.InitModuleConfig(ctx, cfg)
 }

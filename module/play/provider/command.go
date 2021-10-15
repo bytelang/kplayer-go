@@ -6,7 +6,6 @@ import (
     "sync"
 
     "github.com/bytelang/kplayer/core"
-    "github.com/bytelang/kplayer/module/play/types"
     "github.com/bytelang/kplayer/server"
     log "github.com/sirupsen/logrus"
     "github.com/spf13/cobra"
@@ -14,7 +13,7 @@ import (
 
 func GetCommand() *cobra.Command {
     cmd := &cobra.Command{
-        Use:   types.ModuleName,
+        Use:   ModuleName,
         Short: "play category",
         Long:  `App management commands. control kplayer basic status`,
     }

@@ -7,7 +7,7 @@ import "C"
 import (
     "unsafe"
 
-    kpproto "github.com/bytelang/kplayer/proto"
+    kpproto "github.com/bytelang/kplayer/types/core"
     "github.com/golang/protobuf/proto"
     log "github.com/sirupsen/logrus"
     "google.golang.org/protobuf/runtime/protoiface"
