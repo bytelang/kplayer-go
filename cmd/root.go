@@ -8,11 +8,6 @@ import (
     "github.com/spf13/cobra"
 )
 
-const (
-    DefaultConfigFileName = "kplayer.yaml"
-    DefaultConfigFilePath = "./"
-)
-
 func NewRootCmd() *cobra.Command {
 
     // init kplayer
@@ -21,8 +16,8 @@ func NewRootCmd() *cobra.Command {
 
     // init command
     rootCmd := &cobra.Command{
-        Use:   "kplayer",
-        Short: "kplayer launch application1",
+        Use:   app.AppName,
+        Short: "launch application",
         PersistentPreRun: func(cmd *cobra.Command, args []string) {
             cmd.SetOut(cmd.OutOrStdout())
             cmd.SetErr(cmd.ErrOrStderr())
@@ -35,6 +30,9 @@ func NewRootCmd() *cobra.Command {
 }
 
 func initRootCmd(rootCmd *cobra.Command) {
+    // add init command
+    rootCmd.AddCommand(app.AddInitCommands())
+
     // add module command
     app.AddCommands(rootCmd)
 }

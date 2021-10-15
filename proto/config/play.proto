@@ -15,9 +15,11 @@ enum PLAY_MODAL {
 message Play {
 	uint32 start_point = 1;
 	PLAY_MODAL modal = 2;
-	Encode encode = 3;
-	bool api = 4;
-	string log_level = 5;
+	Encode encode = 3 [(gogoproto.nullable) = false, (gogoproto.moretags) = "validate:\"required\""];
+	bool jsonrpc = 4;
+	uint32 port = 5;
+	string address = 6;
+	string log_level = 7;
 }
 
 message Encode {

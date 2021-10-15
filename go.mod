@@ -8,6 +8,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/rpc v1.2.0
+	github.com/manifoldco/promptui v0.8.0 // indirect
 	github.com/rs/zerolog v1.25.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.1

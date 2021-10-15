@@ -23,7 +23,7 @@ func init() {
 func main() {
     rootCmd := cmd.NewRootCmd()
 
-    if err := Execute(rootCmd, cmd.DefaultConfigFilePath); err != nil {
+    if err := Execute(rootCmd, app.DefaultConfigFilePath); err != nil {
         switch e := err.(type) {
         case kptypes.ErrorCode:
             os.Exit(e.Code)

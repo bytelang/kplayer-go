@@ -4,8 +4,17 @@ package ConfigProto;
 
 option go_package = "github.com/bytelang/kplayer/types/config";
 
+import "gogoproto/gogo.proto";
+
 import "play.proto";
+import "output.proto";
+import "resource.proto";
+import "plugin.proto";
 
 message KPConfig {
-	Play play = 1;
+	string version = 1;
+	Resource resource = 4 [(gogoproto.nullable) = false];
+	Play play = 2 [(gogoproto.nullable) = false];
+	Output output = 3 [(gogoproto.nullable) = false];
+	Plugin plugin = 5 [(gogoproto.nullable) = false];
 }
