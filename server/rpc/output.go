@@ -5,6 +5,7 @@ import (
     "github.com/bytelang/kplayer/module"
     outputype "github.com/bytelang/kplayer/module/output/types"
     "github.com/bytelang/kplayer/proto/msg"
+    "github.com/golang/protobuf/proto"
     "github.com/google/uuid"
     log "github.com/sirupsen/logrus"
     "net/http"
@@ -35,7 +36,14 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
     }
 
     outputModule := o.mm[outputype.ModuleName]
-    keeperCtx := module.NewKeeperContext(uuid.New().String(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD)
+    outputAddMsg := &msg.EventMessageOutputAdd{}
+
+    keeperCtx := module.NewKeeperContext(uuid.New().String(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg []byte) bool {
+        if err := proto.Unmarshal(msg, outputAddMsg); err != nil {
+            log.Fatal(err)
+        }
+        return string(outputAddMsg.Unique) == args.Output.Unique
+    })
     defer keeperCtx.Close()
 
     if err := outputModule.RegisterKeeperChannel(keeperCtx); err != nil {
@@ -43,10 +51,8 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
     }
 
     // wait context
-    outputAddMsg := &msg.EventMessageOutputAdd{}
-    if err := keeperCtx.Wait(outputAddMsg); err != nil {
-        return fmt.Errorf("messge type invalid")
-    }
+    keeperCtx.Wait()
+
     if outputAddMsg.Error != nil {
         log.Errorf("%s", outputAddMsg.Error)
         return fmt.Errorf("%s", outputAddMsg.Error)

@@ -5,23 +5,23 @@ import (
     "fmt"
     kpproto "github.com/bytelang/kplayer/proto"
     "github.com/bytelang/kplayer/types"
-    "github.com/golang/protobuf/proto"
     "github.com/spf13/cobra"
-    "reflect"
     "sync"
 )
 
 type KeeperContext struct {
-    id     string
-    action kpproto.EventAction
-    ch     chan []byte
+    id        string
+    action    kpproto.EventAction
+    ch        chan []byte
+    validator func(msg []byte) bool
 }
 
-func NewKeeperContext(id string, action kpproto.EventAction) KeeperContext {
+func NewKeeperContext(id string, action kpproto.EventAction, validator func(msg []byte) bool) KeeperContext {
     return KeeperContext{
-        id:     id,
-        action: action,
-        ch:     make(chan []byte),
+        id:        id,
+        action:    action,
+        ch:        make(chan []byte),
+        validator: validator,
     }
 }
 
@@ -29,13 +29,8 @@ func (kc *KeeperContext) Close() {
     close(kc.ch)
 }
 
-func (kc KeeperContext) Wait(scanPtr proto.Message) error {
-    if reflect.TypeOf(scanPtr).Kind() != reflect.Ptr {
-        return fmt.Errorf("scan object must be pointer")
-    }
-
-    d := <-kc.ch
-    return proto.Unmarshal(d, scanPtr)
+func (kc KeeperContext) Wait() {
+    _ = <-kc.ch
 }
 
 func (kc KeeperContext) GetId() string {
@@ -58,6 +53,8 @@ func (m *ModuleKeeper) GetKeeperContext(id string) *KeeperContext {
 }
 
 func (m *ModuleKeeper) RegisterKeeperChannel(ctx KeeperContext) error {
+    m.triggerMutex.Lock()
+    defer m.triggerMutex.Unlock()
     if m.GetKeeperContext(ctx.id) != nil {
         return fmt.Errorf("id has existed: %s", ctx.id)
     }
@@ -72,10 +69,9 @@ func (m *ModuleKeeper) Trigger(message *kpproto.KPMessage) {
 
     for key, item := range m.keeper {
         if item.action == message.Action {
-            if keeperCtx := m.GetKeeperContext(item.id); keeperCtx != nil {
-                keeperCtx.ch <- message.Body
+            if item.validator(message.Body) {
+                item.ch <- message.Body
                 m.keeper = append(m.keeper[:key], m.keeper[key+1:]...)
-                break
             }
         }
     }
