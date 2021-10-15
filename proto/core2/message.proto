@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package KPProto;
+
+import "keys.proto";
+
+option optimize_for = LITE_RUNTIME;
+option go_package = "github.com/bytelang/kplayer/types/core";
+
+message KPMessage {
+	EventAction action = 2;
+	bytes body = 3;
+}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package ConfigProto;
+
+option go_package = "github.com/bytelang/kplayer/types/config";
+
+import "play.proto";
+
+message KPConfig {
+	Play play = 1;
+}

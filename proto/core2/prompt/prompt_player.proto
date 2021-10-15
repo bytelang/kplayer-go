@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package KPProto.Prompt;
+
+option optimize_for = LITE_RUNTIME;
+option go_package = "github.com/bytelang/kplayer/types/core/prompt";
+
+message EventPromptPlayerStop {
+}
+
+message EventPromptPlayerPause {
+}
+
+message EventPromptPlayerSkip {
+}
+
+message EventPromptPlayerContinue {
+}
+
+message EventPromptPlayerSeek {
+	int64 seek = 1;
+}

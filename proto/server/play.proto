@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package RPCProto;
+
+option go_package = "github.com/bytelang/kplayer/types/server";
+
+import "gogoproto/gogo.proto";
+
+message StopPlayArgs {
+}
+message StopPlayReply {
+}

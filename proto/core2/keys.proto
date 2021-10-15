@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package KPProto;
+
+option optimize_for = LITE_RUNTIME;
+option go_package = "github.com/bytelang/kplayer/types/core";
+
+import "gogoproto/gogo.proto";
+
+enum EventAction {
+	option (gogoproto.goproto_enum_prefix) = false;
+
+	// ----------------------------------
+	// define prompt action
+	// send command to kplayer core
+	// ----------------------------------
+
+	// player
+	EVENT_PROMPT_ACTION_PLAYER_STOP = 0;
+	EVENT_PROMPT_ACTION_PLAYER_PAUSE = 1;
+	EVENT_PROMPT_ACTION_PLAYER_SKIP = 2;
+	EVENT_PROMPT_ACTION_PLAYER_CONTINUE = 3;
+	EVENT_PROMPT_ACTION_PLAYER_SEEK = 4;
+
+	// output
+	EVENT_PROMPT_ACTION_OUTPUT_ADD = 5;
+	EVENT_PROMPT_ACTION_OUTPUT_REMOVE = 6;
+
+	// resource
+	EVENT_PROMPT_ACTION_RESOURCE_ADD = 7;
+	EVENT_PROMPT_ACTION_RESOURCE_REMOVE = 8;
+
+	// plugin
+	EVENT_PROMPT_ACTION_PLUGIN_ADD = 9;
+	EVENT_PROMPT_ACTION_PLUGIN_REMOVE = 10;
+
+	// ----------------------------------
+	// define message action
+	// broadcast message action from kplayer core
+	// ----------------------------------
+
+	// player
+	EVENT_MESSAGE_ACTION_PLAYER_STARTED = 11;
+	EVENT_MESSAGE_ACTION_PLAYER_STOP = 12;
+	EVENT_MESSAGE_ACTION_PLAYER_PAUSE = 13;
+	EVENT_MESSAGE_ACTION_PLAYER_CONTINUE = 14;
+	EVENT_MESSAGE_ACTION_PLAYER_SKIP = 15;
+	EVENT_MESSAGE_ACTION_PLAYER_ENDED = 16;
+
+	// resource
+	EVENT_MESSAGE_ACTION_RESOURCE_START = 17;
+	EVENT_MESSAGE_ACTION_RESOURCE_FINISH = 18;
+	EVENT_MESSAGE_ACTION_RESOURCE_EMPTY = 19;
+	EVENT_MESSAGE_ACTION_RESOURCE_REMOVE = 20;
+	EVENT_MESSAGE_ACTION_RESOURCE_ADD = 21;
+
+	// output
+	EVENT_MESSAGE_ACTION_OUTPUT_ADD = 22;
+	EVENT_MESSAGE_ACTION_OUTPUT_REMOVE = 23;
+
+	// plugin
+	EVENT_MESSAGE_ACTION_PLUGIN_ADD = 24;
+	EVENT_MESSAGE_ACTION_PLUGIN_REMOVE = 25;
+
+}

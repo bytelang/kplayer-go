@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package ConfigProto;
+
+option go_package = "github.com/bytelang/kplayer/types/config";
+
+import "gogoproto/gogo.proto";
+
+enum PLAY_MODAL {
+	LIST = 0;
+	RANDOM = 1;
+	QUEUE = 2;
+}
+
+message Play {
+	uint32 start_point = 1;
+	PLAY_MODAL modal = 2;
+	Encode encode = 3;
+	bool api = 4;
+	string log_level = 5;
+}
+
+message Encode {
+	uint32 video_width = 1;
+	uint32 video_height = 2;
+	uint32 video_fps = 3;
+	uint32 audio_sample_rate = 4;
+	uint32 bit_rate = 5;
+	uint32 avg_quality = 6;
+}
