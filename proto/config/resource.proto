@@ -7,5 +7,5 @@ option go_package = "github.com/bytelang/kplayer/types/config";
 import "gogoproto/gogo.proto";
 
 message Resource {
-	repeated string lists = 1;
+	repeated string lists = 1 [(gogoproto.nullable) = false];
 }

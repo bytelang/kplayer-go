@@ -4,18 +4,19 @@ import (
     "fmt"
     "github.com/bytelang/kplayer/core"
     "github.com/bytelang/kplayer/module"
-    "github.com/bytelang/kplayer/module/output/provider"
+    "github.com/bytelang/kplayer/types"
     kpproto "github.com/bytelang/kplayer/types/core"
     "github.com/bytelang/kplayer/types/core/msg"
     prompt "github.com/bytelang/kplayer/types/core/prompt"
     svrproto "github.com/bytelang/kplayer/types/server"
     "github.com/golang/protobuf/proto"
-    "github.com/google/uuid"
     log "github.com/sirupsen/logrus"
     "net/http"
     "net/url"
     "os"
 )
+
+const outputModuleName = "output"
 
 // Output rpc
 type Output struct {
@@ -61,10 +62,10 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
         return err
     }
 
-    outputModule := o.mm[provider.ModuleName]
+    outputModule := o.mm[outputModuleName]
     outputAddMsg := &msg.EventMessageOutputAdd{}
 
-    keeperCtx := module.NewKeeperContext(uuid.New().String(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg []byte) bool {
+    keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg []byte) bool {
         if err := proto.Unmarshal(msg, outputAddMsg); err != nil {
             log.Fatal(err)
         }

@@ -2,10 +2,9 @@ package rpc
 
 import (
     "github.com/bytelang/kplayer/module"
-    "github.com/bytelang/kplayer/module/resource/provider"
+    "github.com/bytelang/kplayer/types"
     "github.com/bytelang/kplayer/types/core/msg"
     "github.com/golang/protobuf/proto"
-    "github.com/google/uuid"
     "net/http"
 
     "github.com/bytelang/kplayer/core"
@@ -14,6 +13,8 @@ import (
     svrproto "github.com/bytelang/kplayer/types/server"
     log "github.com/sirupsen/logrus"
 )
+
+const playModuleName = "play"
 
 // Resource rpc
 type Resource struct {
@@ -34,10 +35,10 @@ func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *s
         return err
     }
 
-    resourceModule := s.mm[provider.ModuleName]
+    resourceModule := s.mm[playModuleName]
     resourceAddMsg := &msg.EventMessageResourceAdd{}
 
-    keeperCtx := module.NewKeeperContext(uuid.New().String(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_ADD, func(msg []byte) bool {
+    keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_ADD, func(msg []byte) bool {
         if err := proto.Unmarshal(msg, resourceAddMsg); err != nil {
             log.Fatal(err)
         }
@@ -67,10 +68,10 @@ func (s *Resource) Remove(r *http.Request, args *svrproto.RemoveResourceArgs, re
         return err
     }
 
-    ResourceModule := s.mm[provider.ModuleName]
+    ResourceModule := s.mm[playModuleName]
     resourceRemoveMsg := &msg.EventMessageResourceRemove{}
 
-    keeperCtx := module.NewKeeperContext(uuid.New().String(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_REMOVE, func(msg []byte) bool {
+    keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_REMOVE, func(msg []byte) bool {
         if err := proto.Unmarshal(msg, resourceRemoveMsg); err != nil {
             log.Fatal(err)
         }

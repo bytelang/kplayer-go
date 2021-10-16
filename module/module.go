@@ -3,16 +3,16 @@ package module
 import (
     "encoding/json"
     "fmt"
-    kpproto "github.com/bytelang/kplayer/types/core"
     "github.com/bytelang/kplayer/types"
+    kpproto "github.com/bytelang/kplayer/types/core"
     "github.com/spf13/cobra"
     "sync"
 )
 
 type KeeperContext struct {
-    id     string
-    action kpproto.EventAction
-    ch     chan []byte
+    id        string
+    action    kpproto.EventAction
+    ch        chan []byte
     validator func(msg []byte) bool
 }
 
@@ -81,13 +81,14 @@ type AppModule interface {
     KeeperModule
     GetModuleName() string
     GetCommand() *cobra.Command
-    InitConfig(ctx types.ClientContext, data json.RawMessage)
+    InitConfig(ctx *types.ClientContext, cfg json.RawMessage) error
+    ValidateConfig() error
 }
 
 type KeeperModule interface {
     RegisterKeeperChannel(ctx KeeperContext) error
     GetKeeperContext(id string) *KeeperContext
-    Trigger(message *kpproto.KPMessage)
+    ParseMessage(message *kpproto.KPMessage)
 }
 
 type ModuleManager map[string]AppModule

@@ -25,18 +25,18 @@ const (
 type ClientContext struct {
     Output io.Writer
     Viper  *viper.Viper
-    Config config.KPConfig
+    Config *config.KPConfig
 }
 
 func DefaultClientContext() *ClientContext {
     return &ClientContext{
         Output: os.Stdout,
         Viper:  viper.New(),
-        Config: config.KPConfig{},
+        Config: &config.KPConfig{},
     }
 }
 
-func GetCommandContext(cmd *cobra.Command, key string) (interface{}, error) {
+func GetCommandContext(cmd *cobra.Command, key KplayerContextKey) (interface{}, error) {
     if v := cmd.Context().Value(key); v != nil {
         return v, nil
     }

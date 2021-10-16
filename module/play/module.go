@@ -9,7 +9,6 @@ import (
     "github.com/spf13/cobra"
 )
 
-
 type AppModule struct {
     *provider.Provider
 }
@@ -28,11 +27,18 @@ func (m AppModule) GetCommand() *cobra.Command {
     return provider.GetCommand()
 }
 
-func (m AppModule) InitConfig(ctx kptypes.ClientContext, data json.RawMessage) {
+func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage) error {
     var cfg config.Play
     if err := json.Unmarshal(data, &cfg); err != nil {
         panic(err)
     }
 
     m.InitModuleConfig(ctx, cfg)
+
+    return nil
 }
+
+func (m AppModule) ValidateConfig() error {
+    return m.Provider.ValidateConfig()
+}
+

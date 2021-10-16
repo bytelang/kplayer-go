@@ -9,8 +9,7 @@ import (
 )
 
 func NewRootCmd() *cobra.Command {
-
-    // init kplayer
+    // init core
     coreKplayer := core.GetLibKplayerInstance()
     coreKplayer.SetCallBackMessage(messageConsumer)
 
@@ -29,6 +28,7 @@ func NewRootCmd() *cobra.Command {
     return rootCmd
 }
 
+
 func initRootCmd(rootCmd *cobra.Command) {
     // add init command
     rootCmd.AddCommand(app.AddInitCommands())
@@ -41,6 +41,6 @@ func messageConsumer(message *kpproto.KPMessage) {
     log.Debug("receive broadcast message: ", message.Action)
 
     for _, item := range app.ModuleManager {
-        item.Trigger(message)
+        item.ParseMessage(message)
     }
 }
