@@ -33,14 +33,14 @@ var libKplayerInstance *libKplayer = &libKplayer{
 type libKplayer struct {
     // basic params
     protocol             string
-    video_width          uint
-    video_height         uint
-    video_bitrate        uint
-    video_qulity         uint
-    video_fps            uint
-    audio_sample_rate    uint
-    audio_channel_layout uint
-    audio_channels       uint
+    video_width          uint32
+    video_height         uint32
+    video_bitrate        uint32
+    video_qulity         uint32
+    video_fps            uint32
+    audio_sample_rate    uint32
+    audio_channel_layout uint32
+    audio_channels       uint32
 
     // event message receiver
     callbackFn func(message *kpproto.KPMessage)
@@ -52,7 +52,7 @@ func GetLibKplayerInstance() *libKplayer {
 }
 
 // SetOptions set basic options
-func (lb *libKplayer) SetOptions(protocol string, video_width uint, video_height uint, video_bitrate uint, video_qulity uint, video_fps uint, audio_sample_rate uint, audio_channel_layout uint, audio_channels uint) error {
+func (lb *libKplayer) SetOptions(protocol string, video_width uint32, video_height uint32, video_bitrate uint32, video_qulity uint32, video_fps uint32, audio_sample_rate uint32, audio_channel_layout uint32, audio_channels uint32) error {
     libKplayerInstance.protocol = protocol
     libKplayerInstance.video_width = video_width
     libKplayerInstance.video_height = video_height

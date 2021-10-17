@@ -9,6 +9,7 @@ import (
     "os"
     "path"
     "strconv"
+    "strings"
 )
 
 func getDefaultConfig() *config.KPConfig {
@@ -18,21 +19,24 @@ func getDefaultConfig() *config.KPConfig {
             Lists: []string{},
         },
         Play: config.Play{
-            PlayModel:   config.PlayModel_list,
-            EncodeModel: config.EncodeModel_file,
-            Encode: config.Encode{
-                VideoWidth:      780,
-                VideoHeight:     480,
-                VideoFps:        30,
-                AudioSampleRate: 48000,
+            PlayModel:   strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LIST)]),
+            EncodeModel: strings.ToLower(config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_RTMP)]),
+            CacheOn:     false,
+            Encode: &config.Encode{
+                VideoWidth:         780,
+                VideoHeight:        480,
+                VideoFps:           30,
+                AudioSampleRate:    48000,
+                AudioChannelLayout: 3,
+                AudioChannels:      2,
             },
-            Jsonrpc: false,
+            RpcOn: false,
         },
         Output: config.Output{
-            Lists: []config.OutputInstance{},
+            Lists: []*config.OutputInstance{},
         },
         Plugin: config.Plugin{
-            Lists: []config.PluginInstance{},
+            Lists: []*config.PluginInstance{},
         },
     }
 }
@@ -95,7 +99,7 @@ func initInteractionConfig() (*config.KPConfig, error) {
         Label: "Whether to open jsonrpc yes/no? [default: no]",
         Func: func(line string) error {
             if line == "yes" {
-                cfg.Play.Jsonrpc = true
+                // cfg.Play.Jsonrpc = true
             }
             return nil
         },
@@ -106,7 +110,7 @@ func initInteractionConfig() (*config.KPConfig, error) {
             if line == "" {
                 return fmt.Errorf("output path cannot be empty")
             }
-            outputInstances := config.OutputInstance{
+            outputInstances := &config.OutputInstance{
                 Path:   line,
                 Unique: types.GetRandString(6),
             }

@@ -6,34 +6,37 @@ option go_package = "github.com/bytelang/kplayer/types/config";
 
 import "gogoproto/gogo.proto";
 
-enum play_model {
-	list = 0;
-	random = 1;
-	queue = 2;
-	loop = 3;
+enum ENCODE_MODEL {
+	RTMP = 0;
+	FILE = 1;
 }
 
-enum encode_model {
-	rtmp = 0;
-	file = 1;
+enum PLAY_MODEL {
+	LIST = 0;
+	RANDOM = 1;
+	QUEUE = 2;
+	LOOP = 3;
 }
 
 message Play {
-	uint32 start_point = 1;
-	play_model play_model = 2;
-	encode_model encode_model = 3;
-	Encode encode = 4 [(gogoproto.nullable) = false, (gogoproto.moretags) = "validate:\"required\""];
-	bool jsonrpc = 5;
-	uint32 port = 6;
-	string address = 7;
-	string log_level = 8;
+	uint32 start_point = 1 [(gogoproto.moretags) = "validate:\"required,gt=0\" mapstructure:\"start_point\""];
+	string play_model = 2 [(gogoproto.moretags) = "validate:\"oneof=rtmp,file\" mapstructure:\"play_model\""];
+	string encode_model = 3 [(gogoproto.moretags) = "validate:\"oneof=rtmp,file\" mapstructure:\"encode_model\""];
+	bool cache_on = 4 [(gogoproto.moretags) = "validate:\"oneof=rtmp,file\" mapstructure:\"cache_on\""];
+	bool cache_uncheck = 5 [(gogoproto.moretags) = "validate:\"oneof=rtmp,file\" mapstructure:\"cache_uncheck\""];
+	bool rpc_on = 6 [(gogoproto.moretags) = "validate:\"oneof=rtmp,file\" mapstructure:\"rpc_on\""];
+	uint32 rpc_port = 7 [(gogoproto.moretags) = "validate:\"gt=0,lt=65535\" mapstructure:\"rpc_port\""];
+	string rpc_address = 8 [(gogoproto.moretags) = "validate:\"ipv4\""];
+	Encode encode = 10 [(gogoproto.nullable) = true, (gogoproto.moretags) = "validate:\"required\""];
 }
 
 message Encode {
-	uint32 video_width = 1;
-	uint32 video_height = 2;
-	uint32 video_fps = 3;
-	uint32 audio_sample_rate = 4;
-	uint32 bit_rate = 5;
-	uint32 avg_quality = 6;
+	uint32 video_width = 1 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"video_width\""];
+	uint32 video_height = 2 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"video_height\""];
+	uint32 video_fps = 3 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"video_fps\""];
+	uint32 audio_channel_layout = 4 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"audio_channel_layout\""];
+	uint32 audio_channels = 5 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"audio_channels\""];
+	uint32 audio_sample_rate = 6 [(gogoproto.moretags) = "validate:\"gt=0,oneof=48000,44800\" mapstructure:\"audio_sample_rate\""];
+	uint32 bit_rate = 7 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"bit_rate\""];
+	uint32 avg_quality = 8 [(gogoproto.moretags) = "validate:\"gt=0,lt=20\" mapstructure:\"avg_quality\""];
 }

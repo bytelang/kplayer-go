@@ -7,7 +7,7 @@ option go_package = "github.com/bytelang/kplayer/types/config";
 import "gogoproto/gogo.proto";
 
 message Plugin {
-	repeated PluginInstance lists = 1 [(gogoproto.nullable) = false];
+	repeated PluginInstance lists = 1 [(gogoproto.nullable) = true];
 }
 
 message PluginInstance {

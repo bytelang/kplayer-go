@@ -17,4 +17,5 @@ message KPConfig {
 	Play play = 2 [(gogoproto.nullable) = false];
 	Output output = 3 [(gogoproto.nullable) = false];
 	Plugin plugin = 5 [(gogoproto.nullable) = false];
+	string log_level = 9 [(gogoproto.moretags) = "validate:\"oneof=trace,debug,info\" mapstructure:\"log_level\""];
 }

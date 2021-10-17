@@ -37,16 +37,24 @@ func StartCommand() *cobra.Command {
                 mm = ptr.(module.ModuleManager)
             }
 
-            // var clientCtx *kptypes.ClientContext
-            // if ptr, err := kptypes.GetCommandContext(cmd, kptypes.ClientContextKey); err != nil {
-            //     log.Fatal(err)
-            // } else {
-            //     clientCtx = ptr.(*kptypes.ClientContext)
-            // }
+            var clientCtx *kptypes.ClientContext
+            if ptr, err := kptypes.GetCommandContext(cmd, kptypes.ClientContextKey); err != nil {
+                log.Fatal(err)
+            } else {
+                clientCtx = ptr.(*kptypes.ClientContext)
+            }
 
-            // cfg := clientCtx.Config
+            cfg := clientCtx.Config
             coreKplayer := core.GetLibKplayerInstance()
-            if err := coreKplayer.SetOptions("rtmp", 800, 480, 0, 0, 30, 48000, 3, 2); err != nil {
+            if err := coreKplayer.SetOptions(cfg.Play.EncodeModel,
+                cfg.Play.Encode.VideoWidth,
+                cfg.Play.Encode.VideoHeight,
+                cfg.Play.Encode.BitRate,
+                cfg.Play.Encode.AvgQuality,
+                cfg.Play.Encode.VideoFps,
+                cfg.Play.Encode.AudioSampleRate,
+                cfg.Play.Encode.AudioChannelLayout,
+                cfg.Play.Encode.AudioChannels); err != nil {
                 log.Fatal(err)
             }
 

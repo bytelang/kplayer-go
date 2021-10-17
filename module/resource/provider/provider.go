@@ -54,7 +54,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
     case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
         p.currentIndex = p.currentIndex + 1
         if p.currentIndex >= uint32(len(p.config.Lists)) {
-            if p.playConfig.GetPlayModel() != config.PlayModel_loop {
+            if p.playConfig.GetPlayModel() != config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LOOP)] {
                 stopCorePlay()
                 return
             }

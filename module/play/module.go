@@ -41,4 +41,3 @@ func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage) 
 func (m AppModule) ValidateConfig() error {
     return m.Provider.ValidateConfig()
 }
-

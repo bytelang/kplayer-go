@@ -15,7 +15,7 @@ type Provider struct {
 
 type ProviderI interface {
     GetStartPoint() uint32
-    GetPlayModel() config.PlayModel
+    GetPlayModel() string
 }
 
 // NewProvider return provider
