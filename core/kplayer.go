@@ -42,6 +42,10 @@ type libKplayer struct {
     audio_channel_layout uint32
     audio_channels       uint32
 
+    // options
+    cache_on              bool
+    skip_invalid_resource bool
+
     // event message receiver
     callbackFn func(message *kpproto.KPMessage)
 }
@@ -94,17 +98,38 @@ func (lb *libKplayer) Run() {
         C.int(lb.audio_channel_layout),
         C.int(lb.audio_channels))
 
+    if lb.cache_on == true {
+        C.SetCacheOn(C.int(1))
+    }
+    if lb.skip_invalid_resource == true {
+        C.SetSkipInvalidResource(C.int(1))
+    }
+
     C.ReceiveMessage(C.MessageCallBack(C.goCallBackMessage))
 
     // start
     stopChan := make(chan bool)
     go func() {
-        C.Run()
+        defer func() {
+            stopChan <- true
+        }()
 
         log.Info("Core start up success.")
-        stopChan <- true
+        result := C.Run()
+
+        if int(result) < 0 {
+            log.Errorf("core return code: %d. error: %s", int(result), C.GoString(C.GetError()))
+        }
     }()
 
     <-stopChan
     log.Info("Core shut down success.")
+}
+
+func (lb *libKplayer) SetCacheOn(c bool) {
+    lb.cache_on = c
+}
+
+func (lb *libKplayer) SetSkipInvalidResource(s bool) {
+    lb.skip_invalid_resource = s
 }

@@ -28,7 +28,6 @@ func NewRootCmd() *cobra.Command {
     return rootCmd
 }
 
-
 func initRootCmd(rootCmd *cobra.Command) {
     // add init command
     rootCmd.AddCommand(app.AddInitCommands())

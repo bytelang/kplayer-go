@@ -7,6 +7,8 @@ import (
 const (
     FlagHome           = "home"
     FlagConfigFileName = "config"
+    FlagLogLevel       = "log_level"
+    FlagLogFormat      = "plain"
 )
 
 // ErrorCode contains the exit code for server exit.

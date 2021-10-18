@@ -26,7 +26,8 @@ message Play {
 	bool cache_uncheck = 5 [(gogoproto.moretags) = "validate:\"oneof=rtmp,file\" mapstructure:\"cache_uncheck\""];
 	bool rpc_on = 6 [(gogoproto.moretags) = "validate:\"oneof=rtmp,file\" mapstructure:\"rpc_on\""];
 	uint32 rpc_port = 7 [(gogoproto.moretags) = "validate:\"gt=0,lt=65535\" mapstructure:\"rpc_port\""];
-	string rpc_address = 8 [(gogoproto.moretags) = "validate:\"ipv4\""];
+	string rpc_address = 8 [(gogoproto.moretags) = "validate:\"ipv4\" mapstructure:\"rpc_address\""];
+	bool skip_invalid_resource = 9 [(gogoproto.moretags) = "validate:\"bool\" mapstructure:\"skip_invalid_resource\""];
 	Encode encode = 10 [(gogoproto.nullable) = true, (gogoproto.moretags) = "validate:\"required\""];
 }
 
@@ -36,7 +37,7 @@ message Encode {
 	uint32 video_fps = 3 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"video_fps\""];
 	uint32 audio_channel_layout = 4 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"audio_channel_layout\""];
 	uint32 audio_channels = 5 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"audio_channels\""];
-	uint32 audio_sample_rate = 6 [(gogoproto.moretags) = "validate:\"gt=0,oneof=48000,44800\" mapstructure:\"audio_sample_rate\""];
+	uint32 audio_sample_rate = 6 [(gogoproto.moretags) = "validate:\"gt=0,oneof=48000,44100\" mapstructure:\"audio_sample_rate\""];
 	uint32 bit_rate = 7 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"bit_rate\""];
 	uint32 avg_quality = 8 [(gogoproto.moretags) = "validate:\"gt=0,lt=20\" mapstructure:\"avg_quality\""];
 }

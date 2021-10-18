@@ -38,15 +38,13 @@ func main() {
 
 // Execute execute from flags and commands
 func Execute(rootCmd *cobra.Command, defaultHome string, defaultFile string) error {
-    rootCmd.PersistentFlags().String("log_level", zerolog.InfoLevel.String(), "The logging level (trace|debug|info|warn|error|fatal|panic)")
-    rootCmd.PersistentFlags().String("log_format", "plain", "The logging format (json|plain)")
+    rootCmd.PersistentFlags().String(kptypes.FlagLogLevel, zerolog.InfoLevel.String(), "The logging level (trace|debug|info|warn|error|fatal|panic)")
+    rootCmd.PersistentFlags().String(kptypes.FlagLogFormat, "plain", "The logging format (json|plain)")
     rootCmd.PersistentFlags().StringP(kptypes.FlagHome, "", defaultHome, "directory for config and data")
     rootCmd.PersistentFlags().StringP(kptypes.FlagConfigFileName, "", defaultFile, "config file name")
-    rootCmd.PersistentFlags().Bool("trace", false, "print out full stack trace on errors")
     rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-        if cmd.Parent().Use != "init" {
-            InitGlobalConfig(cmd)
-        }
+        InitGlobalContextConfig(cmd)
+
         return nil
     }
 
@@ -57,7 +55,7 @@ func Execute(rootCmd *cobra.Command, defaultHome string, defaultFile string) err
     return kptypes.SetCommandContextAndExecute(rootCmd, ctx)
 }
 
-func InitGlobalConfig(cmd *cobra.Command) {
+func InitGlobalContextConfig(cmd *cobra.Command) {
     mm := cmd.Context().Value(kptypes.ModuleManagerContextKey).(module.ModuleManager)
     clientCtx := cmd.Context().Value(kptypes.ClientContextKey).(*kptypes.ClientContext)
 
@@ -70,11 +68,19 @@ func InitGlobalConfig(cmd *cobra.Command) {
         log.Fatal(err)
     }
 
+    // set log level
+    logLevel, err := app.GetLogLevel(cmd)
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.SetLevel(logLevel)
+
+    // viper
     v := viper.New()
     v.AddConfigPath(home)
     v.SetConfigType("json")
     v.SetConfigName(configFileName)
-    if err := v.ReadInConfig(); err != nil {
+    if err := v.ReadInConfig(); err != nil && cmd.Parent().Use != "init" {
         log.Fatal(err)
     }
 
@@ -83,6 +89,7 @@ func InitGlobalConfig(cmd *cobra.Command) {
         log.Fatal(err)
     }
 
+    // init module
     for _, item := range mm {
         d, err := json.Marshal(v.Get(item.GetModuleName()))
         if err != nil {

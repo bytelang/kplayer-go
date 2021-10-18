@@ -57,6 +57,8 @@ func StartCommand() *cobra.Command {
                 cfg.Play.Encode.AudioChannels); err != nil {
                 log.Fatal(err)
             }
+            coreKplayer.SetCacheOn(cfg.Play.CacheOn)
+            coreKplayer.SetSkipInvalidResource(cfg.Play.SkipInvalidResource)
 
             waitGroup := sync.WaitGroup{}
             waitGroup.Add(2)
