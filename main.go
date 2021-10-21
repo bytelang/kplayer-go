@@ -4,8 +4,11 @@ import (
     "context"
     "encoding/json"
     "github.com/bytelang/kplayer/module"
+    "github.com/sipt/GoJsoner"
     "github.com/spf13/viper"
+    "io/ioutil"
     "os"
+    "strings"
 
     "github.com/bytelang/kplayer/app"
     "github.com/bytelang/kplayer/cmd"
@@ -80,7 +83,25 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
     v.AddConfigPath(home)
     v.SetConfigType("json")
     v.SetConfigName(configFileName)
-    if err := v.ReadInConfig(); err != nil && cmd.Parent().Use != "init" {
+
+    // read config file
+    fs, err := os.Open(home + "/" + configFileName)
+    if err != nil {
+        log.Fatal("open config file failed. ", err)
+    }
+    rawConfigContext, err := ioutil.ReadAll(fs)
+    if err != nil {
+        log.Fatal("read config file failed. ", err)
+    }
+
+    // discard annotation
+    discardRawConfigContext, err := GoJsoner.Discard(string(rawConfigContext))
+    if err != nil {
+        log.Fatal("discard annotation failed. ", err)
+    }
+
+    // load config context
+    if err := v.ReadConfig(strings.NewReader(discardRawConfigContext)); err != nil && cmd.Parent().Use != "init" {
         log.Fatal(err)
     }
 

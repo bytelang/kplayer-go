@@ -52,6 +52,14 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
         kptypes.UnmarshalProtoMessage(message.Body, message)
         log.Info("start play resource: %s", msg.Path)
     case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
+        msg := &kpmsg.EventMessageResourceFinish{}
+        kptypes.UnmarshalProtoMessage(message.Body, message)
+        if msg.Error != nil {
+            log.Warn("play resource failed: %s", string(msg.Error))
+        } else {
+            log.Info("finish play resource: %s; index: %d", string(msg.Path), p.currentIndex)
+        }
+
         p.currentIndex = p.currentIndex + 1
         if p.currentIndex >= uint32(len(p.config.Lists)) {
             if p.playConfig.GetPlayModel() != config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LOOP)] {

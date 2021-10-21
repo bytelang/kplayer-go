@@ -1,5 +1,6 @@
 package core
 
+// #cgo LDFLAGS: -lkplayer -lkpcodec -lkputil -lkpadapter
 // #include "kplayer.h"
 // void goCallBackMessage(char*);
 import "C"
