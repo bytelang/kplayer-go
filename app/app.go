@@ -106,7 +106,6 @@ func exportConfigFile(cfg *config.KPConfig, path string) error {
         return err
     }
 
-
     var indentCfg bytes.Buffer
     if err := json.Indent(&indentCfg, d, "", "    "); err != nil {
         return err

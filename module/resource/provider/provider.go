@@ -30,7 +30,8 @@ func (p *Provider) SetConfig(config config.Resource) {
     p.config = config
 }
 
-func (p *Provider) InitModuleConfig(ctx *kptypes.ClientContext, config config.Resource) {
+func (p *Provider) InitModuleConfig(c
+tx *kptypes.ClientContext, config config.Resource) {
     p.SetConfig(config)
     p.currentIndex = p.playConfig.GetStartPoint() - 1
 
@@ -52,6 +53,14 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
         kptypes.UnmarshalProtoMessage(message.Body, message)
         log.Info("start play resource: %s", msg.Path)
     case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
+        msg := &kpmsg.EventMessageResourceFinish{}
+        kptypes.UnmarshalProtoMessage(message.Body, message)
+        if msg.Error != nil {
+            log.Warn("play resource failed: %s", string(msg.Error))
+        } else {
+            log.Info("finish play resource: %s; index: %d", string(msg.Path), p.currentIndex)
+        }
+
         p.currentIndex = p.currentIndex + 1
         if p.currentIndex >= uint32(len(p.config.Lists)) {
             if p.playConfig.GetPlayModel() != config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LOOP)] {
