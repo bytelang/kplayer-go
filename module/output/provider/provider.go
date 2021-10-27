@@ -5,8 +5,8 @@ import (
     "github.com/bytelang/kplayer/module"
     kptypes "github.com/bytelang/kplayer/types"
     "github.com/bytelang/kplayer/types/config"
-    kpproto "github.com/bytelang/kplayer/types/core"
-    "github.com/bytelang/kplayer/types/core/prompt"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
+    "github.com/bytelang/kplayer/types/core/proto/prompt"
     log "github.com/sirupsen/logrus"
 )
 
@@ -44,8 +44,10 @@ func (p *Provider) addOutput() {
     corePlayer := core.GetLibKplayerInstance()
     for _, item := range p.config.Lists {
         if err := corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &prompt.EventPromptOutputAdd{
-            Path:   []byte(item.Path),
-            Unique: []byte(item.Unique),
+            Output: &kpproto.PromptOutput{
+                Path:   []byte(item.Path),
+                Unique: []byte(item.Unique),
+            },
         }); err != nil {
             log.Warn(err)
         }

@@ -3,7 +3,7 @@ package cmd
 import (
     "github.com/bytelang/kplayer/app"
     "github.com/bytelang/kplayer/core"
-    kpproto "github.com/bytelang/kplayer/types/core"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
     log "github.com/sirupsen/logrus"
     "github.com/spf13/cobra"
 )

@@ -1,17 +1,16 @@
 package core
 
 // #cgo LDFLAGS: -lkplayer -lkpcodec -lkputil -lkpadapter
-// #include "kplayer.h"
+// #include "extra.h"
 // void goCallBackMessage(char*);
 import "C"
 
 import (
     "unsafe"
 
-    kpproto "github.com/bytelang/kplayer/types/core"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
     "github.com/golang/protobuf/proto"
     log "github.com/sirupsen/logrus"
-    "google.golang.org/protobuf/runtime/protoiface"
 )
 
 //export goCallBackMessage
@@ -20,7 +19,7 @@ func goCallBackMessage(msgRaw *C.char) {
     msg := C.GoString(msgRaw)
     message := &kpproto.KPMessage{}
     if err := proto.Unmarshal([]byte(msg), message); err != nil {
-        log.Fatal("error unmarshal message. error: {}. data: {}", err, msg)
+        log.Fatal("error unmarshal message. error: %s. data: %s", err, msg)
     }
 
     libKplayerInstance.callbackFn(message)
@@ -75,7 +74,7 @@ func (lb *libKplayer) SetCallBackMessage(fn func(message *kpproto.KPMessage)) {
     lb.callbackFn = fn
 }
 
-func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body protoiface.MessageV1) error {
+func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body proto.Message) error {
     str, err := proto.Marshal(body)
     if err != nil {
         return err

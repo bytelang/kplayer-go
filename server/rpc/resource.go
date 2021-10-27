@@ -3,15 +3,13 @@ package rpc
 import (
     "github.com/bytelang/kplayer/module"
     "github.com/bytelang/kplayer/types"
-    "github.com/bytelang/kplayer/types/core/msg"
-    "github.com/golang/protobuf/proto"
+    "github.com/bytelang/kplayer/types/core/proto/msg"
     "net/http"
 
     "github.com/bytelang/kplayer/core"
-    kpproto "github.com/bytelang/kplayer/types/core"
-    kpprompt "github.com/bytelang/kplayer/types/core/prompt"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
+    kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
     svrproto "github.com/bytelang/kplayer/types/server"
-    log "github.com/sirupsen/logrus"
 )
 
 const playModuleName = "play"
@@ -29,8 +27,13 @@ func NewResource(manager module.ModuleManager) *Resource {
 func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *svrproto.AddResourceReply) error {
     coreKplayer := core.GetLibKplayerInstance()
     if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_ADD, &kpprompt.EventPromptResourceAdd{
-        Path:   []byte(args.Res.Path),
-        Unique: []byte(args.Res.Unique),
+        Resource: &kpproto.PromptResource{
+            Path:                 []byte(args.Res.Path),
+            Unique:               []byte(args.Res.Unique),
+            XXX_NoUnkeyedLiteral: struct{}{},
+            XXX_unrecognized:     nil,
+            XXX_sizecache:        0,
+        },
     }); err != nil {
         return err
     }
@@ -39,10 +42,8 @@ func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *s
     resourceAddMsg := &msg.EventMessageResourceAdd{}
 
     keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_ADD, func(msg []byte) bool {
-        if err := proto.Unmarshal(msg, resourceAddMsg); err != nil {
-            log.Fatal(err)
-        }
-        return string(resourceAddMsg.Unique) == args.Res.Unique
+        types.UnmarshalProtoMessage(msg, resourceAddMsg)
+        return string(resourceAddMsg.Resource.Unique) == args.Res.Unique
     })
     defer keeperCtx.Close()
 
@@ -53,8 +54,8 @@ func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *s
     // wait context
     keeperCtx.Wait()
 
-    reply.Res.Unique = string(resourceAddMsg.Unique)
-    reply.Res.Path = string(resourceAddMsg.Path)
+    reply.Res.Unique = string(resourceAddMsg.Resource.Unique)
+    reply.Res.Path = string(resourceAddMsg.Resource.Path)
 
     return nil
 }
@@ -72,10 +73,8 @@ func (s *Resource) Remove(r *http.Request, args *svrproto.RemoveResourceArgs, re
     resourceRemoveMsg := &msg.EventMessageResourceRemove{}
 
     keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_REMOVE, func(msg []byte) bool {
-        if err := proto.Unmarshal(msg, resourceRemoveMsg); err != nil {
-            log.Fatal(err)
-        }
-        return string(resourceRemoveMsg.Unique) == args.Unique
+        types.UnmarshalProtoMessage(msg,resourceRemoveMsg)
+        return string(resourceRemoveMsg.Resource.Unique) == args.Unique
     })
     defer keeperCtx.Close()
 
@@ -86,8 +85,8 @@ func (s *Resource) Remove(r *http.Request, args *svrproto.RemoveResourceArgs, re
     // wait context
     keeperCtx.Wait()
 
-    reply.Res.Unique = string(resourceRemoveMsg.Unique)
-    reply.Res.Path = string(resourceRemoveMsg.Path)
+    reply.Res.Unique = string(resourceRemoveMsg.Resource.Unique)
+    reply.Res.Path = string(resourceRemoveMsg.Resource.Path)
 
     return nil
 }

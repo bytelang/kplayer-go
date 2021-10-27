@@ -4,7 +4,7 @@ import (
     "encoding/json"
     "fmt"
     "github.com/bytelang/kplayer/types"
-    kpproto "github.com/bytelang/kplayer/types/core"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
     "github.com/spf13/cobra"
     "sync"
 )

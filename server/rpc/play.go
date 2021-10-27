@@ -5,8 +5,8 @@ import (
     "net/http"
 
     "github.com/bytelang/kplayer/core"
-    kpproto "github.com/bytelang/kplayer/types/core"
-    prompt "github.com/bytelang/kplayer/types/core/prompt"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
+    prompt "github.com/bytelang/kplayer/types/core/proto/prompt"
     "github.com/bytelang/kplayer/types/server"
 )
 

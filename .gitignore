@@ -3,3 +3,4 @@ main
 build
 *.flv
 test
+.DS_Store

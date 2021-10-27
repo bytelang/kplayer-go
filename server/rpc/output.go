@@ -5,11 +5,10 @@ import (
     "github.com/bytelang/kplayer/core"
     "github.com/bytelang/kplayer/module"
     "github.com/bytelang/kplayer/types"
-    kpproto "github.com/bytelang/kplayer/types/core"
-    "github.com/bytelang/kplayer/types/core/msg"
-    prompt "github.com/bytelang/kplayer/types/core/prompt"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
+    "github.com/bytelang/kplayer/types/core/proto/msg"
+    prompt "github.com/bytelang/kplayer/types/core/proto/prompt"
     svrproto "github.com/bytelang/kplayer/types/server"
-    "github.com/golang/protobuf/proto"
     log "github.com/sirupsen/logrus"
     "net/http"
     "net/url"
@@ -56,8 +55,10 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
 
     // send prompt
     if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &prompt.EventPromptOutputAdd{
-        Path:   []byte(args.Output.Path),
-        Unique: []byte(args.Output.Unique),
+        Output: &kpproto.PromptOutput{
+            Path:   []byte(args.Output.Path),
+            Unique: []byte(args.Output.Unique),
+        },
     }); err != nil {
         return err
     }
@@ -66,10 +67,8 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
     outputAddMsg := &msg.EventMessageOutputAdd{}
 
     keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg []byte) bool {
-        if err := proto.Unmarshal(msg, outputAddMsg); err != nil {
-            log.Fatal(err)
-        }
-        return string(outputAddMsg.Unique) == args.Output.Unique
+        types.UnmarshalProtoMessage(msg, outputAddMsg)
+        return string(outputAddMsg.Output.Unique) == args.Output.Unique
     })
     defer keeperCtx.Close()
 
@@ -85,8 +84,8 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
         return fmt.Errorf("%s", outputAddMsg.Error)
     }
 
-    reply.Output.Path = string(outputAddMsg.Path)
-    reply.Output.Unique = string(outputAddMsg.Unique)
+    reply.Output.Path = string(outputAddMsg.Output.Path)
+    reply.Output.Unique = string(outputAddMsg.Output.Unique)
 
     return nil
 }

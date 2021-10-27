@@ -4,7 +4,7 @@ import (
     "github.com/bytelang/kplayer/module"
     kptypes "github.com/bytelang/kplayer/types"
     "github.com/bytelang/kplayer/types/config"
-    kpproto "github.com/bytelang/kplayer/types/core"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
 )
 
 // Provider play module provider
