@@ -20,7 +20,7 @@ func NewPlay(manager module.ModuleManager) *Play {
 }
 
 // Stop  stop player on idle
-func (s *Play) Stop(r *http.Request, args *server.StopPlayArgs, reply *server.StopPlayReply) error {
+func (s *Play) Stop(r *http.Request, args *server.PlayStopArgs, reply *server.PlayStopReply) error {
     coreKplayer := core.GetLibKplayerInstance()
     if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLAYER_STOP, &prompt.EventPromptPlayerStop{}); err != nil {
         return err

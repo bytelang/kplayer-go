@@ -39,7 +39,6 @@ func (p *Provider) InitModuleConfig(ctx *kptypes.ClientContext, config config.Pl
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
-    p.Trigger(message)
 }
 
 func (p *Provider) ValidateConfig() error {

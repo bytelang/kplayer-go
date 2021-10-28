@@ -7,6 +7,7 @@ import (
     "github.com/bytelang/kplayer/module/resource/provider"
     kptypes "github.com/bytelang/kplayer/types"
     "github.com/bytelang/kplayer/types/config"
+    kpproto "github.com/bytelang/kplayer/types/core/proto"
     "github.com/spf13/cobra"
 )
 
@@ -41,4 +42,8 @@ func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage) 
 
 func (m AppModule) ValidateConfig() error {
     return m.Provider.ValidateConfig()
+}
+
+func (m AppModule) TriggerMessage(message *kpproto.KPMessage) {
+    m.Trigger(message)
 }

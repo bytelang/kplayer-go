@@ -10,27 +10,29 @@ import "gogoproto/gogo.proto";
 message Resource {
 	string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
 	string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+	uint64 start_time = 3;
+	uint64 end_time = 4;
 }
 
 // add
-message AddResourceArgs {
+message ResourceAddArgs {
 	Resource res = 1 [(gogoproto.nullable) = false, (gogoproto.moretags) = "validate:\"required\""];
 }
-message AddResourceReply {
+message ResourceAddReply {
 	Resource res = 1 [(gogoproto.nullable) = false];
 }
 
 // remove
-message RemoveResourceArgs {
+message ResourceRemoveArgs {
 	string unique = 1 [(gogoproto.moretags) = "validate:\"required\""];
 }
-message RemoveResourceReply {
+message ResourceRemoveReply {
 	Resource res = 1 [(gogoproto.nullable) = false];
 }
 
 // list
-message ListResourceArgs {
+message ResourceListArgs {
 }
-message ListResourceReply {
+message ResourceListReply {
 	repeated Resource resources = 1 [(gogoproto.nullable) = false];
 }

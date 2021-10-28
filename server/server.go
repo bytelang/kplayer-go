@@ -22,17 +22,17 @@ func StartServer(stopChan chan bool, mm module.ModuleManager) {
     s := rpc.NewServer()
     s.RegisterValidateRequestFunc(func(r *rpc.RequestInfo, i interface{}) error {
         /*
-        t := reflect.TypeOf(i)
-        if t.Kind() == reflect.Ptr {
-            t = t.Elem()
-        }
+           t := reflect.TypeOf(i)
+           if t.Kind() == reflect.Ptr {
+               t = t.Elem()
+           }
 
-        newArgs := reflect.New(t)
-        for i := 0; i < t.NumField(); i++ {
-            newArgs.FieldByName(t.Field(i).Name).Set(reflect.ValueOf(t.Field(i)))
-        }
+           newArgs := reflect.New(t)
+           for i := 0; i < t.NumField(); i++ {
+               newArgs.FieldByName(t.Field(i).Name).Set(reflect.ValueOf(t.Field(i)))
+           }
 
-         */
+        */
         validate := validator.New()
         return validate.Struct(i)
     })
@@ -45,6 +45,9 @@ func StartServer(stopChan chan bool, mm module.ModuleManager) {
         panic(err)
     }
     if err := s.RegisterService(kprpc.NewPlay(mm), ""); err != nil {
+        panic(err)
+    }
+    if err := s.RegisterService(kprpc.NewPlugin(mm), ""); err != nil {
         panic(err)
     }
 

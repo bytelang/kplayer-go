@@ -77,18 +77,19 @@ func (m *ModuleKeeper) Trigger(message *kpproto.KPMessage) {
     }
 }
 
+type BasicAppModule interface {
+    RegisterKeeperChannel(ctx KeeperContext) error
+    GetKeeperContext(id string) *KeeperContext
+    ParseMessage(message *kpproto.KPMessage)
+    TriggerMessage(message *kpproto.KPMessage)
+}
+
 type AppModule interface {
-    KeeperModule
+    BasicAppModule
     GetModuleName() string
     GetCommand() *cobra.Command
     InitConfig(ctx *types.ClientContext, cfg json.RawMessage) error
     ValidateConfig() error
-}
-
-type KeeperModule interface {
-    RegisterKeeperChannel(ctx KeeperContext) error
-    GetKeeperContext(id string) *KeeperContext
-    ParseMessage(message *kpproto.KPMessage)
 }
 
 type ModuleManager map[string]AppModule

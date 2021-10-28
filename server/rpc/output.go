@@ -27,7 +27,7 @@ func NewOutput(manager module.ModuleManager) *Output {
 }
 
 // Add add output to core player
-func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrproto.AddOutputReply) error {
+func (o *Output) Add(r *http.Request, args *svrproto.OutputAddArgs, reply *svrproto.OutputAddReply) error {
     coreKplayer := core.GetLibKplayerInstance()
     // validate
     urlParse, err := url.Parse(args.Output.Path)
@@ -63,7 +63,6 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
         return err
     }
 
-    outputModule := o.mm[outputModuleName]
     outputAddMsg := &msg.EventMessageOutputAdd{}
 
     keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg []byte) bool {
@@ -72,6 +71,7 @@ func (o *Output) Add(r *http.Request, args *svrproto.AddOutputArgs, reply *svrpr
     })
     defer keeperCtx.Close()
 
+    outputModule := o.mm[outputModuleName]
     if err := outputModule.RegisterKeeperChannel(keeperCtx); err != nil {
         return err
     }

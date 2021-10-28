@@ -3,7 +3,7 @@ package play
 import (
     "encoding/json"
     "github.com/bytelang/kplayer/module"
-    "github.com/bytelang/kplayer/module/play/provider"
+    "github.com/bytelang/kplayer/module/plugin/provider"
     kptypes "github.com/bytelang/kplayer/types"
     "github.com/bytelang/kplayer/types/config"
     kpproto "github.com/bytelang/kplayer/types/core/proto"
@@ -29,9 +29,9 @@ func (m AppModule) GetCommand() *cobra.Command {
 }
 
 func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage) error {
-    var cfg config.Play
+    var cfg config.Plugin
     if err := json.Unmarshal(data, &cfg); err != nil {
-        panic(err)
+        return err
     }
 
     m.InitModuleConfig(ctx, cfg)

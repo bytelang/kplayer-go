@@ -12,7 +12,7 @@ import (
     svrproto "github.com/bytelang/kplayer/types/server"
 )
 
-const playModuleName = "play"
+const resourceModuleName = "resource"
 
 // Resource rpc
 type Resource struct {
@@ -24,7 +24,7 @@ func NewResource(manager module.ModuleManager) *Resource {
 }
 
 // Add add Resource to core
-func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *svrproto.AddResourceReply) error {
+func (s *Resource) Add(r *http.Request, args *svrproto.ResourceAddArgs, reply *svrproto.ResourceAddReply) error {
     coreKplayer := core.GetLibKplayerInstance()
     if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_ADD, &kpprompt.EventPromptResourceAdd{
         Resource: &kpproto.PromptResource{
@@ -38,7 +38,6 @@ func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *s
         return err
     }
 
-    resourceModule := s.mm[playModuleName]
     resourceAddMsg := &msg.EventMessageResourceAdd{}
 
     keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_ADD, func(msg []byte) bool {
@@ -47,6 +46,7 @@ func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *s
     })
     defer keeperCtx.Close()
 
+    resourceModule := s.mm[resourceModuleName]
     if err := resourceModule.RegisterKeeperChannel(keeperCtx); err != nil {
         return err
     }
@@ -61,7 +61,7 @@ func (s *Resource) Add(r *http.Request, args *svrproto.AddResourceArgs, reply *s
 }
 
 // Remove remove Resource to core
-func (s *Resource) Remove(r *http.Request, args *svrproto.RemoveResourceArgs, reply *svrproto.RemoveResourceReply) error {
+func (s *Resource) Remove(r *http.Request, args *svrproto.ResourceRemoveArgs, reply *svrproto.ResourceRemoveReply) error {
     coreKplayer := core.GetLibKplayerInstance()
     if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_REMOVE, &kpprompt.EventPromptResourceRemove{
         Unique: []byte(args.Unique),
@@ -69,15 +69,15 @@ func (s *Resource) Remove(r *http.Request, args *svrproto.RemoveResourceArgs, re
         return err
     }
 
-    ResourceModule := s.mm[playModuleName]
     resourceRemoveMsg := &msg.EventMessageResourceRemove{}
 
     keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_REMOVE, func(msg []byte) bool {
-        types.UnmarshalProtoMessage(msg,resourceRemoveMsg)
+        types.UnmarshalProtoMessage(msg, resourceRemoveMsg)
         return string(resourceRemoveMsg.Resource.Unique) == args.Unique
     })
     defer keeperCtx.Close()
 
+    ResourceModule := s.mm[resourceModuleName]
     if err := ResourceModule.RegisterKeeperChannel(keeperCtx); err != nil {
         return err
     }
@@ -87,6 +87,39 @@ func (s *Resource) Remove(r *http.Request, args *svrproto.RemoveResourceArgs, re
 
     reply.Res.Unique = string(resourceRemoveMsg.Resource.Unique)
     reply.Res.Path = string(resourceRemoveMsg.Resource.Path)
+
+    return nil
+}
+
+// List get resource list
+func (s *Resource) List(r *http.Request, args *svrproto.ResourceListArgs, reply *svrproto.ResourceListReply) error {
+    coreKplayer := core.GetLibKplayerInstance()
+    if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_LIST, &kpprompt.EventPromptResourceList{
+    }); err != nil {
+        return err
+    }
+
+    resourceListMsg := &msg.EventMessageResourceList{}
+    keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_LIST, func(msg []byte) bool {
+        types.UnmarshalProtoMessage(msg, resourceListMsg)
+        return true
+    })
+    defer keeperCtx.Close()
+
+    ResourceModule := s.mm[resourceModuleName]
+    if err := ResourceModule.RegisterKeeperChannel(keeperCtx); err != nil {
+        return err
+    }
+
+    // wait context
+    keeperCtx.Wait()
+
+    for _, item := range resourceListMsg.Resources {
+        reply.Resources = append(reply.Resources, svrproto.Resource{
+            Path:   string(item.Path),
+            Unique: string(item.Unique),
+        })
+    }
 
     return nil
 }

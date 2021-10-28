@@ -5,8 +5,9 @@ package RPCProto;
 option go_package = "github.com/bytelang/kplayer/types/server";
 
 import "gogoproto/gogo.proto";
+import "resource.proto";
 
-message StopPlayArgs {
+message PlayStopArgs {
 }
-message StopPlayReply {
+message PlayStopReply {
 }

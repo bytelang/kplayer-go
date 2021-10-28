@@ -70,8 +70,6 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
         }
         p.addNextResourceAdd()
     }
-
-    p.Trigger(message)
 }
 
 func (p *Provider) ValidateConfig() error {

@@ -6,6 +6,7 @@ import (
     "github.com/bytelang/kplayer/module"
     outputm "github.com/bytelang/kplayer/module/output"
     playm "github.com/bytelang/kplayer/module/play"
+    pluginm "github.com/bytelang/kplayer/module/plugin"
     resourcem "github.com/bytelang/kplayer/module/resource"
     "github.com/bytelang/kplayer/types"
     "github.com/bytelang/kplayer/types/config"
@@ -28,8 +29,9 @@ func newModuleManager() module.ModuleManager {
     playProvider := playm.NewAppModule()
     outputProvider := outputm.NewAppModule()
     resourceProvider := resourcem.NewAppModule(playProvider.GetConfig())
+    pluginProvider := pluginm.NewAppModule()
     return module.NewModuleManager(
-        playProvider, outputProvider, resourceProvider,
+        playProvider, outputProvider, resourceProvider, pluginProvider,
     )
 }
 
