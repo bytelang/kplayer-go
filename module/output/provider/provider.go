@@ -7,13 +7,22 @@ import (
     "github.com/bytelang/kplayer/types/config"
     kpproto "github.com/bytelang/kplayer/types/core/proto"
     "github.com/bytelang/kplayer/types/core/proto/prompt"
+    svrproto "github.com/bytelang/kplayer/types/server"
     log "github.com/sirupsen/logrus"
 )
+
+type ProviderI interface {
+    OutputAdd(output *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error)
+    OutputRemove(output *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error)
+    OutputList(output *svrproto.OutputListArgs) (*svrproto.OutputListReply, error)
+}
 
 type Provider struct {
     module.ModuleKeeper
     config config.Output
 }
+
+var _ ProviderI = &Provider{}
 
 func NewProvider() *Provider {
     return &Provider{}
@@ -23,7 +32,7 @@ func (p *Provider) SetConfig(config config.Output) {
     p.config = config
 }
 
-func (p *Provider) InitModuleConfig(ctx *kptypes.ClientContext, config config.Output) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Output) {
     p.SetConfig(config)
 }
 

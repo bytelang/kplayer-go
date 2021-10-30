@@ -38,6 +38,8 @@ type Provider struct {
     input_mutex  sync.Mutex
 }
 
+var _ ProviderI = &Provider{}
+
 func NewProvider(playProvider playprovider.ProviderI) *Provider {
     return &Provider{
         playProvider: playProvider,

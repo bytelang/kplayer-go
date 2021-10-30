@@ -34,7 +34,7 @@ func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage) 
         panic(err)
     }
 
-    m.InitModuleConfig(ctx, cfg)
+    m.InitModule(ctx, cfg)
 
     return nil
 }

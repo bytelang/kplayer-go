@@ -102,6 +102,9 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 
     // wait context
     keeperCtx.Wait()
+    if resourceListMsg.Error != nil {
+        return nil, fmt.Errorf("%s", string(resourceListMsg.Error))
+    }
 
     reply := &svrproto.ResourceListReply{}
     for _, item := range resourceListMsg.Resources {

@@ -2,33 +2,24 @@ package rpc
 
 import (
     "fmt"
-    "github.com/bytelang/kplayer/core"
-    "github.com/bytelang/kplayer/module"
-    "github.com/bytelang/kplayer/types"
-    kpproto "github.com/bytelang/kplayer/types/core/proto"
-    "github.com/bytelang/kplayer/types/core/proto/msg"
-    prompt "github.com/bytelang/kplayer/types/core/proto/prompt"
+    "github.com/bytelang/kplayer/module/output/provider"
     svrproto "github.com/bytelang/kplayer/types/server"
-    log "github.com/sirupsen/logrus"
     "net/http"
     "net/url"
     "os"
 )
 
-const outputModuleName = "output"
-
 // Output rpc
 type Output struct {
-    mm module.ModuleManager
+    pi provider.ProviderI
 }
 
-func NewOutput(manager module.ModuleManager) *Output {
-    return &Output{mm: manager}
+func NewOutput(pi provider.ProviderI) *Output {
+    return &Output{pi: pi}
 }
 
 // Add add output to core player
 func (o *Output) Add(r *http.Request, args *svrproto.OutputAddArgs, reply *svrproto.OutputAddReply) error {
-    coreKplayer := core.GetLibKplayerInstance()
     // validate
     urlParse, err := url.Parse(args.Output.Path)
     if err != nil {
@@ -53,39 +44,35 @@ func (o *Output) Add(r *http.Request, args *svrproto.OutputAddArgs, reply *svrpr
         }
     }
 
-    // send prompt
-    if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &prompt.EventPromptOutputAdd{
-        Output: &kpproto.PromptOutput{
-            Path:   []byte(args.Output.Path),
-            Unique: []byte(args.Output.Unique),
-        },
-    }); err != nil {
+    // call provider add
+    addResource, err := o.pi.OutputAdd(args)
+    if err != nil {
         return err
     }
 
-    outputAddMsg := &msg.EventMessageOutputAdd{}
+    reply.Output = addResource.Output
 
-    keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg []byte) bool {
-        types.UnmarshalProtoMessage(msg, outputAddMsg)
-        return string(outputAddMsg.Output.Unique) == args.Output.Unique
-    })
-    defer keeperCtx.Close()
+    return nil
+}
 
-    outputModule := o.mm[outputModuleName]
-    if err := outputModule.RegisterKeeperChannel(keeperCtx); err != nil {
+// Remove
+func (o *Output) Remove(r *http.Request, args *svrproto.OutputRemoveArgs, reply *svrproto.OutputRemoveReply) error {
+    removeResource, err := o.pi.OutputRemove(args)
+    if err != nil {
         return err
     }
 
-    // wait context
-    keeperCtx.Wait()
+    reply.Output = removeResource.Output
+    return nil
+}
 
-    if outputAddMsg.Error != nil {
-        log.Errorf("%s", outputAddMsg.Error)
-        return fmt.Errorf("%s", outputAddMsg.Error)
+// List
+func (o *Output) List(r *http.Request, args *svrproto.OutputListArgs, reply *svrproto.OutputListReply) error {
+    listResource, err := o.pi.OutputList(args)
+    if err != nil {
+        return err
     }
 
-    reply.Output.Path = string(outputAddMsg.Output.Path)
-    reply.Output.Unique = string(outputAddMsg.Output.Unique)
-
+    reply.Outputs = listResource.Outputs
     return nil
 }

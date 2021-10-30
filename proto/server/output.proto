@@ -11,9 +11,25 @@ message Output {
 	string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
 }
 
+// add
 message OutputAddArgs {
 	Output output = 1 [(gogoproto.nullable) = false, (gogoproto.moretags) = "validate:\"required\""];
 }
 message OutputAddReply {
 	Output output = 1 [(gogoproto.nullable) = false];
+}
+
+// remove
+message OutputRemoveArgs {
+	string unique = 1;
+}
+message OutputRemoveReply {
+	Output output = 1;
+}
+
+// list
+message OutputListArgs {
+}
+message OutputListReply {
+	repeated Output outputs = 1;
 }

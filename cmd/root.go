@@ -37,7 +37,7 @@ func initRootCmd(rootCmd *cobra.Command) {
 }
 
 func messageConsumer(message *kpproto.KPMessage) {
-    log.Debug("receive broadcast message: ", message.Action)
+    log.WithFields(log.Fields{"action": kpproto.EventAction_name[int32(message.Action)]}).Debug("receive broadcast message")
 
     var copyMsg kpproto.KPMessage
     for _, item := range app.ModuleManager {

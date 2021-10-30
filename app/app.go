@@ -28,7 +28,7 @@ var (
 func newModuleManager() module.ModuleManager {
     playProvider := playm.NewAppModule()
     outputProvider := outputm.NewAppModule()
-    resourceProvider := resourcem.NewAppModule(playProvider.GetConfig())
+    resourceProvider := resourcem.NewAppModule(playProvider)
     pluginProvider := pluginm.NewAppModule()
     return module.NewModuleManager(
         playProvider, outputProvider, resourceProvider, pluginProvider,

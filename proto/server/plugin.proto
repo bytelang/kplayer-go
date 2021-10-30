@@ -14,15 +14,34 @@ message Plugin {
 	map<string, string> params = 3;
 }
 
+// list
 message PluginListArgs {
 }
 message PluginListReply {
 	repeated Plugin plugins = 1 [(gogoproto.nullable) = false];
 }
 
+// add
 message PluginAddArgs {
 	Plugin plugin = 1 [(gogoproto.nullable) = false];
 }
 message PluginAddReplay {
 	Plugin plugin = 1 [(gogoproto.nullable) = false];
+}
+
+// remove
+message PluginRemoveArgs {
+	string unique = 1;
+}
+message PluginRemoveReply {
+	Plugin plugin = 1 [(gogoproto.nullable) = false];
+}
+
+// Update
+message PluginUpdateArgs {
+	string unique = 1;
+	map<string, string> params = 2;
+}
+message PluginUpdateReply {
+	Plugin plugin = 1;
 }

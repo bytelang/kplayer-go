@@ -3,7 +3,10 @@ package server
 import (
     "context"
     "github.com/bytelang/kplayer/module"
-    "github.com/bytelang/kplayer/module/resource/provider"
+    outputprovider "github.com/bytelang/kplayer/module/output/provider"
+    playprovider "github.com/bytelang/kplayer/module/play/provider"
+    pluginprovider "github.com/bytelang/kplayer/module/plugin/provider"
+    resourceprovider "github.com/bytelang/kplayer/module/resource/provider"
     "github.com/go-playground/validator/v10"
     "net/http"
     "time"
@@ -34,16 +37,16 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
     })
 
     s.RegisterCodec(json.NewCodec(), "application/json")
-    if err := s.RegisterService(kprpc.NewResource(mm[provider.ModuleName].(provider.ProviderI)), ""); err != nil {
+    if err := s.RegisterService(kprpc.NewResource(mm[resourceprovider.ModuleName].(resourceprovider.ProviderI)), ""); err != nil {
         panic(err)
     }
-    if err := s.RegisterService(kprpc.NewOutput(mm), ""); err != nil {
+    if err := s.RegisterService(kprpc.NewOutput(mm[outputprovider.ModuleName].(outputprovider.ProviderI)), ""); err != nil {
         panic(err)
     }
-    if err := s.RegisterService(kprpc.NewPlay(mm), ""); err != nil {
+    if err := s.RegisterService(kprpc.NewPlay(mm[playprovider.ModuleName].(playprovider.ProviderI)), ""); err != nil {
         panic(err)
     }
-    if err := s.RegisterService(kprpc.NewPlugin(mm), ""); err != nil {
+    if err := s.RegisterService(kprpc.NewPlugin(mm[pluginprovider.ModuleName].(pluginprovider.ProviderI)), ""); err != nil {
         panic(err)
     }
 
