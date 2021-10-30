@@ -102,3 +102,8 @@ func NewModuleManager(modules ...AppModule) ModuleManager {
 
     return moduleMap
 }
+
+func (mm *ModuleManager) GetModule(name string) *AppModule {
+    m := (*mm)[name]
+    return &m
+}

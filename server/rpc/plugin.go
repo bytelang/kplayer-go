@@ -1,6 +1,7 @@
 package rpc
 
 import (
+    "fmt"
     "github.com/bytelang/kplayer/core"
     "github.com/bytelang/kplayer/module"
     "github.com/bytelang/kplayer/types"
@@ -47,6 +48,7 @@ func (s *Plugin) List(r *http.Request, args *server.PluginListArgs, reply *serve
     // wait context
     keeperCtx.Wait()
 
+    reply.Plugins = make([]svrproto.Plugin, 0)
     for _, item := range pluginListMsg.Plugins {
         reply.Plugins = append(reply.Plugins, svrproto.Plugin{
             Path:   string(item.Path),
@@ -78,7 +80,7 @@ func (s *Plugin) Add(r *http.Request, args *server.PluginAddArgs, reply *server.
     pluginAddMsg := &msg.EventMessagePluginAdd{}
     keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg []byte) bool {
         types.UnmarshalProtoMessage(msg, pluginAddMsg)
-        return true
+        return types.NewKPString(pluginAddMsg.Plugin.Path).Equal(args.Plugin.Path) && types.NewKPString(pluginAddMsg.Plugin.Unique).Equal(args.Plugin.Unique)
     })
     defer keeperCtx.Close()
 
@@ -90,8 +92,12 @@ func (s *Plugin) Add(r *http.Request, args *server.PluginAddArgs, reply *server.
     // wait context
     keeperCtx.Wait()
 
-    reply.Plugin.Path = string(pluginAddMsg.Plugin.Path)
-    reply.Plugin.Unique = string(pluginAddMsg.Plugin.Unique)
+    if pluginAddMsg.Error != nil {
+        return fmt.Errorf("%s", types.NewKPString(pluginAddMsg.Error))
+    }
+
+    reply.Plugin.Path = types.NewKPString(pluginAddMsg.Plugin.Path).String()
+    reply.Plugin.Unique = types.NewKPString(pluginAddMsg.Plugin.Unique).String()
 
     return nil
 }

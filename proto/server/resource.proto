@@ -10,16 +10,18 @@ import "gogoproto/gogo.proto";
 message Resource {
 	string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
 	string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
-	uint64 start_time = 3;
-	uint64 end_time = 4;
+	uint64 create_time = 3;
+	uint64 start_time = 4;
+	uint64 end_time = 5;
 }
 
 // add
 message ResourceAddArgs {
-	Resource res = 1 [(gogoproto.nullable) = false, (gogoproto.moretags) = "validate:\"required\""];
+	string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+	string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
 }
 message ResourceAddReply {
-	Resource res = 1 [(gogoproto.nullable) = false];
+	Resource resource = 1 [(gogoproto.nullable) = false];
 }
 
 // remove
@@ -27,12 +29,24 @@ message ResourceRemoveArgs {
 	string unique = 1 [(gogoproto.moretags) = "validate:\"required\""];
 }
 message ResourceRemoveReply {
-	Resource res = 1 [(gogoproto.nullable) = false];
+	message Resource {
+		string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+		string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+		uint64 create_time = 3;
+	}
+	Resource resource = 1;
 }
 
 // list
 message ResourceListArgs {
 }
 message ResourceListReply {
+	repeated Resource resources = 1 [(gogoproto.nullable) = false];
+}
+
+// all list
+message ResourceAllListArgs {
+}
+message ResourceAllListReply {
 	repeated Resource resources = 1 [(gogoproto.nullable) = false];
 }

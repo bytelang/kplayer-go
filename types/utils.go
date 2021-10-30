@@ -21,3 +21,19 @@ func UnmarshalProtoMessage(data []byte, obj protoiface.MessageV1) {
         log.Fatal("error unmarshal message. error: %s. data: %s", err, string(data))
     }
 }
+
+type KPString struct {
+    d []byte
+}
+
+func NewKPString(d []byte) *KPString {
+    return &KPString{d: d}
+}
+
+func (ks *KPString) Equal(con string) bool {
+    return string(ks.d) == con
+}
+
+func (ks *KPString) String() string {
+    return string(ks.d)
+}

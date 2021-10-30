@@ -1,3 +1,6 @@
-config
-core
-server
+config/*.pb.go
+core/proto/*.pb.go
+core/proto/msg/*.pb.go
+core/proto/prompt/*.pb.go
+server/*.pb.go
+module/*.pb.go

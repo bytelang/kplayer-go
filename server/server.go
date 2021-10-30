@@ -3,6 +3,7 @@ package server
 import (
     "context"
     "github.com/bytelang/kplayer/module"
+    "github.com/bytelang/kplayer/module/resource/provider"
     "github.com/go-playground/validator/v10"
     "net/http"
     "time"
@@ -17,28 +18,23 @@ const (
     address = "0.0.0.0:4156"
 )
 
+type jsonRPCServer struct {
+}
+
+func NewJsonRPCServer() *jsonRPCServer {
+    return &jsonRPCServer{}
+}
+
 // StartServer start rpc server
-func StartServer(stopChan chan bool, mm module.ModuleManager) {
+func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
     s := rpc.NewServer()
     s.RegisterValidateRequestFunc(func(r *rpc.RequestInfo, i interface{}) error {
-        /*
-           t := reflect.TypeOf(i)
-           if t.Kind() == reflect.Ptr {
-               t = t.Elem()
-           }
-
-           newArgs := reflect.New(t)
-           for i := 0; i < t.NumField(); i++ {
-               newArgs.FieldByName(t.Field(i).Name).Set(reflect.ValueOf(t.Field(i)))
-           }
-
-        */
         validate := validator.New()
         return validate.Struct(i)
     })
 
     s.RegisterCodec(json.NewCodec(), "application/json")
-    if err := s.RegisterService(kprpc.NewResource(mm), ""); err != nil {
+    if err := s.RegisterService(kprpc.NewResource(mm[provider.ModuleName].(provider.ProviderI)), ""); err != nil {
         panic(err)
     }
     if err := s.RegisterService(kprpc.NewOutput(mm), ""); err != nil {

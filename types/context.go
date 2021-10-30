@@ -20,6 +20,7 @@ func (k KplayerContextKey) String() string {
 const (
     ClientContextKey        KplayerContextKey = "client.context"
     ModuleManagerContextKey KplayerContextKey = "module.manager"
+    ServerCreatorContextKey KplayerContextKey = "server.creator"
 )
 
 type ClientContext struct {

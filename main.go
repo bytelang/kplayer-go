@@ -6,6 +6,7 @@ import (
     "github.com/bytelang/kplayer/app"
     "github.com/bytelang/kplayer/cmd"
     "github.com/bytelang/kplayer/module"
+    "github.com/bytelang/kplayer/server"
     kptypes "github.com/bytelang/kplayer/types"
     "github.com/rs/zerolog"
     log "github.com/sirupsen/logrus"
@@ -50,6 +51,7 @@ func Execute(rootCmd *cobra.Command, defaultHome string, defaultFile string) err
     ctx := context.Background()
     ctx = context.WithValue(ctx, kptypes.ClientContextKey, kptypes.DefaultClientContext())
     ctx = context.WithValue(ctx, kptypes.ModuleManagerContextKey, app.ModuleManager)
+    ctx = context.WithValue(ctx, kptypes.ServerCreatorContextKey, server.NewJsonRPCServer())
 
     return kptypes.SetCommandContextAndExecute(rootCmd, ctx)
 }
