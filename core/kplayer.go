@@ -19,7 +19,7 @@ func goCallBackMessage(msgRaw *C.char) {
     msg := C.GoString(msgRaw)
     message := &kpproto.KPMessage{}
     if err := proto.Unmarshal([]byte(msg), message); err != nil {
-        log.Fatal("error unmarshal message. error: %s. data: %s", err, msg)
+        log.WithFields(log.Fields{"error": err, "message": msg}).Fatal("error unmarshal message")
     }
 
     libKplayerInstance.callbackFn(message)
@@ -118,7 +118,7 @@ func (lb *libKplayer) Run() {
         result := C.Run()
 
         if int(result) < 0 {
-            log.Errorf("core return code: %d. error: %s", int(result), C.GoString(C.GetError()))
+            log.WithFields(log.Fields{"code": int(result), "error": C.GoString(C.GetError())}).Error("core return error")
         }
     }()
 

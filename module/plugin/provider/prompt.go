@@ -84,6 +84,7 @@ func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.Plug
     reply := &svrproto.PluginRemoveReply{}
     reply.Plugin.Path = string(pluginRemoveMsg.Plugin.Path)
     reply.Plugin.Unique = string(pluginRemoveMsg.Plugin.Unique)
+    reply.Plugin.Params = make(map[string]string)
     for k, v := range pluginRemoveMsg.Plugin.Params {
         reply.Plugin.Params[k] = string(v)
     }

@@ -66,7 +66,7 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
         stopChan <- true
     }()
 
-    log.Info("RPC server listening on: ", address)
+    log.Infof("RPC server listening on: %s", address)
 
     <-stopChan
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

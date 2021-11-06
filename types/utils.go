@@ -18,7 +18,7 @@ func GetRandString(size ...uint) string {
 
 func UnmarshalProtoMessage(data []byte, obj protoiface.MessageV1) {
     if err := proto.Unmarshal(data, obj); err != nil {
-        log.Fatal("error unmarshal message. error: %s. data: %s", err, string(data))
+        log.WithFields(log.Fields{"error": err, "data": string(data)}).Fatal("error unmarshal message")
     }
 }
 
