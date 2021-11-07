@@ -6,6 +6,7 @@ package core
 import "C"
 
 import (
+    "bytes"
     "unsafe"
 
     kpproto "github.com/bytelang/kplayer/types/core/proto"
@@ -72,6 +73,21 @@ func (lb *libKplayer) SetOptions(protocol string, video_width uint32, video_heig
 
 func (lb *libKplayer) SetCallBackMessage(fn func(message *kpproto.KPMessage)) {
     lb.callbackFn = fn
+}
+
+func (lb *libKplayer) GetInformation() *kpproto.Information {
+    infoMemorySize := 200
+    str := make([]byte, infoMemorySize)
+    cs := (*C.char)(unsafe.Pointer(&str[0]))
+
+    C.GetInformation(cs, C.int(infoMemorySize))
+
+    str = bytes.Trim(str, "\x00")
+    info := &kpproto.Information{}
+    if err := proto.Unmarshal(str, info); err != nil {
+        log.Fatalf("error: %s", err)
+    }
+    return info
 }
 
 func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body proto.Message) error {

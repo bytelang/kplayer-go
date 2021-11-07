@@ -1,6 +1,7 @@
 package cmd
 
 import (
+    "fmt"
     "github.com/bytelang/kplayer/app"
     "github.com/bytelang/kplayer/core"
     kpproto "github.com/bytelang/kplayer/types/core/proto"
@@ -8,15 +9,38 @@ import (
     "github.com/spf13/cobra"
 )
 
+var (
+    MAJOR_TAG string = "<MAJOR_TAG>"
+    WebSite   string = "<WEB_SITE>"
+)
+
 func NewRootCmd() *cobra.Command {
     // init core
     coreKplayer := core.GetLibKplayerInstance()
     coreKplayer.SetCallBackMessage(messageConsumer)
 
+    // get core information
+    info := coreKplayer.GetInformation()
+
     // init command
     rootCmd := &cobra.Command{
-        Use:   app.AppName,
-        Short: "launch application",
+        Use: app.AppName,
+        Short: fmt.Sprintf(`kplayer for golang major version %s Copyright (c) %s the ByteLang Studio (%s)
+  core libkplayer version: %s, plugin version: %s, license version: %s 
+  build with buildchains %s, toolchains %s, type with %s on %s
+  Hope you have a good experience.
+`,
+            MAJOR_TAG,
+            info.Copyright,
+            WebSite,
+            info.MajorVersion,
+            info.PluginVersion,
+            info.LicenseVersion,
+            info.BuildChains,
+            info.ToolChains,
+            info.BuildType,
+            info.ArchiveVersion,
+        ),
         PersistentPreRun: func(cmd *cobra.Command, args []string) {
             cmd.SetOut(cmd.OutOrStdout())
             cmd.SetErr(cmd.ErrOrStderr())
