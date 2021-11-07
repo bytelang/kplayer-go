@@ -41,7 +41,7 @@ func Execute(rootCmd *cobra.Command, defaultHome string, defaultFile string) err
     rootCmd.PersistentFlags().String(kptypes.FlagLogLevel, zerolog.InfoLevel.String(), "The logging level (trace|debug|info|warn|error|fatal|panic)")
     rootCmd.PersistentFlags().String(kptypes.FlagLogFormat, "plain", "The logging format (json|plain)")
     rootCmd.PersistentFlags().StringP(kptypes.FlagHome, "", defaultHome, "directory for config and data")
-    rootCmd.PersistentFlags().StringP(kptypes.FlagConfigFileName, "", defaultFile, "config file name")
+    rootCmd.PersistentFlags().StringP(kptypes.FlagConfigFileName, "c", defaultFile, "config file name")
     rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
         InitGlobalContextConfig(cmd)
 
