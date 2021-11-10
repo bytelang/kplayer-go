@@ -21,7 +21,10 @@ type ProviderI interface {
     ResourceRemove(resource *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error)
     ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error)
     ResourceAllList(*svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error)
+    ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error)
 }
+
+var _ ProviderI = &Provider{}
 
 type Provider struct {
     module.ModuleKeeper

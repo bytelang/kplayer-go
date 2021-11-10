@@ -50,3 +50,10 @@ message ResourceAllListArgs {
 message ResourceAllListReply {
 	repeated Resource resources = 1 [(gogoproto.nullable) = false];
 }
+
+// get current resource
+message ResourceCurrentArgs {
+}
+message ResourceCurrentReply {
+	Resource resource = 1 [(gogoproto.nullable) = false];
+}

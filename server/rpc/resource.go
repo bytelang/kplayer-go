@@ -59,3 +59,14 @@ func (s *Resource) AllList(r *http.Request, args *svrproto.ResourceAllListArgs, 
     reply.Resources = listResult.Resources
     return
 }
+
+// Current get current play resource
+func (s *Resource) Current(r *http.Request, args *svrproto.ResourceCurrentArgs, reply *svrproto.ResourceCurrentReply) (err error) {
+    currentResource, err := s.pi.ResourceCurrent(args)
+    if err != nil {
+        return err
+    }
+
+    reply.Resource = currentResource.Resource
+    return
+}

@@ -10,6 +10,7 @@ import (
     kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
     moduletypes "github.com/bytelang/kplayer/types/module"
     svrproto "github.com/bytelang/kplayer/types/server"
+    "os"
     "time"
 )
 
@@ -17,6 +18,13 @@ func (p *Provider) ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.Re
     p.input_mutex.Lock()
     defer p.input_mutex.Unlock()
 
+    // determine whether the file exists
+    _, err := os.Stat(resource.Path)
+    if os.IsNotExist(err) {
+        return nil, fmt.Errorf("file not exists. path: %s", resource.Path)
+    }
+
+    // append to playlist
     p.inputs = append(p.inputs, moduletypes.Resource{
         Path:       resource.Path,
         Unique:     resource.Unique,
@@ -48,7 +56,7 @@ func (p *Provider) ResourceRemove(resource *svrproto.ResourceRemoveArgs) (*svrpr
 
 func (p *Provider) ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {
     res := []svrproto.Resource{}
-    for _, item := range p.inputs[p.currentIndex:] {
+    for _, item := range p.inputs[p.currentIndex+1:] {
         res = append(res, svrproto.Resource{
             Path:       item.Path,
             Unique:     item.Unique,
@@ -114,5 +122,18 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
         })
     }
 
+    return reply, nil
+}
+
+func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error) {
+    currentRes := p.inputs[p.currentIndex]
+    reply := &svrproto.ResourceCurrentReply{
+        Resource: svrproto.Resource{
+            Path:       currentRes.Path,
+            Unique:     currentRes.Unique,
+            CreateTime: currentRes.CreateTime,
+            StartTime:  currentRes.StartTime,
+            EndTime:    currentRes.EndTime,
+        }}
     return reply, nil
 }
