@@ -35,24 +35,23 @@ func NewRootCmd() *cobra.Command {
     }
 
     // init command
-    shortDesc := fmt.Sprintf(`kplayer for golang %s(%s) Copyright (c) %s the ByteLang Studio (%s)
+    shortDesc := fmt.Sprintf(`kplayer for golang %s Copyright(c) %s the ByteLang Studio (%s)
   libkplayer version: %s plugin version: %s license version: %s 
   toolchains %s C++ Standard %s on %s
-  build with build-chains %s, type with %s
+  build with build-chains %s type with %s
   Hope you have a good experience.
 `,
         MAJOR_TAG,
-        MAJOR_HASH,
         info.Copyright,
         WebSite,
         info.MajorVersion,
         info.PluginVersion,
         info.LicenseVersion,
-        info.BuildChains,
-        info.BuildType,
         info.ToolChains,
         info.CppStd,
         info.ArchiveVersion,
+        info.BuildChains,
+        info.BuildType,
     )
 
     for i := 0; uint(i) < terminalWidth; i++ {

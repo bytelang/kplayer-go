@@ -100,6 +100,7 @@ func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body proto.Message)
     defer C.free(unsafe.Pointer(cs))
 
     C.PromptMessage(C.int(action), cs)
+    log.WithFields(log.Fields{"action": kpproto.EventAction_name[int32(action)]}).Debug("send prompt message")
     return nil
 }
 
@@ -122,6 +123,7 @@ func (lb *libKplayer) Run() {
     }
 
     C.ReceiveMessage(C.MessageCallBack(C.goCallBackMessage))
+    C.SetLogLevel(C.int(0))
 
     // start
     stopChan := make(chan bool)
