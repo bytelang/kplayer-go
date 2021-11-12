@@ -67,6 +67,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Resource
         p.inputs = append(p.inputs, moduletypes.Resource{
             Path:       item,
             Unique:     kptypes.GetRandString(6),
+            Seek:       0,
             CreateTime: uint64(time.Now().Unix()),
         })
     }
@@ -79,6 +80,9 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
             log.Info("the resource list is empty. waiting to add a resource")
             break
         }
+
+        p.input_mutex.Lock()
+        defer p.input_mutex.Unlock()
         p.addNextResourceToCore()
     case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_START:
         msg := &kpmsg.EventMessageResourceStart{}
@@ -92,6 +96,9 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
         } else {
             log.WithFields(log.Fields{"path": string(msg.Resource.Path), "index": p.currentIndex}).Info("finish play resource")
         }
+
+        p.input_mutex.Lock()
+        defer p.input_mutex.Unlock()
 
         p.currentIndex = p.currentIndex + 1
         if p.currentIndex >= uint32(len(p.inputs)) {
@@ -114,6 +121,7 @@ func (p *Provider) addNextResourceToCore() {
         Resource: &kpproto.PromptResource{
             Path:   []byte(p.inputs[p.currentIndex].Path),
             Unique: []byte(p.inputs[p.currentIndex].Unique),
+            Seek:   int64(p.inputs[p.currentIndex].Seek),
         },
     }); err != nil {
         log.Warn(err)

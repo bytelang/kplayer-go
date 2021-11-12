@@ -28,11 +28,12 @@ func (p *Provider) ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.Re
     p.inputs = append(p.inputs, moduletypes.Resource{
         Path:       resource.Path,
         Unique:     resource.Unique,
+        Seek:       resource.Seek,
         CreateTime: uint64(time.Now().Unix()),
     })
     reply := &svrproto.ResourceAddReply{}
-    reply.Resource.Unique = string(resource.Unique)
-    reply.Resource.Path = string(resource.Path)
+    reply.Resource.Unique = resource.Unique
+    reply.Resource.Path = resource.Path
 
     return reply, nil
 }

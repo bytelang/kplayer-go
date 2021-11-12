@@ -10,7 +10,8 @@ import "gogoproto/gogo.proto";
 message Resource {
 	string path = 1;
 	string unique = 2;
-	uint64 create_time = 3;
-	uint64 start_time = 4;
-	uint64 end_time = 5;
+	uint64 seek = 3;
+	uint64 create_time = 4;
+	uint64 start_time = 5;
+	uint64 end_time = 6;
 }
