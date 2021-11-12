@@ -1,10 +1,11 @@
 package rpc
 
 import (
+    "fmt"
     "github.com/bytelang/kplayer/module/resource/provider"
-    "net/http"
-
     svrproto "github.com/bytelang/kplayer/types/server"
+    "net/http"
+    "time"
 )
 
 // Resource rpc
@@ -24,6 +25,15 @@ func (s *Resource) Add(r *http.Request, args *svrproto.ResourceAddArgs, reply *s
     }
 
     reply.Resource = addResult.Resource
+    return
+}
+
+func (s *Resource) Seek(r *http.Request, args *svrproto.ResourceSeekArgs, reply *svrproto.ResourceSeekReply) (err error) {
+    seekResult, err := s.pi.ResourceSeek(args)
+    if err != nil {
+        return err
+    }
+    reply.Resource = seekResult.Resource
     return
 }
 
@@ -68,5 +78,12 @@ func (s *Resource) Current(r *http.Request, args *svrproto.ResourceCurrentArgs, 
     }
 
     reply.Resource = currentResource.Resource
+    reply.Duration = currentResource.Duration
+    resourceDuration := time.Duration(time.Second * time.Duration(currentResource.Duration))
+    reply.DurationFormat = fmt.Sprintf("%d:%d:%d", uint64(resourceDuration.Hours()), uint64(resourceDuration.Minutes()), uint64(resourceDuration.Seconds()))
+
+    reply.Seek = currentResource.Seek
+    resourceSeek := time.Duration(time.Second * time.Duration(currentResource.Seek))
+    reply.SeekFormat = fmt.Sprintf("%d:%d:%d", uint64(resourceSeek.Hours()), uint64(resourceSeek.Minutes()), uint64(resourceSeek.Seconds()))
     return
 }

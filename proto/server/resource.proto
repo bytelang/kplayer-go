@@ -57,6 +57,10 @@ message ResourceCurrentArgs {
 }
 message ResourceCurrentReply {
 	Resource resource = 1 [(gogoproto.nullable) = false];
+	uint64 duration = 2;
+	string duration_format = 3;
+	uint64 seek = 4;
+	string seek_format = 5;
 }
 
 // seek to timestamp

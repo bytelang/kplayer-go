@@ -129,3 +129,20 @@ func (p *Provider) PlayDuration(args *svrproto.PlayDurationArgs) (*svrproto.Play
     }
     return reply, nil
 }
+
+func (p *Provider) PlayInformation(args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error) {
+    coreKplayer := core.GetLibKplayerInstance()
+    // get core information
+    info := coreKplayer.GetInformation()
+
+    reply := &svrproto.PlayInformationReply{
+        MajorVersion:       types.MAJOR_TAG,
+        LibkplayerVersion:  info.MajorVersion,
+        PluginVersion:      info.PluginVersion,
+        LicenseVersion:     info.LicenseVersion,
+        StartTime:          p.startTime.String(),
+        StartTimeTimestamp: uint64(p.startTime.Unix()),
+    }
+
+    return reply, nil
+}

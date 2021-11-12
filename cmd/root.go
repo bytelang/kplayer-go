@@ -4,16 +4,11 @@ import (
     "fmt"
     "github.com/bytelang/kplayer/app"
     "github.com/bytelang/kplayer/core"
+    "github.com/bytelang/kplayer/types"
     kpproto "github.com/bytelang/kplayer/types/core/proto"
     log "github.com/sirupsen/logrus"
     "github.com/spf13/cobra"
     terminal "github.com/wayneashleyberry/terminal-dimensions"
-)
-
-var (
-    MAJOR_TAG  string = "<MAJOR_TAG>"
-    MAJOR_HASH string = "<MAJOR_HASH>"
-    WebSite    string = "<WEB_SITE>"
 )
 
 const terminalCharsetMaxCount uint = 115
@@ -41,9 +36,9 @@ func NewRootCmd() *cobra.Command {
   build with build-chains %s type with %s
   Hope you have a good experience.
 `,
-        MAJOR_TAG,
+        types.MAJOR_TAG,
         info.Copyright,
-        WebSite,
+        types.WebSite,
         info.MajorVersion,
         info.PluginVersion,
         info.LicenseVersion,

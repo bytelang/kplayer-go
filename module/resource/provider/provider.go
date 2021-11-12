@@ -12,6 +12,7 @@ import (
     moduletypes "github.com/bytelang/kplayer/types/module"
     svrproto "github.com/bytelang/kplayer/types/server"
     log "github.com/sirupsen/logrus"
+    "strings"
     "sync"
     "time"
 )
@@ -22,6 +23,7 @@ type ProviderI interface {
     ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error)
     ResourceAllList(*svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error)
     ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error)
+    ResourceSeek(*svrproto.ResourceSeekArgs) (*svrproto.ResourceSeekReply, error)
 }
 
 var _ ProviderI = &Provider{}
@@ -37,8 +39,13 @@ type Provider struct {
 
     // module member
     currentIndex uint32
-    inputs       []moduletypes.Resource
-    input_mutex  sync.Mutex
+    inputs       moduletypes.Resources
+
+    // will reset seek attribute
+    // set resource seek on replayed need set the resource attribute
+    resetInputs map[string]uint64
+
+    input_mutex sync.Mutex
 }
 
 var _ ProviderI = &Provider{}
@@ -46,6 +53,7 @@ var _ ProviderI = &Provider{}
 func NewProvider(playProvider playprovider.ProviderI) *Provider {
     return &Provider{
         playProvider: playProvider,
+        resetInputs:  make(map[string]uint64),
     }
 }
 
@@ -88,6 +96,19 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
         msg := &kpmsg.EventMessageResourceStart{}
         kptypes.UnmarshalProtoMessage(message.Body, msg)
         log.WithFields(log.Fields{"path": string(msg.Resource.Path)}).Info("start play resource")
+
+        res := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
+        if res == nil {
+            break
+        }
+
+        res.StartTime = uint64(time.Now().Unix())
+        res.EndTime = 0
+
+        // reset resource seek attribute
+        if seek, ok := p.resetInputs[string(msg.Resource.Unique)]; ok {
+            res.Seek = seek
+        }
     case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
         msg := &kpmsg.EventMessageResourceFinish{}
         kptypes.UnmarshalProtoMessage(message.Body, msg)
@@ -100,9 +121,16 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
         p.input_mutex.Lock()
         defer p.input_mutex.Unlock()
 
+        // get resource
+        res := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
+        if res == nil {
+            break
+        }
+        res.EndTime = uint64(time.Now().Unix())
+
         p.currentIndex = p.currentIndex + 1
         if p.currentIndex >= uint32(len(p.inputs)) {
-            if p.playProvider.GetPlayModel() != config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LOOP)] {
+            if p.playProvider.GetPlayModel() != strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LOOP)]) {
                 stopCorePlay()
                 return
             }

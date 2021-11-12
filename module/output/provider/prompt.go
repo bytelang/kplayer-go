@@ -27,7 +27,7 @@ func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddR
     outputAddMsg := &msg.EventMessageOutputAdd{}
     keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg []byte) bool {
         types.UnmarshalProtoMessage(msg, outputAddMsg)
-        return string(outputAddMsg.Output.Unique) == args.Output.Unique && string(outputAddMsg.Output.Path) == args.Output.Unique
+        return string(outputAddMsg.Output.Unique) == args.Output.Unique && string(outputAddMsg.Output.Path) == args.Output.Path
     })
     defer keeperCtx.Close()
 

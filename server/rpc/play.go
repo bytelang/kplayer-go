@@ -71,3 +71,21 @@ func (s *Play) Skip(r *http.Request, args *server.PlaySkipArgs, reply *server.Pl
 
     return nil
 }
+
+func (s *Play) Information(r *http.Request, args *server.PlayInformationArgs, reply *server.PlayInformationReply) error {
+    info, err := s.pi.PlayInformation(args)
+    if err != nil {
+        return err
+    }
+
+    msg, err := proto.Marshal(info)
+    if err != nil {
+        return err
+    }
+
+    if err := proto.Unmarshal(msg, reply); err != nil {
+        return err
+    }
+
+    return nil
+}

@@ -34,3 +34,14 @@ message PlayContinueArgs {
 }
 message PlayContinueReply {
 }
+
+message PlayInformationArgs {
+}
+message PlayInformationReply {
+	string major_version = 1;
+	string libkplayer_version = 2;
+	string plugin_version = 3;
+	string license_version = 4;
+	string start_time = 5;
+	uint64 start_time_timestamp = 6;
+}

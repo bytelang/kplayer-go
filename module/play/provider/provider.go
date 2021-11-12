@@ -17,6 +17,7 @@ type ProviderI interface {
     PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error)
     PlayContinue(args *svrproto.PlayContinueArgs) (*svrproto.PlayContinueReply, error)
     PlayDuration(args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error)
+    PlayInformation(args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error)
 }
 
 var _ ProviderI = &Provider{}
