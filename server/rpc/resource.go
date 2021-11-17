@@ -80,10 +80,10 @@ func (s *Resource) Current(r *http.Request, args *svrproto.ResourceCurrentArgs, 
     reply.Resource = currentResource.Resource
     reply.Duration = currentResource.Duration
     resourceDuration := time.Duration(time.Second * time.Duration(currentResource.Duration))
-    reply.DurationFormat = fmt.Sprintf("%d:%d:%d", uint64(resourceDuration.Hours()), uint64(resourceDuration.Minutes()), uint64(resourceDuration.Seconds()))
+    reply.DurationFormat = fmt.Sprintf("%d:%d:%d", uint64(resourceDuration.Hours()), uint64(resourceDuration.Minutes())%60, uint64(resourceDuration.Seconds())%60)
 
     reply.Seek = currentResource.Seek
     resourceSeek := time.Duration(time.Second * time.Duration(currentResource.Seek))
-    reply.SeekFormat = fmt.Sprintf("%d:%d:%d", uint64(resourceSeek.Hours()), uint64(resourceSeek.Minutes()), uint64(resourceSeek.Seconds()))
+    reply.SeekFormat = fmt.Sprintf("%d:%d:%d", uint64(resourceSeek.Hours()), uint64(resourceSeek.Minutes())%60, uint64(resourceSeek.Seconds())%60)
     return
 }

@@ -43,7 +43,7 @@ type Provider struct {
 
     // will reset seek attribute
     // set resource seek on replayed need set the resource attribute
-    resetInputs map[string]uint64
+    resetInputs map[string]int64
 
     input_mutex sync.Mutex
 }
@@ -53,7 +53,7 @@ var _ ProviderI = &Provider{}
 func NewProvider(playProvider playprovider.ProviderI) *Provider {
     return &Provider{
         playProvider: playProvider,
-        resetInputs:  make(map[string]uint64),
+        resetInputs:  make(map[string]int64),
     }
 }
 
@@ -76,6 +76,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Resource
             Path:       item,
             Unique:     kptypes.GetRandString(6),
             Seek:       0,
+            End:        -1,
             CreateTime: uint64(time.Now().Unix()),
         })
     }
@@ -97,8 +98,9 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
         kptypes.UnmarshalProtoMessage(message.Body, msg)
         log.WithFields(log.Fields{"path": string(msg.Resource.Path)}).Info("start play resource")
 
-        res := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
-        if res == nil {
+        res, _, err := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
+        if err != nil {
+            log.WithFields(log.Fields{"unique": msg.Resource.Unique, "path": msg.Resource.Path}).Warn(err)
             break
         }
 
@@ -122,8 +124,9 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
         defer p.input_mutex.Unlock()
 
         // get resource
-        res := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
-        if res == nil {
+        res, _, err := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
+        if err != nil {
+            log.WithFields(log.Fields{"unique": string(msg.Resource.Unique), "path": string(msg.Resource.Path)}).Warn(err)
             break
         }
         res.EndTime = uint64(time.Now().Unix())
@@ -149,7 +152,8 @@ func (p *Provider) addNextResourceToCore() {
         Resource: &kpproto.PromptResource{
             Path:   []byte(p.inputs[p.currentIndex].Path),
             Unique: []byte(p.inputs[p.currentIndex].Unique),
-            Seek:   int64(p.inputs[p.currentIndex].Seek),
+            Seek:   p.inputs[p.currentIndex].Seek,
+            End:    p.inputs[p.currentIndex].End,
         },
     }); err != nil {
         log.Warn(err)

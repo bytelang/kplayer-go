@@ -23,12 +23,16 @@ func (p *Provider) ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.Re
     if os.IsNotExist(err) {
         return nil, fmt.Errorf("file not exists. path: %s", resource.Path)
     }
+    if resource.End < resource.Seek {
+        return nil, fmt.Errorf("end timestamp can not be less than start timestamp")
+    }
 
     // append to playlist
     p.inputs = append(p.inputs, moduletypes.Resource{
         Path:       resource.Path,
         Unique:     resource.Unique,
         Seek:       resource.Seek,
+        End:        resource.End,
         CreateTime: uint64(time.Now().Unix()),
     })
     reply := &svrproto.ResourceAddReply{}
@@ -42,17 +46,22 @@ func (p *Provider) ResourceRemove(resource *svrproto.ResourceRemoveArgs) (*svrpr
     p.input_mutex.Lock()
     defer p.input_mutex.Unlock()
 
-    reply := &svrproto.ResourceRemoveReply{}
-    for _, item := range p.inputs {
-        if item.Unique == resource.Unique {
-            reply.Resource.Path = item.Path
-            reply.Resource.Unique = item.Unique
-            reply.Resource.CreateTime = item.CreateTime
-            return reply, nil
-        }
+    if resource.Unique == p.inputs[p.currentIndex].Unique {
+        return nil, CannotRemoveCurrentResource
     }
 
-    return nil, fmt.Errorf("resource not found. unique name: %s", resource.Unique)
+    // remove resource
+    res, err := p.inputs.RemoveResourceByUnique(resource.Unique)
+    if err != nil {
+        return nil, err
+    }
+    p.currentIndex = p.currentIndex - 1
+
+    reply := &svrproto.ResourceRemoveReply{}
+    reply.Resource.Path = res.Path
+    reply.Resource.Unique = res.Unique
+    reply.Resource.CreateTime = res.CreateTime
+    return reply, nil
 }
 
 func (p *Provider) ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {

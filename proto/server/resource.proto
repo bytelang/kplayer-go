@@ -10,16 +10,19 @@ import "gogoproto/gogo.proto";
 message Resource {
 	string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
 	string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
-	uint64 create_time = 3;
-	uint64 start_time = 4;
-	uint64 end_time = 5;
+	int64 seek = 3 [(gogoproto.moretags) = "validate:\"number\""];
+	int64 end = 4 [(gogoproto.moretags) = "validate:\"number\""];
+	uint64 create_time = 5;
+	uint64 start_time = 6;
+	uint64 end_time = 7;
 }
 
 // add
 message ResourceAddArgs {
 	string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
 	string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
-	uint64 seek = 3 [(gogoproto.moretags) = "validate:\"integer\""];
+	int64 seek = 3 [(gogoproto.moretags) = "validate:\"number\""];
+	int64 end = 4 [(gogoproto.moretags) = "validate:\"number\""];
 }
 message ResourceAddReply {
 	Resource resource = 1 [(gogoproto.nullable) = false];
@@ -35,7 +38,7 @@ message ResourceRemoveReply {
 		string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
 		uint64 create_time = 3;
 	}
-	Resource resource = 1;
+	Resource resource = 1 [(gogoproto.nullable) = false];
 }
 
 // list
@@ -59,14 +62,14 @@ message ResourceCurrentReply {
 	Resource resource = 1 [(gogoproto.nullable) = false];
 	uint64 duration = 2;
 	string duration_format = 3;
-	uint64 seek = 4;
+	int64 seek = 4;
 	string seek_format = 5;
 }
 
 // seek to timestamp
 message ResourceSeekArgs {
 	string unique = 1;
-	uint64 seek = 2;
+	int64 seek = 2;
 }
 message ResourceSeekReply {
 	Resource resource = 1;
