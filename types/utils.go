@@ -22,6 +22,15 @@ func UnmarshalProtoMessage(data []byte, obj protoiface.MessageV1) {
     }
 }
 
+func CopyProtoMessage(src protoiface.MessageV1, dst protoiface.MessageV1) error {
+    d, err := proto.Marshal(src)
+    if err != nil {
+        return err
+    }
+
+    return proto.Unmarshal(d, dst)
+}
+
 type KPString struct {
     d []byte
 }

@@ -64,6 +64,7 @@ message ResourceCurrentReply {
 	string duration_format = 3;
 	int64 seek = 4;
 	string seek_format = 5;
+	bool hit_cache = 6 [(gogoproto.jsontag) = "hit_cache"];
 }
 
 // seek to timestamp

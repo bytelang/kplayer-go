@@ -8,12 +8,12 @@ import (
     pluginprovider "github.com/bytelang/kplayer/module/plugin/provider"
     resourceprovider "github.com/bytelang/kplayer/module/resource/provider"
     "github.com/go-playground/validator/v10"
+    "github.com/gorilla/rpc/v2/json"
     "net/http"
     "time"
 
     kprpc "github.com/bytelang/kplayer/server/rpc"
     "github.com/gorilla/rpc/v2"
-    "github.com/gorilla/rpc/v2/json"
     log "github.com/sirupsen/logrus"
 )
 

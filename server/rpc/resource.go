@@ -77,12 +77,11 @@ func (s *Resource) Current(r *http.Request, args *svrproto.ResourceCurrentArgs, 
         return err
     }
 
-    reply.Resource = currentResource.Resource
-    reply.Duration = currentResource.Duration
+    (*reply) = *currentResource
+
     resourceDuration := time.Duration(time.Second * time.Duration(currentResource.Duration))
     reply.DurationFormat = fmt.Sprintf("%d:%d:%d", uint64(resourceDuration.Hours()), uint64(resourceDuration.Minutes())%60, uint64(resourceDuration.Seconds())%60)
 
-    reply.Seek = currentResource.Seek
     resourceSeek := time.Duration(time.Second * time.Duration(currentResource.Seek))
     reply.SeekFormat = fmt.Sprintf("%d:%d:%d", uint64(resourceSeek.Hours()), uint64(resourceSeek.Minutes())%60, uint64(resourceSeek.Seconds())%60)
     return

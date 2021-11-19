@@ -170,6 +170,7 @@ func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.Res
         },
         Duration: resourceCurrentMsg.Duration,
         Seek:     resourceCurrentMsg.Seek,
+        HitCache: resourceCurrentMsg.HitCache,
     }
     return reply, nil
 }
