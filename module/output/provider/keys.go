@@ -1,5 +1,5 @@
 package provider
 
 const (
-    ModuleName = "output"
+	ModuleName = "output"
 )

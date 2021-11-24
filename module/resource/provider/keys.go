@@ -3,13 +3,13 @@ package provider
 type ResourceError string
 
 func (r ResourceError) Error() string {
-    return string(r)
+	return string(r)
 }
 
 const (
-    ModuleName = "resource"
+	ModuleName = "resource"
 )
 
 const (
-    CannotRemoveCurrentResource ResourceError = "can not remove playing resource"
+	CannotRemoveCurrentResource ResourceError = "can not remove playing resource"
 )

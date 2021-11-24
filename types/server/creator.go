@@ -1,9 +1,9 @@
 package server
 
 import (
-    "github.com/bytelang/kplayer/module"
+	"github.com/bytelang/kplayer/module"
 )
 
 type ServerCreator interface {
-    StartServer(stopChan chan bool, mm module.ModuleManager)
+	StartServer(stopChan chan bool, mm module.ModuleManager)
 }

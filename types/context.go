@@ -1,50 +1,50 @@
 package types
 
 import (
-    "context"
-    "fmt"
-    "github.com/bytelang/kplayer/types/config"
-    "io"
-    "os"
+	"context"
+	"fmt"
+	"github.com/bytelang/kplayer/types/config"
+	"io"
+	"os"
 
-    "github.com/spf13/cobra"
-    "github.com/spf13/viper"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type KplayerContextKey string
 
 func (k KplayerContextKey) String() string {
-    return "kplayer_ctx" + string(k)
+	return "kplayer_ctx" + string(k)
 }
 
 const (
-    ClientContextKey        KplayerContextKey = "client.context"
-    ModuleManagerContextKey KplayerContextKey = "module.manager"
-    ServerCreatorContextKey KplayerContextKey = "server.creator"
+	ClientContextKey        KplayerContextKey = "client.context"
+	ModuleManagerContextKey KplayerContextKey = "module.manager"
+	ServerCreatorContextKey KplayerContextKey = "server.creator"
 )
 
 type ClientContext struct {
-    Output io.Writer
-    Viper  *viper.Viper
-    Config *config.KPConfig
+	Output io.Writer
+	Viper  *viper.Viper
+	Config *config.KPConfig
 }
 
 func DefaultClientContext() *ClientContext {
-    return &ClientContext{
-        Output: os.Stdout,
-        Viper:  viper.New(),
-        Config: &config.KPConfig{},
-    }
+	return &ClientContext{
+		Output: os.Stdout,
+		Viper:  viper.New(),
+		Config: &config.KPConfig{},
+	}
 }
 
 func GetCommandContext(cmd *cobra.Command, key KplayerContextKey) (interface{}, error) {
-    if v := cmd.Context().Value(key); v != nil {
-        return v, nil
-    }
+	if v := cmd.Context().Value(key); v != nil {
+		return v, nil
+	}
 
-    return nil, fmt.Errorf("get context failed")
+	return nil, fmt.Errorf("get context failed")
 }
 
 func SetCommandContextAndExecute(cmd *cobra.Command, ctx context.Context) error {
-    return cmd.ExecuteContext(ctx)
+	return cmd.ExecuteContext(ctx)
 }
