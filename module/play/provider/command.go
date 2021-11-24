@@ -28,7 +28,7 @@ func StartCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "Start kplayer",
-		Long:  "Start the kplayer application1, use '-g' support the daemon mode. on daemon mode, kplayer with creating PID file and same directory only run once.",
+		Long:  "Start the kplayer application, use '-g' support the daemon mode. on daemon mode, kplayer with creating PID file and same directory only run once.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get module manager
 			var mm module.ModuleManager

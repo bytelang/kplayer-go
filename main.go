@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"runtime"
+
 	"github.com/bytelang/kplayer/app"
 	"github.com/bytelang/kplayer/cmd"
 	"github.com/bytelang/kplayer/module"
@@ -12,14 +15,20 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 func init() {
 	log.SetOutput(os.Stdout)
 	log.SetReportCaller(true)
 	log.SetLevel(log.TraceLevel)
-	logFormat := &log.TextFormatter{}
+	logFormat := &log.TextFormatter{
+		TimestampFormat: "2006-01-02 15:04:05",
+		DisableColors:   false,
+		FullTimestamp:   true,
+		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
+			return "", f.File
+		},
+	}
 	log.SetFormatter(logFormat)
 }
 

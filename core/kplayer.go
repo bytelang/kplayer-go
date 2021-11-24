@@ -123,7 +123,9 @@ func (lb *libKplayer) Run() {
 	}
 
 	C.ReceiveMessage(C.MessageCallBack(C.goCallBackMessage))
-	C.SetLogLevel(C.int(1))
+	logPath := C.CString("log/core.log")
+	defer C.free(unsafe.Pointer(logPath))
+	C.SetLogLevel(logPath, C.int(1))
 
 	// start
 	stopChan := make(chan bool)
