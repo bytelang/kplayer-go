@@ -13,6 +13,7 @@
             "program": "main.go",
             "externalConsole": "true",
             "cwd": "build",
+            "buildFlags": "--gcflags='all=-trimpath=${workspaceFolder}' --asmflags 'all=-trimpath=${workspaceFolder}'",
             "preLaunchTask": "make proto",
             "args": [
                 "play",
