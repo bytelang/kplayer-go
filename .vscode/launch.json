@@ -5,19 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "internalConsoleOptions": "openOnSessionStart",
-            "name": "Launch Package",
+            "name": "status",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "main.go",
-            "externalConsole": "true",
             "cwd": "build",
-            "buildFlags": "--gcflags='all=-trimpath=${workspaceFolder}' --asmflags 'all=-trimpath=${workspaceFolder}'",
-            "preLaunchTask": "make proto",
+            "internalConsoleOptions": "openOnSessionStart",
             "args": [
                 "play",
-                "start"
+                "status"
             ]
         }
     ]
