@@ -105,6 +105,10 @@ func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body proto.Message)
 }
 
 func (lb *libKplayer) Run() {
+	logPath := C.CString("log/core.log")
+	C.SetLogLevel(logPath, C.int(1))
+	defer C.free(unsafe.Pointer(logPath))
+
 	C.Initialization(C.CString(lb.protocol),
 		C.int(lb.video_width),
 		C.int(lb.video_height),
@@ -123,9 +127,6 @@ func (lb *libKplayer) Run() {
 	}
 
 	C.ReceiveMessage(C.MessageCallBack(C.goCallBackMessage))
-	logPath := C.CString("log/core.log")
-	defer C.free(unsafe.Pointer(logPath))
-	C.SetLogLevel(logPath, C.int(1))
 
 	// start
 	stopChan := make(chan bool)

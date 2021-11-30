@@ -55,10 +55,10 @@ func NewRootCmd() *cobra.Command {
 		shortDesc = shortDesc + "-"
 	}
 	shortDesc = shortDesc + "\n"
+	fmt.Print(shortDesc)
 
 	rootCmd := &cobra.Command{
 		Use:   app.AppName,
-		Short: shortDesc,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
@@ -66,7 +66,6 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	initRootCmd(rootCmd)
-
 	return rootCmd
 }
 

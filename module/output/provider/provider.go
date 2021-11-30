@@ -6,6 +6,7 @@ import (
 	kptypes "github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/config"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
+	kpmsg "github.com/bytelang/kplayer/types/core/proto/msg"
 	"github.com/bytelang/kplayer/types/core/proto/prompt"
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
@@ -37,12 +38,28 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Output) 
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
+	defer p.Trigger(message)
+
 	switch message.Action {
 	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
 		p.addOutput()
+	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD:
+		msg := &kpmsg.EventMessageOutputAdd{}
+		kptypes.UnmarshalProtoMessage(message.Body, msg)
+		if msg.Error != nil {
+			log.WithFields(log.Fields{
+				"unique": string(msg.Output.Unique),
+				"path":   string(msg.Output.Path),
+				"error":  string(msg.Error)}).
+				Error("output add failed.")
+			return
+		}
+		log.WithFields(log.Fields{
+			"unique": string(msg.Output.Unique),
+			"path":   string(msg.Output.Path),
+			"error":  string(msg.Error)}).
+			Info("output add success.")
 	}
-
-	p.Trigger(message)
 }
 
 func (p *Provider) ValidateConfig() error {

@@ -6,6 +6,7 @@ import (
 	"github.com/bytelang/kplayer/types/config"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	svrproto "github.com/bytelang/kplayer/types/server"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -54,6 +55,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Play) {
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
 	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
+		log.Info("kplayer start success")
 		p.startTime = time.Now()
 	}
 }
