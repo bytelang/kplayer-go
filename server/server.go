@@ -34,30 +34,30 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 	})
 
 	s.RegisterCodec(json.NewCodec(), "application/json")
-	if err := s.RegisterService(kprpc.NewResource(mm[resourceprovider.ModuleName].(resourceprovider.ProviderI)), ""); err != nil {
+	if err := s.RegisterService(kprpc.NewResource(mm.GetModule(resourceprovider.ModuleName).(resourceprovider.ProviderI)), ""); err != nil {
 		panic(err)
 	}
-	if err := s.RegisterService(kprpc.NewOutput(mm[outputprovider.ModuleName].(outputprovider.ProviderI)), ""); err != nil {
+	if err := s.RegisterService(kprpc.NewOutput(mm.GetModule(outputprovider.ModuleName).(outputprovider.ProviderI)), ""); err != nil {
 		panic(err)
 	}
-	if err := s.RegisterService(kprpc.NewPlay(mm[playprovider.ModuleName].(playprovider.ProviderI)), ""); err != nil {
+	if err := s.RegisterService(kprpc.NewPlay(mm.GetModule(playprovider.ModuleName).(playprovider.ProviderI)), ""); err != nil {
 		panic(err)
 	}
-	if err := s.RegisterService(kprpc.NewPlugin(mm[pluginprovider.ModuleName].(pluginprovider.ProviderI)), ""); err != nil {
+	if err := s.RegisterService(kprpc.NewPlugin(mm.GetModule(pluginprovider.ModuleName).(pluginprovider.ProviderI)), ""); err != nil {
 		panic(err)
 	}
 
 	// get play module provider
-	playProviderInstance := mm[playprovider.ModuleName].(playprovider.ProviderI)
-	rpc := playProviderInstance.GetRPCParams()
-	if !rpc.On {
+	playProviderInstance := mm.GetModule(playprovider.ModuleName).(playprovider.ProviderI)
+	rpcParams := playProviderInstance.GetRPCParams()
+	if !rpcParams.On {
 		return
 	}
 
 	m := http.NewServeMux()
 	m.Handle("/rpc", s)
 	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", rpc.Address, rpc.Port),
+		Addr:    fmt.Sprintf("%s:%d", rpcParams.Address, rpcParams.Port),
 		Handler: m,
 	}
 
@@ -66,11 +66,11 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 			panic(err)
 		}
 
-		log.Info("rpc server shutdown success")
+		log.Info("rpc server hutdown success")
 		stopChan <- true
 	}()
 
-	log.WithFields(log.Fields{"address": rpc.Address, "port": rpc.Port}).Info("rpc server listening")
+	log.WithFields(log.Fields{"address": rpcParams.Address, "port": rpcParams.Port}).Info("rpc server listening")
 
 	<-stopChan
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

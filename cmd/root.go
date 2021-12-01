@@ -58,7 +58,7 @@ func NewRootCmd() *cobra.Command {
 	fmt.Print(shortDesc)
 
 	rootCmd := &cobra.Command{
-		Use:   app.AppName,
+		Use: app.AppName,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
@@ -74,14 +74,14 @@ func initRootCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(app.AddInitCommands())
 
 	// add module command
-	app.AddCommands(rootCmd)
+	app.AddModuleCommands(rootCmd)
 }
 
 func messageConsumer(message *kpproto.KPMessage) {
 	log.WithFields(log.Fields{"action": kpproto.EventAction_name[int32(message.Action)]}).Debug("receive broadcast message")
 
 	var copyMsg kpproto.KPMessage
-	for _, item := range app.ModuleManager {
+	for _, item := range app.ModuleManager.Modules {
 		copyMsg = *message
 		item.ParseMessage(&copyMsg)
 

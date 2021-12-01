@@ -28,8 +28,17 @@ message OutputRemoveReply {
 }
 
 // list
+message OutputModule {
+	string path = 1 [(gogoproto.jsontag) = "path"];
+	string unique = 2 [(gogoproto.jsontag) = "unique"];
+	uint64 create_time = 3 [(gogoproto.jsontag) = "create_time"];
+	uint64 end_time = 4 [(gogoproto.jsontag) = "end_time"];
+	uint64 start_time = 5 [(gogoproto.jsontag) = "start_time"];
+	bool connected = 6 [(gogoproto.jsontag) = "connected"];
+}
+
 message OutputListArgs {
 }
 message OutputListReply {
-	repeated Output outputs = 1;
+	repeated OutputModule outputs = 1;
 }

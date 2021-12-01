@@ -85,36 +85,19 @@ func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.Outp
 }
 
 func (p *Provider) OutputList(args *svrproto.OutputListArgs) (*svrproto.OutputListReply, error) {
-	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_LIST, &prompt.EventPromptOutputList{}); err != nil {
-		return nil, err
-	}
-
-	// register prompt
-	outputListMsg := &msg.EventMessageOutputList{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_LIST, func(msg []byte) bool {
-		types.UnmarshalProtoMessage(msg, outputListMsg)
-		return true
-	})
-	defer keeperCtx.Close()
-
-	if err := p.RegisterKeeperChannel(keeperCtx); err != nil {
-		return nil, err
-	}
-
-	// wait context
-	keeperCtx.Wait()
-	if outputListMsg.Error != nil {
-		return nil, fmt.Errorf("%s", string(outputListMsg.Error))
-	}
-
-	reply := &svrproto.OutputListReply{}
-	for _, item := range outputListMsg.Outputs {
-		reply.Outputs = append(reply.Outputs, &svrproto.Output{
-			Path:   string(item.Path),
-			Unique: string(item.Unique),
+	outputs := []*svrproto.OutputModule{}
+	for _, item := range p.outputs {
+		outputs = append(outputs, &svrproto.OutputModule{
+			Path:       item.Path,
+			Unique:     item.Unique,
+			CreateTime: item.CreateTime,
+			EndTime:    item.EndTime,
+			StartTime:  item.StartTime,
+			Connected:  item.Connected,
 		})
 	}
 
-	return reply, nil
+	return &svrproto.OutputListReply{
+		Outputs: outputs,
+	}, nil
 }

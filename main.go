@@ -27,7 +27,7 @@ func init() {
 		DisableColors:   false,
 		FullTimestamp:   true,
 		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
-			return "", fmt.Sprintf("%s:%d",f.File,f.Line)
+			return "", fmt.Sprintf("%s:%d", f.File, f.Line)
 		},
 	}
 	log.SetFormatter(logFormat)
@@ -85,8 +85,8 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		log.Fatal(err)
 	}
 	log.SetLevel(logLevel)
-	if logLevel == log.InfoLevel{
-	    log.SetReportCaller(false)
+	if logLevel == log.InfoLevel {
+		log.SetReportCaller(false)
 	}
 
 	// viper
@@ -106,15 +106,22 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 	}
 
 	// init module
-	for _, item := range mm {
-		d, err := json.Marshal(v.Get(item.GetModuleName()))
+	for _, item := range mm.OrderInitConfig {
+		m := mm.GetModule(item)
+
+		// init config and set default value
+		d, err := json.Marshal(v.Get(m.GetModuleName()))
 		if err != nil {
 			log.Fatal(err)
 		}
-		if err := item.InitConfig(clientCtx, d); err != nil {
+		modifyData, err := m.InitConfig(clientCtx, d)
+		if err != nil {
 			log.Fatal(err)
 		}
-		if err := item.ValidateConfig(); err != nil {
+		v.Set(m.GetModuleName(), modifyData)
+
+		// validate config
+		if err := m.ValidateConfig(); err != nil {
 			log.Fatal(err)
 		}
 	}

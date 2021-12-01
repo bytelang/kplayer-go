@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
 	playprovider "github.com/bytelang/kplayer/module/play/provider"
@@ -31,9 +32,6 @@ var _ ProviderI = &Provider{}
 type Provider struct {
 	module.ModuleKeeper
 
-	// load config
-	config config.Resource
-
 	// module provider
 	playProvider playprovider.ProviderI
 
@@ -57,21 +55,11 @@ func NewProvider(playProvider playprovider.ProviderI) *Provider {
 	}
 }
 
-func (p *Provider) SetConfig(config config.Resource) {
-	p.config = config
-}
-
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Resource) {
-	p.SetConfig(config)
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource) {
+	// initialize attribute
 	p.currentIndex = p.playProvider.GetStartPoint() - 1
 
-	// initialize current index
-	if p.currentIndex < 0 || p.currentIndex > uint32(len(p.config.Lists)) {
-		p.currentIndex = 0
-	}
-
-	// initialize inputs
-	for _, item := range p.config.Lists {
+	for _, item := range config.Lists {
 		p.inputs = append(p.inputs, moduletypes.Resource{
 			Path:       item,
 			Unique:     kptypes.GetRandString(6),
@@ -80,6 +68,16 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Resource
 			CreateTime: uint64(time.Now().Unix()),
 		})
 	}
+}
+
+func (p *Provider) ValidateConfig() error {
+	if p.currentIndex < 0 {
+		return fmt.Errorf("start point invalid. cannot less than 1")
+	} else if p.currentIndex > uint32(len(p.inputs)) {
+		return fmt.Errorf("start point invalid. cannot great than total resource count")
+	}
+
+	return nil
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
@@ -96,7 +94,8 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_START:
 		msg := &kpmsg.EventMessageResourceStart{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		log.WithFields(log.Fields{"path": string(msg.Resource.Path), "index": p.currentIndex}).Info("start play resource")
+		log.WithFields(log.Fields{"path": string(msg.Resource.Path), "unique": string(msg.Resource.Unique)}).
+			Info("start play resource")
 
 		res, _, err := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
 		if err != nil {
@@ -117,7 +116,8 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		if msg.Error != nil {
 			log.WithFields(log.Fields{"error": string(msg.Error)}).Warn("play resource failed")
 		} else {
-			log.WithFields(log.Fields{"path": string(msg.Resource.Path), "index": p.currentIndex}).Info("finish play resource")
+			log.WithFields(log.Fields{"path": string(msg.Resource.Path), "unique": string(msg.Resource.Unique)}).
+				Info("finish play resource")
 		}
 
 		p.input_mutex.Lock()
@@ -142,10 +142,6 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 		p.addNextResourceToCore()
 	}
-}
-
-func (p *Provider) ValidateConfig() error {
-	return nil
 }
 
 func (p *Provider) addNextResourceToCore() {

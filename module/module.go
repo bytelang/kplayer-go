@@ -88,24 +88,34 @@ type AppModule interface {
 	BasicAppModule
 	GetModuleName() string
 	GetCommand() *cobra.Command
-	InitConfig(ctx *types.ClientContext, cfg json.RawMessage) error
+	InitConfig(ctx *types.ClientContext, cfg json.RawMessage) (interface{}, error)
 	ValidateConfig() error
 	BeginRunning()
 	EndRunning()
 }
 
-type ModuleManager map[string]AppModule
+type ModuleManager struct {
+	Modules         map[string]AppModule
+	OrderInitConfig []string
+}
 
 func NewModuleManager(modules ...AppModule) ModuleManager {
-	moduleMap := make(ModuleManager)
+	moduleMap := ModuleManager{
+		Modules: make(map[string]AppModule, 0),
+	}
+
 	for _, module := range modules {
-		moduleMap[module.GetModuleName()] = module
+		moduleMap.Modules[module.GetModuleName()] = module
 	}
 
 	return moduleMap
 }
 
-func (mm *ModuleManager) GetModule(name string) *AppModule {
-	m := (*mm)[name]
-	return &m
+func (mm *ModuleManager) GetModule(name string) AppModule {
+	m := mm.Modules[name]
+	return m
+}
+
+func (mm *ModuleManager) SetOrderInitConfig(order ...string) {
+	mm.OrderInitConfig = order
 }

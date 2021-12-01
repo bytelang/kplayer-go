@@ -28,15 +28,15 @@ func (m AppModule) GetCommand() *cobra.Command {
 	return provider.GetCommand()
 }
 
-func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage) error {
+func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage) (interface{}, error) {
 	var cfg config.Play
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		panic(err)
 	}
 
-	m.InitModule(ctx, cfg)
+	m.InitModule(ctx, &cfg)
 
-	return nil
+	return cfg, nil
 }
 
 func (m AppModule) ValidateConfig() error {

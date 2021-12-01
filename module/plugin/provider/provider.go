@@ -17,7 +17,6 @@ type ProviderI interface {
 
 type Provider struct {
 	module.ModuleKeeper
-	config config.Plugin
 }
 
 var _ ProviderI = &Provider{}
@@ -26,12 +25,7 @@ func NewProvider() *Provider {
 	return &Provider{}
 }
 
-func (p *Provider) SetConfig(config config.Plugin) {
-	p.config = config
-}
-
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Plugin) {
-	p.SetConfig(config)
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin) {
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {

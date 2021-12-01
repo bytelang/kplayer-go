@@ -1,16 +1,82 @@
 package app
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/config"
 	"github.com/manifoldco/promptui"
+	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 )
+
+
+func addInitDefaultCommands() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "default",
+		Short: "export default config file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			home, err := GetHome(cmd)
+			if err != nil {
+				return err
+			}
+
+			// init config
+			cfg := getDefaultConfig()
+
+			// export file
+			return exportConfigFile(cfg, home+DefaultConfigFileName)
+		},
+	}
+
+	return cmd
+}
+
+func addInitInteractionCommands() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "interaction",
+		Short: "interaction init config file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			home, err := cmd.Flags().GetString(types.FlagHome)
+			if err != nil {
+				return err
+			}
+			if home[:1] != "/" {
+				home = home + "/"
+			}
+
+			// interaction
+			cfg, err := initInteractionConfig()
+			if err != nil {
+				return err
+			}
+
+			// export file
+			return exportConfigFile(cfg, home+DefaultConfigFileName)
+		},
+	}
+
+	return cmd
+}
+
+func exportConfigFile(cfg *config.KPConfig, path string) error {
+	d, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	var indentCfg bytes.Buffer
+	if err := json.Indent(&indentCfg, d, "", "    "); err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(path, indentCfg.Bytes(), 0666)
+}
 
 func getDefaultConfig() *config.KPConfig {
 	return &config.KPConfig{
@@ -22,6 +88,11 @@ func getDefaultConfig() *config.KPConfig {
 			PlayModel:   strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LIST)]),
 			EncodeModel: strings.ToLower(config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_RTMP)]),
 			CacheOn:     false,
+			Rpc: &config.Rpc{
+				On:      true,
+				Address: types.DefaultRPCAddress,
+				Port:    types.DefaultRPCPort,
+			},
 			Encode: &config.Encode{
 				VideoWidth:         780,
 				VideoHeight:        480,
@@ -29,9 +100,6 @@ func getDefaultConfig() *config.KPConfig {
 				AudioSampleRate:    48000,
 				AudioChannelLayout: 3,
 				AudioChannels:      2,
-			},
-			Rpc: &config.Rpc{
-				On: false,
 			},
 		},
 		Output: config.Output{

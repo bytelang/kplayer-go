@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-const (
-	defaultRPCAddress string = "127.0.0.1"
-	defaultRPCPort    uint32 = 4156
-)
-
 type ProviderI interface {
 	GetStartPoint() uint32
 	GetPlayModel() string
@@ -31,8 +26,12 @@ var _ ProviderI = &Provider{}
 
 // Provider play module provider
 type Provider struct {
-	config *config.Play
 	module.ModuleKeeper
+
+	// config
+	startPoint uint32
+	playMode   string
+	rpc        config.Rpc
 
 	// module member
 	startTime time.Time
@@ -41,32 +40,30 @@ type Provider struct {
 // NewProvider return provider
 func NewProvider() *Provider {
 	return &Provider{
-		config: &config.Play{},
 	}
-}
-
-func (p *Provider) GetConfig() *config.Play {
-	return p.config
-}
-
-func (p *Provider) setConfig(config config.Play) {
-	p.config = &config
 }
 
 // InitConfig set module config on kplayer started
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg config.Play) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Play) {
+	// set default value
 	if cfg.Rpc == nil {
-		cfg.Rpc = &config.Rpc{}
+		cfg.Rpc = &config.Rpc{On: true}
 	}
-
 	if cfg.Rpc.Address == "" {
-		cfg.Rpc.Address = defaultRPCAddress
+		cfg.Rpc.Address = kptypes.DefaultRPCAddress
 	}
 	if cfg.Rpc.Port == 0 {
-		cfg.Rpc.Port = defaultRPCPort
+		cfg.Rpc.Port = kptypes.DefaultRPCPort
 	}
 
-	p.setConfig(cfg)
+	if cfg.StartPoint == 0 {
+		cfg.StartPoint = 1
+	}
+
+	// set provider attribute
+	p.startPoint = cfg.StartPoint
+	p.playMode = cfg.PlayModel
+	p.rpc = *cfg.Rpc
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
@@ -82,9 +79,9 @@ func (p *Provider) ValidateConfig() error {
 }
 
 func (p *Provider) GetStartPoint() uint32 {
-	return p.config.StartPoint
+	return p.startPoint
 }
 
 func (p *Provider) GetPlayModel() string {
-	return p.config.PlayModel
+	return p.playMode
 }

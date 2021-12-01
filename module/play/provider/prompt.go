@@ -149,5 +149,5 @@ func (p *Provider) PlayInformation(args *svrproto.PlayInformationArgs) (*svrprot
 }
 
 func (p *Provider) GetRPCParams() config.Rpc {
-	return *p.config.Rpc
+	return p.rpc
 }
