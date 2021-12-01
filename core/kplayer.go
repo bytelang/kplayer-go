@@ -135,7 +135,7 @@ func (lb *libKplayer) Run() {
 			stopChan <- true
 		}()
 
-		log.Info("Core start up success.")
+		log.Info("core start up success")
 		result := C.Run()
 
 		if int(result) < 0 {
@@ -144,7 +144,7 @@ func (lb *libKplayer) Run() {
 	}()
 
 	<-stopChan
-	log.Info("Core shut down success.")
+	log.Info("core shut down success")
 }
 
 func (lb *libKplayer) SetCacheOn(c bool) {

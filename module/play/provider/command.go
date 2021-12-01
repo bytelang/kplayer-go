@@ -167,6 +167,15 @@ func startCommand() *cobra.Command {
             serverStopChan := make(chan bool)
 
             go func() {
+                for _, m := range mm {
+                    m.BeginRunning()
+                }
+                defer func() {
+                    for _, m := range mm {
+                        m.EndRunning()
+                    }
+                }()
+
                 coreKplayer.Run()
                 serverStopChan <- true
 

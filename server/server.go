@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/bytelang/kplayer/module"
 	outputprovider "github.com/bytelang/kplayer/module/output/provider"
 	playprovider "github.com/bytelang/kplayer/module/play/provider"
@@ -15,10 +16,6 @@ import (
 	kprpc "github.com/bytelang/kplayer/server/rpc"
 	"github.com/gorilla/rpc/v2"
 	log "github.com/sirupsen/logrus"
-)
-
-const (
-	address = "0.0.0.0:4156"
 )
 
 type jsonRPCServer struct {
@@ -50,10 +47,17 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 		panic(err)
 	}
 
+	// get play module provider
+	playProviderInstance := mm[playprovider.ModuleName].(playprovider.ProviderI)
+	rpc := playProviderInstance.GetRPCParams()
+	if !rpc.On {
+		return
+	}
+
 	m := http.NewServeMux()
 	m.Handle("/rpc", s)
 	server := &http.Server{
-		Addr:    address,
+		Addr:    fmt.Sprintf("%s:%d", rpc.Address, rpc.Port),
 		Handler: m,
 	}
 
@@ -62,11 +66,11 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 			panic(err)
 		}
 
-		log.Info("RPC server shutdown success.")
+		log.Info("rpc server shutdown success")
 		stopChan <- true
 	}()
 
-	log.Infof("RPC server listening on: %s", address)
+	log.WithFields(log.Fields{"address": rpc.Address, "port": rpc.Port}).Info("rpc server listening")
 
 	<-stopChan
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

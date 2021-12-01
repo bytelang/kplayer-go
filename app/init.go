@@ -30,7 +30,9 @@ func getDefaultConfig() *config.KPConfig {
 				AudioChannelLayout: 3,
 				AudioChannels:      2,
 			},
-			RpcOn: false,
+			Rpc: &config.Rpc{
+				On: false,
+			},
 		},
 		Output: config.Output{
 			Lists: []*config.OutputInstance{},

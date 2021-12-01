@@ -10,9 +10,15 @@ import (
 	"time"
 )
 
+const (
+	defaultRPCAddress string = "127.0.0.1"
+	defaultRPCPort    uint32 = 4156
+)
+
 type ProviderI interface {
 	GetStartPoint() uint32
 	GetPlayModel() string
+	GetRPCParams() config.Rpc
 	PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error)
 	PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error)
 	PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error)
@@ -48,8 +54,19 @@ func (p *Provider) setConfig(config config.Play) {
 }
 
 // InitConfig set module config on kplayer started
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config config.Play) {
-	p.setConfig(config)
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg config.Play) {
+	if cfg.Rpc == nil {
+		cfg.Rpc = &config.Rpc{}
+	}
+
+	if cfg.Rpc.Address == "" {
+		cfg.Rpc.Address = defaultRPCAddress
+	}
+	if cfg.Rpc.Port == 0 {
+		cfg.Rpc.Port = defaultRPCPort
+	}
+
+	p.setConfig(cfg)
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {

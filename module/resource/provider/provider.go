@@ -96,7 +96,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_START:
 		msg := &kpmsg.EventMessageResourceStart{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		log.WithFields(log.Fields{"path": string(msg.Resource.Path)}).Info("start play resource")
+		log.WithFields(log.Fields{"path": string(msg.Resource.Path), "index": p.currentIndex}).Info("start play resource")
 
 		res, _, err := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
 		if err != nil {
@@ -134,6 +134,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		p.currentIndex = p.currentIndex + 1
 		if p.currentIndex >= uint32(len(p.inputs)) {
 			if p.playProvider.GetPlayModel() != strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LOOP)]) {
+				log.Info("the playlist has been play completed")
 				stopCorePlay()
 				return
 			}

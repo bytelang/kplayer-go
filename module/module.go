@@ -90,6 +90,8 @@ type AppModule interface {
 	GetCommand() *cobra.Command
 	InitConfig(ctx *types.ClientContext, cfg json.RawMessage) error
 	ValidateConfig() error
+	BeginRunning()
+	EndRunning()
 }
 
 type ModuleManager map[string]AppModule

@@ -7,7 +7,8 @@ option go_package = "github.com/bytelang/kplayer/types/config";
 import "gogoproto/gogo.proto";
 
 message Output {
-	repeated OutputInstance lists = 1 [(gogoproto.nullable) = true];
+	int32 reconnect_internal = 1;
+	repeated OutputInstance lists = 2 [(gogoproto.nullable) = true];
 }
 
 message OutputInstance {

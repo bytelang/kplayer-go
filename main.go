@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"runtime"
 
@@ -26,7 +27,7 @@ func init() {
 		DisableColors:   false,
 		FullTimestamp:   true,
 		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
-			return "", f.File
+			return "", fmt.Sprintf("%s:%d",f.File,f.Line)
 		},
 	}
 	log.SetFormatter(logFormat)
@@ -84,6 +85,9 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		log.Fatal(err)
 	}
 	log.SetLevel(logLevel)
+	if logLevel == log.InfoLevel{
+	    log.SetReportCaller(false)
+	}
 
 	// viper
 	v := viper.New()

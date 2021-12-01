@@ -5,6 +5,7 @@ import (
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
 	"github.com/bytelang/kplayer/types"
+	"github.com/bytelang/kplayer/types/config"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
 	"github.com/bytelang/kplayer/types/core/proto/prompt"
@@ -145,4 +146,8 @@ func (p *Provider) PlayInformation(args *svrproto.PlayInformationArgs) (*svrprot
 	}
 
 	return reply, nil
+}
+
+func (p *Provider) GetRPCParams() config.Rpc {
+	return *p.config.Rpc
 }

@@ -46,3 +46,9 @@ func (m AppModule) ValidateConfig() error {
 func (m AppModule) TriggerMessage(message *kpproto.KPMessage) {
 	m.Trigger(message)
 }
+
+func (m AppModule) BeginRunning() {
+}
+
+func (m AppModule) EndRunning() {
+}
