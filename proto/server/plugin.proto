@@ -11,14 +11,16 @@ import "resource.proto";
 message Plugin {
 	string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
 	string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
-	map<string, string> params = 3;
+	uint64 create_time = 3 [(gogoproto.jsontag) = "create_time"];
+	uint64 loaded_time = 4 [(gogoproto.jsontag) = "loaded_time"];
+	map<string, string> params = 5;
 }
 
 // list
 message PluginListArgs {
 }
 message PluginListReply {
-	repeated Plugin plugins = 1 [(gogoproto.nullable) = false];
+	repeated Plugin plugins = 1 [(gogoproto.nullable) = true];
 }
 
 // add

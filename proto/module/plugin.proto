@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package ModuleProto;
+
+option go_package = "github.com/bytelang/kplayer/types/module";
+
+import "gogoproto/gogo.proto";
+
+// res
+message Plugin {
+	string path = 1;
+	string unique = 2;
+	uint64 create_time = 3;
+	uint64 loaded_time = 4;
+	map<string,string> params = 5;
+}

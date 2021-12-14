@@ -37,7 +37,7 @@ type Provider struct {
 
 	// module member
 	currentIndex uint32
-	inputs       moduletypes.Resources
+	inputs       Resources
 
 	// will reset seek attribute
 	// set resource seek on replayed need set the resource attribute

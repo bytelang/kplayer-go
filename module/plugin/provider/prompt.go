@@ -8,26 +8,22 @@ import (
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
 	kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
+	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
+	"time"
 )
 
 func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error) {
-	params := map[string][]byte{}
-	for k, v := range args.Plugin.Params {
-		params[k] = []byte(v)
-	}
-
-	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
-		Plugin: &kpproto.PromptPlugin{
-			Path:   []byte(args.Plugin.Path),
-			Unique: []byte(args.Plugin.Unique),
-			Params: params,
-		},
+	if err := p.addPlugin(moduletypes.Plugin{
+		Path:       args.Plugin.Path,
+		Unique:     args.Plugin.Unique,
+		CreateTime: uint64(time.Now().Unix()),
+		Params:     args.Plugin.Params,
 	}); err != nil {
 		return nil, err
 	}
 
+	// wait for message
 	pluginAddMsg := &msg.EventMessagePluginAdd{}
 	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg []byte) bool {
 		types.UnmarshalProtoMessage(msg, pluginAddMsg)
@@ -46,17 +42,29 @@ func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddR
 		return nil, fmt.Errorf("%s", types.NewKPString(pluginAddMsg.Error))
 	}
 
-	reply := &svrproto.PluginAddReplay{}
-	reply.Plugin.Path = string(pluginAddMsg.Plugin.Path)
-	reply.Plugin.Unique = string(pluginAddMsg.Plugin.Unique)
-	for k, v := range pluginAddMsg.Plugin.Params {
-		reply.Plugin.Params[k] = string(v)
+	// get plugin
+	plugin, _, err := p.list.GetPluginByUnique(string(pluginAddMsg.Plugin.Unique))
+	if err != nil {
+		return nil, err
 	}
+
+	reply := &svrproto.PluginAddReplay{}
+	reply.Plugin.Path = plugin.Path
+	reply.Plugin.Unique = plugin.Unique
+	reply.Plugin.Params = plugin.Params
+	reply.Plugin.CreateTime = plugin.CreateTime
+	reply.Plugin.LoadedTime = plugin.LoadedTime
 
 	return reply, nil
 }
 
 func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error) {
+	// validate
+	if !p.list.Exist(args.Unique) {
+		return nil, PluginNotFound
+	}
+
+	// send prompt
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_REMOVE, &kpprompt.EventPromptPluginRemove{
 		Unique: []byte(args.Unique),
@@ -92,7 +100,22 @@ func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.Plug
 	return reply, nil
 }
 
-func (p *Provider) PluginList(args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
+func (p *Provider) PluginList(plugin *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
+	reply := &svrproto.PluginListReply{}
+	for _, item := range p.list.plugins {
+		reply.Plugins = append(reply.Plugins, &svrproto.Plugin{
+			Path:       item.Path,
+			Unique:     item.Unique,
+			CreateTime: item.CreateTime,
+			LoadedTime: item.LoadedTime,
+			Params:     item.Params,
+		})
+	}
+
+	return reply, nil
+}
+
+func (p *Provider) PluginListFromCore(args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_LIST, &kpprompt.EventPromptPluginList{}); err != nil {
 		return nil, err
@@ -116,15 +139,13 @@ func (p *Provider) PluginList(args *svrproto.PluginListArgs) (*svrproto.PluginLi
 	}
 
 	reply := &svrproto.PluginListReply{}
-	reply.Plugins = make([]svrproto.Plugin, 0)
-
 	for _, item := range pluginListMsg.Plugins {
 		params := map[string]string{}
 		for k, v := range item.Params {
 			params[k] = string(v)
 		}
 
-		reply.Plugins = append(reply.Plugins, svrproto.Plugin{
+		reply.Plugins = append(reply.Plugins, &svrproto.Plugin{
 			Path:   string(item.Path),
 			Unique: string(item.Unique),
 			Params: params,
@@ -135,6 +156,12 @@ func (p *Provider) PluginList(args *svrproto.PluginListArgs) (*svrproto.PluginLi
 }
 
 func (p *Provider) PluginUpdate(args *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error) {
+	// validate
+	if !p.list.Exist(args.Unique) {
+		return nil, PluginNotFound
+	}
+
+	// send prompt
 	coreKplayer := core.GetLibKplayerInstance()
 
 	argParams := map[string][]byte{}
