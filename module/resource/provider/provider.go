@@ -74,7 +74,7 @@ func (p *Provider) ValidateConfig() error {
 	if p.currentIndex < 0 {
 		return fmt.Errorf("start point invalid. cannot less than 1")
 	} else if p.currentIndex > uint32(len(p.inputs)) {
-		return fmt.Errorf("start point invalid. cannot great than total resource count")
+		return fmt.Errorf("start point invalid. cannot great than total resource")
 	}
 
 	return nil

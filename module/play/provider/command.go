@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"strconv"
 	"sync"
 	"syscall"
@@ -119,6 +120,7 @@ func startCommand() *cobra.Command {
 			} else {
 				// not daemon mode
 				// write pid to file
+				_ = os.Mkdir(path.Dir(pidFilePath),os.ModePerm)
 				f, err := os.OpenFile(pidFilePath, os.O_CREATE|os.O_RDWR, 0666)
 				if err != nil {
 					log.WithField("error", err).Fatal("open pid file failed")
