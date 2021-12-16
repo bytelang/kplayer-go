@@ -61,7 +61,7 @@ func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddR
 func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error) {
 	// validate
 	if !p.list.Exist(args.Unique) {
-		return nil, PluginNotFound
+		return nil, PluginUniqueNotFound
 	}
 
 	// send prompt
@@ -158,7 +158,7 @@ func (p *Provider) PluginListFromCore(args *svrproto.PluginListArgs) (*svrproto.
 func (p *Provider) PluginUpdate(args *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error) {
 	// validate
 	if !p.list.Exist(args.Unique) {
-		return nil, PluginNotFound
+		return nil, PluginUniqueNotFound
 	}
 
 	// send prompt

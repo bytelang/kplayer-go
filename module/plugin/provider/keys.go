@@ -10,8 +10,9 @@ const (
 )
 
 const (
-	PluginNotFound       ResourceError = "plugin not found"
+	PluginUniqueNotFound ResourceError = "plugin not found"
 	PluginUniqueHasExist ResourceError = "plugin unique has exist"
+	PluginFileNotFound   ResourceError = "plugin file not found"
 )
 
 type ResourceError string
@@ -32,7 +33,7 @@ func (p *Plugins) GetPluginByUnique(unique string) (*moduletypes.Plugin, int, er
 		}
 	}
 
-	return nil, 0, PluginNotFound
+	return nil, 0, PluginUniqueNotFound
 }
 
 func (p *Plugins) Exist(unique string) bool {

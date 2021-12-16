@@ -106,6 +106,7 @@ func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body proto.Message)
 
 func (lb *libKplayer) Run() {
 	logPath := C.CString("log/core.log")
+	//logPath := C.CString("")
 	C.SetLogLevel(logPath, C.int(1))
 	defer C.free(unsafe.Pointer(logPath))
 

@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/runtime/protoiface"
+	"os"
 )
 
 func GetRandString(size ...uint) string {
@@ -45,4 +46,16 @@ func (ks *KPString) Equal(con string) bool {
 
 func (ks *KPString) String() string {
 	return string(ks.d)
+}
+
+func FileExists(filePath string) bool {
+	stat, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		return false
+	}
+	if stat.IsDir() {
+		return false
+	}
+
+	return true
 }

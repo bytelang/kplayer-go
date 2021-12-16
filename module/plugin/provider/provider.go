@@ -119,6 +119,9 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 	if p.list.Exist(plugin.Unique) {
 		return PluginUniqueHasExist
 	}
+	if !kptypes.FileExists(plugin.Path) {
+		return PluginFileNotFound
+	}
 
 	// send prompt
 	params := map[string][]byte{}
