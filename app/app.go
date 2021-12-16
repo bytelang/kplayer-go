@@ -50,7 +50,7 @@ func AddModuleCommands(rootCmd *cobra.Command) {
 func AddInitCommands() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "init config file",
+		Short: "Init config file",
 	}
 	cmd.AddCommand(addInitDefaultCommands())
 	cmd.AddCommand(addInitInteractionCommands())

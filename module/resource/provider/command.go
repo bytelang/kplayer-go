@@ -7,7 +7,7 @@ import (
 func GetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   ModuleName,
-		Short: "resource category",
+		Short: "Resource category",
 		Long:  `Kplayer resource management commands. control kplayer resource add,remove...`,
 	}
 	cmd.AddCommand(AddCommand())

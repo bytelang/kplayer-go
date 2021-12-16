@@ -13,8 +13,8 @@ require (
 	github.com/rs/zerolog v1.25.0
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.2.1
-	github.com/spf13/viper v1.8.1
+	github.com/spf13/cobra v1.3.0
+	github.com/spf13/viper v1.10.0
 	github.com/wayneashleyberry/terminal-dimensions v1.1.0
 	google.golang.org/protobuf v1.27.1
 )

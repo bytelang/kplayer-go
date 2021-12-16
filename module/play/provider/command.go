@@ -28,7 +28,7 @@ const (
 func GetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   ModuleName,
-		Short: "play category",
+		Short: "Play category",
 		Long:  `App management commands. control kplayer basic status`,
 	}
 

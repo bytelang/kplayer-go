@@ -7,7 +7,7 @@ import (
 func GetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   ModuleName,
-		Short: "plugin category",
+		Short: "Plugin category",
 		Long:  `Kplayer plugin management commands. control kplayer plugin add,remove...`,
 	}
 	cmd.AddCommand(AddCommand())

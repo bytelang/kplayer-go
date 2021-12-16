@@ -54,8 +54,7 @@ func NewRootCmd() *cobra.Command {
 	for i := 0; uint(i) < terminalWidth; i++ {
 		shortDesc = shortDesc + "-"
 	}
-	shortDesc = shortDesc + "\n"
-	fmt.Print(shortDesc)
+	fmt.Println(shortDesc)
 
 	rootCmd := &cobra.Command{
 		Use: app.AppName,
