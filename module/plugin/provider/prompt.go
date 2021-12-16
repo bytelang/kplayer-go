@@ -15,7 +15,7 @@ import (
 
 func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error) {
 	if err := p.addPlugin(moduletypes.Plugin{
-		Path:       args.Plugin.Path,
+		Path:       GetPluginPath(args.Plugin.Path, p.home),
 		Unique:     args.Plugin.Unique,
 		CreateTime: uint64(time.Now().Unix()),
 		Params:     args.Plugin.Params,
@@ -27,7 +27,7 @@ func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddR
 	pluginAddMsg := &msg.EventMessagePluginAdd{}
 	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg []byte) bool {
 		types.UnmarshalProtoMessage(msg, pluginAddMsg)
-		return types.NewKPString(pluginAddMsg.Plugin.Path).Equal(args.Plugin.Path) && types.NewKPString(pluginAddMsg.Plugin.Unique).Equal(args.Plugin.Unique)
+		return types.NewKPString(pluginAddMsg.Plugin.Unique).Equal(args.Plugin.Unique)
 	})
 	defer keeperCtx.Close()
 

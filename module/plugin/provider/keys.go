@@ -2,6 +2,7 @@ package provider
 
 import (
 	moduletypes "github.com/bytelang/kplayer/types/module"
+	"path"
 	"sync"
 )
 
@@ -13,6 +14,10 @@ const (
 	PluginUniqueNotFound ResourceError = "plugin not found"
 	PluginUniqueHasExist ResourceError = "plugin unique has exist"
 	PluginFileNotFound   ResourceError = "plugin file not found"
+)
+
+const (
+	PluginExtensionName = ".kpe"
 )
 
 type ResourceError string
@@ -75,4 +80,8 @@ func (ps *Plugins) AppendPlugin(plugin moduletypes.Plugin) error {
 
 	ps.plugins = append(ps.plugins, plugin)
 	return nil
+}
+
+func GetPluginPath(name string, homePath string) string {
+	return path.Join(homePath, "plugin", name+PluginExtensionName)
 }

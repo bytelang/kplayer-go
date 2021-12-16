@@ -41,7 +41,7 @@ func NewProvider() *Provider {
 	}
 }
 
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Output) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Output, homePath string) {
 	// set module attribute
 	p.reconnectInternal = config.ReconnectInternal
 

@@ -44,7 +44,7 @@ func NewProvider() *Provider {
 }
 
 // InitConfig set module config on kplayer started
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Play) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Play, homePath string) {
 	// set default value
 	if cfg.Rpc == nil {
 		cfg.Rpc = &config.Rpc{On: true}

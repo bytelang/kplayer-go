@@ -55,7 +55,7 @@ func NewProvider(playProvider playprovider.ProviderI) *Provider {
 	}
 }
 
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource, homePath string) {
 	// initialize attribute
 	p.currentIndex = p.playProvider.GetStartPoint() - 1
 

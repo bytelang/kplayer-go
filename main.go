@@ -114,7 +114,7 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		modifyData, err := m.InitConfig(clientCtx, d)
+		modifyData, err := m.InitConfig(clientCtx, d, home)
 		if err != nil {
 			log.Fatal(err)
 		}

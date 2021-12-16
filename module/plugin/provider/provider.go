@@ -24,6 +24,9 @@ type ProviderI interface {
 type Provider struct {
 	module.ModuleKeeper
 
+	// flag
+	home string
+
 	// config
 	configList Plugins
 	list       Plugins
@@ -35,11 +38,13 @@ func NewProvider() *Provider {
 	return &Provider{}
 }
 
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin, homePath string) {
+	p.home = homePath
+
 	// set plugin list
 	for _, item := range config.Lists {
 		if err := p.configList.AppendPlugin(moduletypes.Plugin{
-			Path:       item.Path,
+			Path:       GetPluginPath(item.Path, homePath),
 			Unique:     item.Unique,
 			CreateTime: uint64(time.Now().Unix()),
 			LoadedTime: 0,
@@ -55,7 +60,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
 		for _, item := range p.configList.plugins {
 			if err := p.addPlugin(item); err != nil {
-				log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path}).Warn("add plugin failed")
+				log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Warn("add plugin failed")
 			}
 		}
 	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD:
