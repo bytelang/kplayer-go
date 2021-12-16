@@ -43,9 +43,14 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin,
 
 	// set plugin list
 	for _, item := range config.Lists {
+		uniqueName := item.Unique
+		if len(uniqueName) == 0 {
+			uniqueName = kptypes.GetRandString(6)
+		}
+
 		if err := p.configList.AppendPlugin(moduletypes.Plugin{
 			Path:       GetPluginPath(item.Path, homePath),
-			Unique:     item.Unique,
+			Unique:     uniqueName,
 			CreateTime: uint64(time.Now().Unix()),
 			LoadedTime: 0,
 			Params:     item.Params,

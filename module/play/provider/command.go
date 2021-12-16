@@ -47,7 +47,7 @@ func statusCommand() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			pid, err := getPID()
 			if err != nil {
-				log.WithField("status", "off").Info("kplayer active running on daemon mode")
+				log.WithField("status", "off").Info("kplayer not running on daemon mode")
 				return nil
 			}
 			log.WithFields(log.Fields{"status": "on", "pid": pid}).Info("kplayer active running on daemon mode")
@@ -66,7 +66,7 @@ func stopCommand() *cobra.Command {
 			pid, err := getPID()
 			if err != nil {
 				log.WithField("error", err).Error("stop failed")
-				return err
+				return nil
 			}
 
 			// kill process
