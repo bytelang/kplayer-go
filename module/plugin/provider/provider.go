@@ -121,6 +121,31 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		plugin.Params = params
 
 		logFields.Info("update plugin success")
+	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
+		// reload failed plugin
+		p.list.lock.Lock()
+		defer p.list.lock.Unlock()
+
+		for _, item := range p.list.plugins {
+			if item.LoadedTime == 0 {
+				// send prompt
+				params := map[string][]byte{}
+				for k, v := range item.Params {
+					params[k] = []byte(v)
+				}
+
+				coreKplayer := core.GetLibKplayerInstance()
+				if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
+					Plugin: &kpproto.PromptPlugin{
+						Path:   []byte(item.Path),
+						Unique: []byte(item.Unique),
+						Params: params,
+					},
+				}); err != nil {
+					log.WithFields(log.Fields{"path": item.Path, "unique": item.Unique, "error": err}).Warn("reload plugin failed")
+				}
+			}
+		}
 	}
 }
 

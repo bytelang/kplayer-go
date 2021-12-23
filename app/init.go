@@ -11,17 +11,17 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
-
 
 func addInitDefaultCommands() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "default",
 		Short: "export default config file",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			home, err := GetHome(cmd)
+			home, err := types.GetHome(cmd)
 			if err != nil {
 				return err
 			}
@@ -42,12 +42,9 @@ func addInitInteractionCommands() *cobra.Command {
 		Use:   "interaction",
 		Short: "interaction init config file",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			home, err := cmd.Flags().GetString(types.FlagHome)
+			home, err := types.GetHome(cmd)
 			if err != nil {
 				return err
-			}
-			if home[:1] != "/" {
-				home = home + "/"
 			}
 
 			// interaction
@@ -57,7 +54,7 @@ func addInitInteractionCommands() *cobra.Command {
 			}
 
 			// export file
-			return exportConfigFile(cfg, home+DefaultConfigFileName)
+			return exportConfigFile(cfg, filepath.Join(home, DefaultConfigFileName))
 		},
 	}
 

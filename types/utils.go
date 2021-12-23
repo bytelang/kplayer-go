@@ -8,13 +8,25 @@ import (
 	"os"
 )
 
+var issueRandStr map[string]bool
+
+func init() {
+	issueRandStr = make(map[string]bool)
+}
+
 func GetRandString(size ...uint) string {
-	str := uuid.New().String()
-	if len(size) == 0 {
-		return str
+	var str string
+	for {
+		str = uuid.New().String()
+		if len(size) != 0 {
+			str = str[:size[0]]
+		}
+		if ok := issueRandStr[str]; !ok {
+			break
+		}
 	}
 
-	return str[:size[0]]
+	return str
 }
 
 func UnmarshalProtoMessage(data []byte, obj protoiface.MessageV1) {

@@ -105,11 +105,6 @@ func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body proto.Message)
 }
 
 func (lb *libKplayer) Run() {
-	logPath := C.CString("log/core.log")
-	//logPath := C.CString("")
-	C.SetLogLevel(logPath, C.int(1))
-	defer C.free(unsafe.Pointer(logPath))
-
 	C.Initialization(C.CString(lb.protocol),
 		C.int(lb.video_width),
 		C.int(lb.video_height),
@@ -154,4 +149,10 @@ func (lb *libKplayer) SetCacheOn(c bool) {
 
 func (lb *libKplayer) SetSkipInvalidResource(s bool) {
 	lb.skip_invalid_resource = s
+}
+
+func (lb *libKplayer) SetLogLevel(path string, level int) {
+	logPath := C.CString(path)
+	C.SetLogLevel(logPath, C.int(level))
+	defer C.free(unsafe.Pointer(logPath))
 }

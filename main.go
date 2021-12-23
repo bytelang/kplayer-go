@@ -70,17 +70,17 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 	mm := cmd.Context().Value(kptypes.ModuleManagerContextKey).(module.ModuleManager)
 	clientCtx := cmd.Context().Value(kptypes.ClientContextKey).(*kptypes.ClientContext)
 
-	home, err := app.GetHome(cmd)
+	home, err := kptypes.GetHome(cmd)
 	if err != nil {
 		log.Fatal(err)
 	}
-	configFileName, err := app.GetConfigFileName(cmd)
+	configFileName, err := kptypes.GetConfigFileName(cmd)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// set log level
-	logLevel, err := app.GetLogLevel(cmd)
+	logLevel, err := kptypes.GetLogLevel(cmd)
 	if err != nil {
 		log.Fatal(err)
 	}
