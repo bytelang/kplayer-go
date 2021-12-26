@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/bytelang/kplayer/module"
 	kptypes "github.com/bytelang/kplayer/types"
@@ -94,8 +95,7 @@ func startCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			_ = os.Mkdir(filepath.Join(homePath, "log"), os.ModeDir)
-			return nil
+			return kptypes.MkDir(filepath.Join(homePath, "log"))
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			homePath, err := kptypes.GetHome(cmd)
@@ -227,6 +227,28 @@ func startCommand() *cobra.Command {
 			go func() {
 				(svrCreator).(server.ServerCreator).StartServer(serverStopChan, mm)
 				waitGroup.Done()
+			}()
+
+			// knock api
+			timeTicker := time.NewTicker(time.Minute * 6)
+			defer timeTicker.Stop()
+			go func() {
+				maxRetriesCount := 5
+				currentRetriesCount := 0
+				for {
+					if currentRetriesCount > maxRetriesCount {
+						log.Fatal("knock failed. cannot connection api server on max retries")
+					}
+
+					<-timeTicker.C
+					if err := kptypes.Knock(); err != nil {
+						currentRetriesCount = currentRetriesCount + 1
+						continue
+					}
+
+					log.Debug("knock success")
+					currentRetriesCount = 0
+				}
 			}()
 
 			waitGroup.Wait()

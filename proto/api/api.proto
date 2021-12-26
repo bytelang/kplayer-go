@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package ApiProto;
+
+option go_package = "github.com/bytelang/kplayer/types/api";
+
+import "gogoproto/gogo.proto";
+
+message PluginInformationRequest {
+	string name = 1;
+	string version = 2;
+}
+message PluginInformationResponse {
+	uint32 id = 1;
+	string name = 2;
+	uint32 min_version = 3;
+	uint32 max_version = 4;
+	string download_url = 5;
+	string md5 = 6;
+	string created_at = 7;
+	string updated_at = 8;
+}
+
+message ResourceInformationRequest {
+	string type = 1;
+	string name = 2;
+}
+message ResourceInformationResponse {
+	uint32 id = 1;
+	string type = 2;
+	string name = 3;
+	string download_url = 4;
+	string md5 = 5;
+	string created_at = 6;
+	string updated_at = 7;
+}
+
+message StatusKnockRequest {
+}
+message StatusKnockResponse {
+}

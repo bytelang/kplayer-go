@@ -1,10 +1,13 @@
 package types
 
 import (
+	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/runtime/protoiface"
+	"io"
+	"net/http"
 	"os"
 )
 
@@ -70,4 +73,34 @@ func FileExists(filePath string) bool {
 	}
 
 	return true
+}
+
+func MkDir(dir string) error {
+	stat, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		return os.Mkdir(dir, os.ModePerm)
+	}
+	if stat.IsDir() {
+		return nil
+	}
+
+	return fmt.Errorf("plugin directory can not be avaiable")
+}
+
+func DownloadFile(url, filePath string) error {
+	res, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	openFile, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer openFile.Close()
+
+	if _, err := io.Copy(openFile, res.Body); err != nil {
+		return err
+	}
+
+	return nil
 }

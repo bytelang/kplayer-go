@@ -1,4 +1,4 @@
-SUB_DIR = server config module
+SUB_DIR = server config module api
 
 .PHONY: subdirs $(SUB_DIR)
 

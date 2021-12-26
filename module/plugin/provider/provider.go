@@ -11,6 +11,8 @@ import (
 	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -58,6 +60,62 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin,
 			log.Fatal(err)
 		}
 	}
+}
+
+func (p *Provider) ValidateConfig() error {
+	// get version
+	kptypes.GetCorePluginVersion()
+
+	// init plugin
+	if len(p.configList.plugins) > 0 {
+		if err := kptypes.MkDir(filepath.Join(p.home, "plugin")); err != nil {
+			return err
+		}
+	}
+
+	for _, item := range p.configList.plugins {
+		pluginName := strings.TrimSuffix(filepath.Base(item.Path), filepath.Ext(item.Path))
+
+		logField := log.WithFields(log.Fields{"name": pluginName, "path": item.Path})
+		if err := InitPluginFile(pluginName, item.Path); err != nil {
+			if !kptypes.FileExists(item.Path) {
+				logField.Error("plugin initialization failed")
+				return err
+			}
+
+			logField.Warn("plugin file exist, but plugin is no registration.")
+		}
+	}
+
+	// init resource
+	if len(p.configList.plugins) > 0 {
+		if err := kptypes.MkDir(filepath.Join(p.home, "resource")); err != nil {
+			return err
+		}
+	}
+	resources := []map[string]string{
+		{
+			"type": "font",
+			"name": "default",
+		},
+	}
+	for _, item := range resources {
+		logField := log.WithFields(log.Fields{"type": item["type"], "name": item["name"]})
+
+		var resourceFilePath string
+		if item["type"] == "font" {
+			resourceFilePath = filepath.Join(p.home, "resource/font.ttf")
+		}
+
+		if !kptypes.FileExists(resourceFilePath) {
+			if err := InitResourceFile(item["type"], item["name"], resourceFilePath); err != nil {
+				return err
+			}
+			logField.Info("resource initialization success")
+		}
+	}
+
+	return nil
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
@@ -180,9 +238,5 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 		return err
 	}
 
-	return nil
-}
-
-func (p *Provider) ValidateConfig() error {
 	return nil
 }

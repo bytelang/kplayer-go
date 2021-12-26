@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/bytelang/kplayer/types/config"
+	errortypes "github.com/bytelang/kplayer/types/error"
+	"io/ioutil"
 	"os"
 	"runtime"
 
@@ -12,7 +15,6 @@ import (
 	"github.com/bytelang/kplayer/module"
 	"github.com/bytelang/kplayer/server"
 	kptypes "github.com/bytelang/kplayer/types"
-	"github.com/rs/zerolog"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -48,7 +50,7 @@ func main() {
 
 // Execute execute from flags and commands
 func Execute(rootCmd *cobra.Command, defaultHome string, defaultFile string) error {
-	rootCmd.PersistentFlags().String(kptypes.FlagLogLevel, zerolog.InfoLevel.String(), "The logging level (trace|debug|info|warn|error|fatal|panic)")
+	rootCmd.PersistentFlags().String(kptypes.FlagLogLevel, log.InfoLevel.String(), "The logging level (trace|debug|info|warn|error|fatal|panic)")
 	rootCmd.PersistentFlags().String(kptypes.FlagLogFormat, "plain", "The logging format (json|plain)")
 	rootCmd.PersistentFlags().StringP(kptypes.FlagHome, "", defaultHome, "directory for config and data")
 	rootCmd.PersistentFlags().StringP(kptypes.FlagConfigFileName, "c", defaultFile, "config file name")
@@ -105,6 +107,11 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		log.Fatal(err)
 	}
 
+	// validate global config
+	if err := ValidateConfig(clientCtx.Config); err != nil {
+		log.Fatal(err)
+	}
+
 	// init module
 	for _, item := range mm.OrderInitConfig {
 		m := mm.GetModule(item)
@@ -125,4 +132,28 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 			log.Fatal(err)
 		}
 	}
+}
+
+func ValidateConfig(config *config.KPConfig) error {
+	if config.Version != app.ConfigVersion {
+		return errortypes.VersionInvalidMainError
+	}
+
+	// load user token file
+	if config.TokenPath != "" {
+		if !kptypes.FileExists(config.TokenPath) {
+			return errortypes.TokenFileNotFoundMainError
+		}
+
+		fileContent, err := ioutil.ReadFile(config.TokenPath)
+		if err != nil {
+			return err
+		}
+
+		if err := kptypes.LoadClientToken(string(fileContent)); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return nil
 }
