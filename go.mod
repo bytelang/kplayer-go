@@ -11,11 +11,11 @@ require (
 	github.com/gorilla/rpc v1.2.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/manifoldco/promptui v0.8.0
-	github.com/rs/zerolog v1.25.0
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.0
 	github.com/wayneashleyberry/terminal-dimensions v1.1.0
+	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
 	google.golang.org/protobuf v1.27.1
 )

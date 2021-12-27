@@ -3,13 +3,16 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/bytelang/kplayer/cmd"
 	"github.com/bytelang/kplayer/module"
 	outputprovider "github.com/bytelang/kplayer/module/output/provider"
 	playprovider "github.com/bytelang/kplayer/module/play/provider"
 	pluginprovider "github.com/bytelang/kplayer/module/plugin/provider"
 	resourceprovider "github.com/bytelang/kplayer/module/resource/provider"
+	"github.com/bytelang/kplayer/types"
 	"github.com/go-playground/validator/v10"
-	"github.com/gorilla/rpc/v2/json"
+	rpcjson "github.com/gorilla/rpc/v2/json"
+	"golang.org/x/net/websocket"
 	"net/http"
 	"time"
 
@@ -33,7 +36,7 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 		return validate.Struct(i)
 	})
 
-	s.RegisterCodec(json.NewCodec(), "application/json")
+	s.RegisterCodec(rpcjson.NewCodec(), "application/json")
 	if err := s.RegisterService(kprpc.NewResource(mm.GetModule(resourceprovider.ModuleName).(resourceprovider.ProviderI)), ""); err != nil {
 		panic(err)
 	}
@@ -56,6 +59,7 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 
 	m := http.NewServeMux()
 	m.Handle("/rpc", s)
+	m.Handle("/websocket", websocket.Handler(wsClientHandler))
 	server := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", rpcParams.Address, rpcParams.Port),
 		Handler: m,
@@ -77,5 +81,27 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func wsClientHandler(ws *websocket.Conn) {
+	sub, err := cmd.SubscribeMessage("server")
+	if err != nil {
+		log.WithField("error", err).Errorf("subscribe message failed")
+		return
+	}
+	for {
+		message := <-sub
+		jsonRawMessage, err := types.ParseMessageToJson(message)
+		if err != nil {
+			log.WithField("error", err).Errorf("message cannot encode to json")
+			break
+		}
+
+		_, err = ws.Write(jsonRawMessage)
+		if err != nil {
+			log.WithField("error", err).Errorf("send websocket client failed")
+			break
+		}
 	}
 }

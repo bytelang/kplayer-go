@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/bytelang/kplayer/app"
 	"github.com/bytelang/kplayer/core"
@@ -13,6 +14,13 @@ import (
 )
 
 const terminalCharsetMaxCount uint = 115
+
+var subscribeCollector map[string]chan kpproto.KPMessage
+var subscribeMutex sync.Mutex
+
+func init() {
+	subscribeCollector = make(map[string]chan kpproto.KPMessage)
+}
 
 func NewRootCmd() *cobra.Command {
 	// init core
@@ -87,4 +95,22 @@ func messageConsumer(message *kpproto.KPMessage) {
 		copyMsg = *message
 		item.TriggerMessage(&copyMsg)
 	}
+
+	go func() {
+		for _, item := range subscribeCollector {
+			item <- *message
+		}
+	}()
+}
+
+func SubscribeMessage(name string) (chan kpproto.KPMessage, error) {
+	subscribeMutex.Lock()
+	defer subscribeMutex.Unlock()
+
+	if _, ok := subscribeCollector[name]; ok {
+		return nil, fmt.Errorf("subscribe name has been registed")
+	}
+
+	subscribeCollector[name] = make(chan kpproto.KPMessage, 500)
+	return subscribeCollector[name], nil
 }
