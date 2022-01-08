@@ -94,7 +94,7 @@ func (lb *libKplayer) SendPrompt(action kpproto.EventPromptAction, body proto.Me
 		return err
 	}
 
-	cs := C.CString(string(str))
+	cs := C.CString(str)
 	defer C.free(unsafe.Pointer(cs))
 
 	C.PromptMessage(C.int(action), cs)

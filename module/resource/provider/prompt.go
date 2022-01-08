@@ -120,14 +120,14 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 	// wait context
 	keeperCtx.Wait()
 	if len(resourceListMsg.Error) != 0 {
-		return nil, fmt.Errorf("%s", string(resourceListMsg.Error))
+		return nil, fmt.Errorf("%s", resourceListMsg.Error)
 	}
 
 	reply := &svrproto.ResourceListReply{}
 	for _, item := range resourceListMsg.Resources {
 		reply.Resources = append(reply.Resources, svrproto.Resource{
-			Path:   string(item.Path),
-			Unique: string(item.Unique),
+			Path:   item.Path,
+			Unique: item.Unique,
 		})
 	}
 
@@ -154,14 +154,14 @@ func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.Res
 	// wait context
 	keeperCtx.Wait()
 	if len(resourceCurrentMsg.Error) != 0 {
-		return nil, fmt.Errorf("%s", string(resourceCurrentMsg.Error))
+		return nil, fmt.Errorf("%s", resourceCurrentMsg.Error)
 	}
 
 	currentRes := p.inputs[p.currentIndex]
 	reply := &svrproto.ResourceCurrentReply{
 		Resource: svrproto.Resource{
-			Path:       string(resourceCurrentMsg.Resource.Path),
-			Unique:     string(resourceCurrentMsg.Resource.Unique),
+			Path:       resourceCurrentMsg.Resource.Path,
+			Unique:     resourceCurrentMsg.Resource.Unique,
 			CreateTime: currentRes.CreateTime,
 			StartTime:  currentRes.StartTime,
 			EndTime:    currentRes.EndTime,

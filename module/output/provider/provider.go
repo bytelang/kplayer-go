@@ -71,10 +71,10 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 
 		logFields := log.WithFields(log.Fields{
-			"unique": string(msg.Output.Unique),
-			"path":   string(msg.Output.Path)})
-		if string(msg.Error) != "" {
-			logFields = logFields.WithField("error", string(msg.Error))
+			"unique": msg.Output.Unique,
+			"path":   msg.Output.Path})
+		if msg.Error != "" {
+			logFields = logFields.WithField("error", msg.Error)
 		}
 
 		if len(msg.Error) != 0 {
@@ -83,8 +83,8 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 			// send reconnect instance to channel
 			if p.reconnectInternal > 0 {
 				p.reconnectChan <- config.OutputInstance{
-					Path:   string(msg.Output.Path),
-					Unique: string(msg.Output.Unique),
+					Path:   msg.Output.Path,
+					Unique: msg.Output.Unique,
 				}
 			}
 			return
@@ -93,7 +93,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		logFields.Info("output add success")
 
 		// update output status
-		if output := p.outputs.GetOutputByUnique(string(msg.Output.Unique)); output != nil {
+		if output := p.outputs.GetOutputByUnique(msg.Output.Unique); output != nil {
 			output.StartTime = uint64(time.Now().Unix())
 		}
 	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_DISCONNECT:
@@ -101,21 +101,21 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 
 		logFields := log.WithFields(log.Fields{
-			"unique": string(msg.Output.Unique),
-			"path":   string(msg.Output.Path),
-			"error":  string(msg.Error)})
+			"unique": msg.Output.Unique,
+			"path":   msg.Output.Path,
+			"error":  msg.Error})
 		logFields.Error("output disconnection")
 
 		// send reconnect instance to channel
 		if p.reconnectInternal > 0 {
 			p.reconnectChan <- config.OutputInstance{
-				Path:   string(msg.Output.Path),
-				Unique: string(msg.Output.Unique),
+				Path:   msg.Output.Path,
+				Unique: msg.Output.Unique,
 			}
 		}
 
 		// update output status
-		if output := p.outputs.GetOutputByUnique(string(msg.Output.Unique)); output != nil {
+		if output := p.outputs.GetOutputByUnique(msg.Output.Unique); output != nil {
 			output.EndTime = uint64(time.Now().Unix())
 		}
 	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_ENDED:

@@ -94,10 +94,10 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_START:
 		msg := &kpmsg.EventMessageResourceStart{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		log.WithFields(log.Fields{"path": string(msg.Resource.Path), "unique": string(msg.Resource.Unique)}).
+		log.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique}).
 			Info("start play resource")
 
-		res, _, err := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
+		res, _, err := p.inputs.GetResourceByUnique(msg.Resource.Unique)
 		if err != nil {
 			log.WithFields(log.Fields{"unique": msg.Resource.Unique, "path": msg.Resource.Path}).Warn(err)
 			break
@@ -107,16 +107,16 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		res.EndTime = 0
 
 		// reset resource seek attribute
-		if seek, ok := p.resetInputs[string(msg.Resource.Unique)]; ok {
+		if seek, ok := p.resetInputs[msg.Resource.Unique]; ok {
 			res.Seek = seek
 		}
 	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
 		msg := &kpmsg.EventMessageResourceFinish{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		if len(msg.Error) != 0 {
-			log.WithFields(log.Fields{"error": string(msg.Error)}).Warn("play resource failed")
+			log.WithFields(log.Fields{"error": msg.Error}).Warn("play resource failed")
 		} else {
-			log.WithFields(log.Fields{"path": string(msg.Resource.Path), "unique": string(msg.Resource.Unique)}).
+			log.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique}).
 				Info("finish play resource")
 		}
 
@@ -124,9 +124,9 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		defer p.input_mutex.Unlock()
 
 		// get resource
-		res, _, err := p.inputs.GetResourceByUnique(string(msg.Resource.Unique))
+		res, _, err := p.inputs.GetResourceByUnique(msg.Resource.Unique)
 		if err != nil {
-			log.WithFields(log.Fields{"unique": string(msg.Resource.Unique), "path": string(msg.Resource.Path)}).Warn(err)
+			log.WithFields(log.Fields{"unique": msg.Resource.Unique, "path": msg.Resource.Path}).Warn(err)
 			break
 		}
 		res.EndTime = uint64(time.Now().Unix())

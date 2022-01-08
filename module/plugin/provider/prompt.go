@@ -43,7 +43,7 @@ func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddR
 	}
 
 	// get plugin
-	plugin, _, err := p.list.GetPluginByUnique(string(pluginAddMsg.Plugin.Unique))
+	plugin, _, err := p.list.GetPluginByUnique(pluginAddMsg.Plugin.Unique)
 	if err != nil {
 		return nil, err
 	}
@@ -90,11 +90,11 @@ func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.Plug
 	}
 
 	reply := &svrproto.PluginRemoveReply{}
-	reply.Plugin.Path = string(pluginRemoveMsg.Plugin.Path)
-	reply.Plugin.Unique = string(pluginRemoveMsg.Plugin.Unique)
+	reply.Plugin.Path = pluginRemoveMsg.Plugin.Path
+	reply.Plugin.Unique = pluginRemoveMsg.Plugin.Unique
 	reply.Plugin.Params = make(map[string]string)
 	for k, v := range pluginRemoveMsg.Plugin.Params {
-		reply.Plugin.Params[k] = string(v)
+		reply.Plugin.Params[k] = v
 	}
 
 	return reply, nil
@@ -142,12 +142,12 @@ func (p *Provider) PluginListFromCore(args *svrproto.PluginListArgs) (*svrproto.
 	for _, item := range pluginListMsg.Plugins {
 		params := map[string]string{}
 		for k, v := range item.Params {
-			params[k] = string(v)
+			params[k] = v
 		}
 
 		reply.Plugins = append(reply.Plugins, &svrproto.Plugin{
-			Path:   string(item.Path),
-			Unique: string(item.Unique),
+			Path:   item.Path,
+			Unique: item.Unique,
 			Params: params,
 		})
 	}
@@ -194,13 +194,13 @@ func (p *Provider) PluginUpdate(args *svrproto.PluginUpdateArgs) (*svrproto.Plug
 
 	replyParams := map[string]string{}
 	for k, v := range pluginUpdateMsg.Plugin.Params {
-		replyParams[k] = string(v)
+		replyParams[k] = v
 	}
 
 	return &svrproto.PluginUpdateReply{
 		Plugin: &svrproto.Plugin{
-			Path:   string(pluginUpdateMsg.Plugin.Path),
-			Unique: string(pluginUpdateMsg.Plugin.Unique),
+			Path:   pluginUpdateMsg.Plugin.Path,
+			Unique: pluginUpdateMsg.Plugin.Unique,
 			Params: replyParams,
 		},
 	}, nil

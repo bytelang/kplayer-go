@@ -34,7 +34,7 @@ func (p *Provider) PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopRepl
 	// wait context
 	keeperCtx.Wait()
 	if len(endedMsg.Error) != 0 {
-		return nil, fmt.Errorf("%s", string(endedMsg.Error))
+		return nil, fmt.Errorf("%s", endedMsg.Error)
 	}
 
 	return &svrproto.PlayStopReply{}, nil

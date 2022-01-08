@@ -27,7 +27,7 @@ func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddR
 	outputAddMsg := &msg.EventMessageOutputAdd{}
 	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, outputAddMsg)
-		return string(outputAddMsg.Output.Unique) == args.Output.Unique && string(outputAddMsg.Output.Path) == args.Output.Path
+		return outputAddMsg.Output.Unique == args.Output.Unique && outputAddMsg.Output.Path == args.Output.Path
 	})
 	defer keeperCtx.Close()
 
@@ -43,8 +43,8 @@ func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddR
 
 	return &svrproto.OutputAddReply{
 		Output: svrproto.Output{
-			Path:   string(outputAddMsg.Output.Path),
-			Unique: string(outputAddMsg.Output.Unique),
+			Path:   outputAddMsg.Output.Path,
+			Unique: outputAddMsg.Output.Unique,
 		},
 	}, nil
 }
@@ -62,7 +62,7 @@ func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.Outp
 	outputRemoveMsg := &msg.EventMessageOutputRemove{}
 	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_REMOVE, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, outputRemoveMsg)
-		return string(outputRemoveMsg.Output.Unique) == args.Unique
+		return outputRemoveMsg.Output.Unique == args.Unique
 	})
 	defer keeperCtx.Close()
 
@@ -73,13 +73,13 @@ func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.Outp
 	// wait context
 	keeperCtx.Wait()
 	if len(outputRemoveMsg.Error) != 0 {
-		return nil, fmt.Errorf("%s", string(outputRemoveMsg.Error))
+		return nil, fmt.Errorf("%s", outputRemoveMsg.Error)
 	}
 
 	return &svrproto.OutputRemoveReply{
 		Output: &svrproto.Output{
-			Path:   string(outputRemoveMsg.Output.Path),
-			Unique: string(outputRemoveMsg.Output.Unique),
+			Path:   outputRemoveMsg.Output.Path,
+			Unique: outputRemoveMsg.Output.Unique,
 		},
 	}, nil
 }

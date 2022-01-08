@@ -129,14 +129,14 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD:
 		msg := &kpmsg.EventMessagePluginAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		logFields := log.WithFields(log.Fields{"unique": string(msg.Plugin.Unique), "path": string(msg.Plugin.Path)})
+		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path})
 		if len(msg.Error) != 0 {
 			logFields.WithField("error", msg.Error).Warn("add plugin failed")
 			break
 		}
 
 		// update plugin
-		plugin, _, err := p.list.GetPluginByUnique(string(msg.Plugin.Unique))
+		plugin, _, err := p.list.GetPluginByUnique(msg.Plugin.Unique)
 		if err != nil {
 			logFields.Warn(err)
 		}
@@ -146,13 +146,13 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_REMOVE:
 		msg := &kpmsg.EventMessagePluginRemove{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		logFields := log.WithFields(log.Fields{"unique": string(msg.Plugin.Unique), "path": string(msg.Plugin.Path)})
+		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path})
 		if len(msg.Error) != 0 {
-			logFields.WithField("error", string(msg.Error)).Warn("remove plugin failed")
+			logFields.WithField("error", msg.Error).Warn("remove plugin failed")
 			break
 		}
 
-		if _, err := p.list.RemovePluginByUnique(string(msg.Plugin.Unique)); err != nil {
+		if _, err := p.list.RemovePluginByUnique(msg.Plugin.Unique); err != nil {
 			log.Fatal(err)
 			break
 		}
@@ -161,20 +161,20 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_UPDATE:
 		msg := &kpmsg.EventMessagePluginUpdate{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		logFields := log.WithFields(log.Fields{"unique": string(msg.Plugin.Unique), "path": string(msg.Plugin.Path)})
+		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path})
 		if len(msg.Error) != 0 {
-			logFields.WithField("error", string(msg.Error)).Warn("update plugin failed")
+			logFields.WithField("error", msg.Error).Warn("update plugin failed")
 			break
 		}
 
 		// update
-		plugin, _, err := p.list.GetPluginByUnique(string(msg.Plugin.Unique))
+		plugin, _, err := p.list.GetPluginByUnique(msg.Plugin.Unique)
 		if err != nil {
 			logFields.Warn(err)
 		}
 		params := make(map[string]string)
 		for key, item := range msg.Plugin.Params {
-			params[key] = string(item)
+			params[key] = item
 		}
 		plugin.Params = params
 
