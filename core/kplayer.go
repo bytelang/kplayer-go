@@ -2,11 +2,12 @@ package core
 
 // #cgo LDFLAGS: -lkplayer -lkpcodec -lkputil -lkpadapter -lkpplugin
 // #include "extra.h"
-// void goCallBackMessage(char*);
+// void goCallBackMessage(int, char*);
 import "C"
 
 import (
 	"bytes"
+	"github.com/golang/protobuf/jsonpb"
 	"unsafe"
 
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
@@ -16,18 +17,14 @@ import (
 
 //export goCallBackMessage
 // goCallBackMessage define libkplayer callback function
-func goCallBackMessage(msgRaw *C.char) {
+func goCallBackMessage(action C.int, msgRaw *C.char) {
 	msg := C.GoString(msgRaw)
-	message := &kpproto.KPMessage{}
-	if err := proto.Unmarshal([]byte(msg), message); err != nil {
-		log.WithFields(log.Fields{"error": err, "message": msg}).Fatal("error unmarshal message")
-	}
-
-	libKplayerInstance.callbackFn(message)
+	ac := int(action)
+	libKplayerInstance.callbackFn(ac, msg)
 }
 
 var libKplayerInstance *libKplayer = &libKplayer{
-	callbackFn: func(message *kpproto.KPMessage) {},
+	callbackFn: func(action int, message string) {},
 }
 
 // libKplayer
@@ -48,7 +45,7 @@ type libKplayer struct {
 	skip_invalid_resource bool
 
 	// event message receiver
-	callbackFn func(message *kpproto.KPMessage)
+	callbackFn func(action int, message string)
 }
 
 // GetLibKplayer return singleton LibKplayer instance
@@ -71,12 +68,12 @@ func (lb *libKplayer) SetOptions(protocol string, video_width uint32, video_heig
 	return nil
 }
 
-func (lb *libKplayer) SetCallBackMessage(fn func(message *kpproto.KPMessage)) {
+func (lb *libKplayer) SetCallBackMessage(fn func(action int, message string)) {
 	lb.callbackFn = fn
 }
 
 func (lb *libKplayer) GetInformation() *kpproto.Information {
-	infoMemorySize := 200
+	infoMemorySize := 2000
 	str := make([]byte, infoMemorySize)
 	cs := (*C.char)(unsafe.Pointer(&str[0]))
 
@@ -84,14 +81,15 @@ func (lb *libKplayer) GetInformation() *kpproto.Information {
 
 	str = bytes.Trim(str, "\x00")
 	info := &kpproto.Information{}
-	if err := proto.Unmarshal(str, info); err != nil {
+	if err := jsonpb.UnmarshalString(string(str), info); err != nil {
 		log.Fatalf("error: %s", err)
 	}
 	return info
 }
 
-func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body proto.Message) error {
-	str, err := proto.Marshal(body)
+func (lb *libKplayer) SendPrompt(action kpproto.EventPromptAction, body proto.Message) error {
+	m := jsonpb.Marshaler{}
+	str, err := m.MarshalToString(body)
 	if err != nil {
 		return err
 	}
@@ -100,7 +98,7 @@ func (lb *libKplayer) SendPrompt(action kpproto.EventAction, body proto.Message)
 	defer C.free(unsafe.Pointer(cs))
 
 	C.PromptMessage(C.int(action), cs)
-	log.WithFields(log.Fields{"action": kpproto.EventAction_name[int32(action)]}).Debug("send prompt message")
+	log.WithFields(log.Fields{"action": kpproto.EventPromptAction_name[int32(action)]}).Debug("send prompt message")
 	return nil
 }
 

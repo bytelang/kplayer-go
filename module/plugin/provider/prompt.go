@@ -25,9 +25,9 @@ func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddR
 
 	// wait for message
 	pluginAddMsg := &msg.EventMessagePluginAdd{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pluginAddMsg)
-		return types.NewKPString(pluginAddMsg.Plugin.Unique).Equal(args.Plugin.Unique)
+		return pluginAddMsg.Plugin.Unique == args.Plugin.Unique
 	})
 	defer keeperCtx.Close()
 
@@ -38,8 +38,8 @@ func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddR
 	// wait context
 	keeperCtx.Wait()
 
-	if pluginAddMsg.Error != nil {
-		return nil, fmt.Errorf("%s", types.NewKPString(pluginAddMsg.Error))
+	if len(pluginAddMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", pluginAddMsg.Error)
 	}
 
 	// get plugin
@@ -67,15 +67,15 @@ func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.Plug
 	// send prompt
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_REMOVE, &kpprompt.EventPromptPluginRemove{
-		Unique: []byte(args.Unique),
+		Unique: args.Unique,
 	}); err != nil {
 		return nil, err
 	}
 
 	pluginRemoveMsg := &msg.EventMessagePluginRemove{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_REMOVE, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_REMOVE, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pluginRemoveMsg)
-		return types.NewKPString(pluginRemoveMsg.Plugin.Unique).Equal(args.Unique)
+		return pluginRemoveMsg.Plugin.Unique == args.Unique
 	})
 	defer keeperCtx.Close()
 
@@ -85,8 +85,8 @@ func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.Plug
 
 	// wait context
 	keeperCtx.Wait()
-	if pluginRemoveMsg.Error != nil {
-		return nil, fmt.Errorf("%s", string(pluginRemoveMsg.Error))
+	if len(pluginRemoveMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", pluginRemoveMsg.Error)
 	}
 
 	reply := &svrproto.PluginRemoveReply{}
@@ -122,7 +122,7 @@ func (p *Provider) PluginListFromCore(args *svrproto.PluginListArgs) (*svrproto.
 	}
 
 	pluginListMsg := &msg.EventMessagePluginList{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_LIST, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_LIST, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pluginListMsg)
 		return true
 	})
@@ -134,8 +134,8 @@ func (p *Provider) PluginListFromCore(args *svrproto.PluginListArgs) (*svrproto.
 
 	// wait context
 	keeperCtx.Wait()
-	if pluginListMsg.Error != nil {
-		return nil, fmt.Errorf("%s", string(pluginListMsg.Error))
+	if len(pluginListMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", pluginListMsg.Error)
 	}
 
 	reply := &svrproto.PluginListReply{}
@@ -164,19 +164,19 @@ func (p *Provider) PluginUpdate(args *svrproto.PluginUpdateArgs) (*svrproto.Plug
 	// send prompt
 	coreKplayer := core.GetLibKplayerInstance()
 
-	argParams := map[string][]byte{}
+	argParams := map[string]string{}
 	for k, v := range args.Params {
-		argParams[k] = []byte(v)
+		argParams[k] = v
 	}
 	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_UPDATE, &kpprompt.EventPromptPluginUpdate{
-		Unique: []byte(args.Unique),
+		Unique: args.Unique,
 		Params: argParams,
 	}); err != nil {
 		return nil, err
 	}
 
 	pluginUpdateMsg := &msg.EventMessagePluginUpdate{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_UPDATE, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_UPDATE, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pluginUpdateMsg)
 		return true
 	})
@@ -188,8 +188,8 @@ func (p *Provider) PluginUpdate(args *svrproto.PluginUpdateArgs) (*svrproto.Plug
 
 	// wait context
 	keeperCtx.Wait()
-	if pluginUpdateMsg.Error != nil {
-		return nil, fmt.Errorf("%s", string(pluginUpdateMsg.Error))
+	if len(pluginUpdateMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", pluginUpdateMsg.Error)
 	}
 
 	replyParams := map[string]string{}

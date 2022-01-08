@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
@@ -32,35 +33,30 @@ func GetRandString(size ...uint) string {
 	return str
 }
 
-func UnmarshalProtoMessage(data []byte, obj protoiface.MessageV1) {
-	if err := proto.Unmarshal(data, obj); err != nil {
-		log.WithFields(log.Fields{"error": err, "data": string(data)}).Fatal("error unmarshal message")
+func UnmarshalProtoMessage(data string, obj protoiface.MessageV1) {
+	if err := jsonpb.UnmarshalString(data, obj); err != nil {
+		log.WithFields(log.Fields{"error": err, "data": data}).Fatal("error unmarshal message")
 	}
 }
 
+func MarshalProtoMessage(obj proto.Message) (string, error) {
+	m := jsonpb.Marshaler{}
+	d, err := m.MarshalToString(obj)
+	if err != nil {
+		return "", err
+	}
+
+	return d, nil
+}
+
 func CopyProtoMessage(src protoiface.MessageV1, dst protoiface.MessageV1) error {
-	d, err := proto.Marshal(src)
+	d, err := MarshalProtoMessage(src)
 	if err != nil {
 		return err
 	}
 
-	return proto.Unmarshal(d, dst)
-}
-
-type KPString struct {
-	d []byte
-}
-
-func NewKPString(d []byte) *KPString {
-	return &KPString{d: d}
-}
-
-func (ks *KPString) Equal(con string) bool {
-	return string(ks.d) == con
-}
-
-func (ks *KPString) String() string {
-	return string(ks.d)
+	UnmarshalProtoMessage(d, dst)
+	return nil
 }
 
 func FileExists(filePath string) bool {

@@ -21,7 +21,7 @@ func (p *Provider) PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopRepl
 
 	// register prompt
 	endedMsg := &msg.EventMessagePlayerEnded{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_ENDED, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_ENDED, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, endedMsg)
 		return true
 	})
@@ -33,7 +33,7 @@ func (p *Provider) PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopRepl
 
 	// wait context
 	keeperCtx.Wait()
-	if endedMsg.Error != nil {
+	if len(endedMsg.Error) != 0 {
 		return nil, fmt.Errorf("%s", string(endedMsg.Error))
 	}
 
@@ -48,7 +48,7 @@ func (p *Provider) PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseR
 
 	// register prompt
 	pauseMsg := &msg.EventMessagePlayerPause{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_PAUSE, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_PAUSE, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pauseMsg)
 		return true
 	})
@@ -60,8 +60,8 @@ func (p *Provider) PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseR
 
 	// wait context
 	keeperCtx.Wait()
-	if pauseMsg.Error != nil {
-		return nil, fmt.Errorf("%s", string(pauseMsg.Error))
+	if len(pauseMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", pauseMsg.Error)
 	}
 
 	return &svrproto.PlayPauseReply{}, nil
@@ -76,7 +76,7 @@ func (p *Provider) PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipRepl
 
 	// register prompt
 	skipMsg := &msg.EventMessagePlayerSkip{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_SKIP, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_SKIP, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, skipMsg)
 		return true
 	})
@@ -88,8 +88,8 @@ func (p *Provider) PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipRepl
 
 	// wait context
 	keeperCtx.Wait()
-	if skipMsg.Error != nil {
-		return nil, fmt.Errorf("%s", string(skipMsg.Error))
+	if len(skipMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", skipMsg.Error)
 	}
 
 	return &svrproto.PlaySkipReply{}, nil
@@ -103,7 +103,7 @@ func (p *Provider) PlayContinue(args *svrproto.PlayContinueArgs) (*svrproto.Play
 
 	// register prompt
 	continueMsg := &msg.EventMessagePlayerContinue{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_CONTINUE, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_CONTINUE, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, continueMsg)
 		return true
 	})
@@ -115,8 +115,8 @@ func (p *Provider) PlayContinue(args *svrproto.PlayContinueArgs) (*svrproto.Play
 
 	// wait context
 	keeperCtx.Wait()
-	if continueMsg.Error != nil {
-		return nil, fmt.Errorf("%s", string(continueMsg.Error))
+	if len(continueMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", continueMsg.Error)
 	}
 
 	return &svrproto.PlayContinueReply{}, nil

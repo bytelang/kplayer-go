@@ -2,16 +2,15 @@ package types
 
 import (
 	"encoding/json"
-	"fmt"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
 	"github.com/gogo/protobuf/proto"
 )
 
-var messageKeyMapping map[kpproto.EventAction]proto.Message
+var messageKeyMapping map[kpproto.EventMessageAction]proto.Message
 
 func init() {
-	messageKeyMapping = make(map[kpproto.EventAction]proto.Message)
+	messageKeyMapping = make(map[kpproto.EventMessageAction]proto.Message)
 
 	// register message
 	messageKeyMapping[kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED] = &msg.EventMessagePlayerStarted{}
@@ -42,17 +41,5 @@ type messageJson struct {
 }
 
 func ParseMessageToJson(message kpproto.KPMessage) ([]byte, error) {
-	msgCore, ok := messageKeyMapping[message.Action]
-	if !ok {
-		return nil, fmt.Errorf("message action cannot registed")
-	}
-
-	if err := proto.Unmarshal(message.Body, msgCore); err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(messageJson{
-		Action: kpproto.EventAction_name[int32(message.Action)],
-		Body:   msgCore,
-	})
+	return json.Marshal(message)
 }

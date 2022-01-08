@@ -113,7 +113,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
 		msg := &kpmsg.EventMessageResourceFinish{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		if msg.Error != nil {
+		if len(msg.Error) != 0 {
 			log.WithFields(log.Fields{"error": string(msg.Error)}).Warn("play resource failed")
 		} else {
 			log.WithFields(log.Fields{"path": string(msg.Resource.Path), "unique": string(msg.Resource.Unique)}).
@@ -147,8 +147,8 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 func (p *Provider) addNextResourceToCore() {
 	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
 		Resource: &kpproto.PromptResource{
-			Path:   []byte(p.inputs[p.currentIndex].Path),
-			Unique: []byte(p.inputs[p.currentIndex].Unique),
+			Path:   p.inputs[p.currentIndex].Path,
+			Unique: p.inputs[p.currentIndex].Unique,
 			Seek:   p.inputs[p.currentIndex].Seek,
 			End:    p.inputs[p.currentIndex].End,
 		},

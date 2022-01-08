@@ -107,7 +107,7 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 	}
 
 	resourceListMsg := &msg.EventMessageResourceList{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_LIST, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_LIST, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, resourceListMsg)
 		return true
 	})
@@ -119,7 +119,7 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 
 	// wait context
 	keeperCtx.Wait()
-	if resourceListMsg.Error != nil {
+	if len(resourceListMsg.Error) != 0 {
 		return nil, fmt.Errorf("%s", string(resourceListMsg.Error))
 	}
 
@@ -141,7 +141,7 @@ func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.Res
 	}
 
 	resourceCurrentMsg := &msg.EventMessageResourceCurrent{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_CURRENT, func(msg []byte) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_CURRENT, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, resourceCurrentMsg)
 		return true
 	})
@@ -153,7 +153,7 @@ func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.Res
 
 	// wait context
 	keeperCtx.Wait()
-	if resourceCurrentMsg.Error != nil {
+	if len(resourceCurrentMsg.Error) != 0 {
 		return nil, fmt.Errorf("%s", string(resourceCurrentMsg.Error))
 	}
 

@@ -130,8 +130,8 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		msg := &kpmsg.EventMessagePluginAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": string(msg.Plugin.Unique), "path": string(msg.Plugin.Path)})
-		if msg.Error != nil {
-			logFields.WithField("error", string(msg.Error)).Warn("add plugin failed")
+		if len(msg.Error) != 0 {
+			logFields.WithField("error", msg.Error).Warn("add plugin failed")
 			break
 		}
 
@@ -147,7 +147,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		msg := &kpmsg.EventMessagePluginRemove{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": string(msg.Plugin.Unique), "path": string(msg.Plugin.Path)})
-		if msg.Error != nil {
+		if len(msg.Error) != 0 {
 			logFields.WithField("error", string(msg.Error)).Warn("remove plugin failed")
 			break
 		}
@@ -162,7 +162,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		msg := &kpmsg.EventMessagePluginUpdate{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": string(msg.Plugin.Unique), "path": string(msg.Plugin.Path)})
-		if msg.Error != nil {
+		if len(msg.Error) != 0 {
 			logFields.WithField("error", string(msg.Error)).Warn("update plugin failed")
 			break
 		}
@@ -187,16 +187,16 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		for _, item := range p.list.plugins {
 			if item.LoadedTime == 0 {
 				// send prompt
-				params := map[string][]byte{}
+				params := map[string]string{}
 				for k, v := range item.Params {
-					params[k] = []byte(v)
+					params[k] = v
 				}
 
 				coreKplayer := core.GetLibKplayerInstance()
 				if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
-					Plugin: &kpproto.PromptPlugin{
-						Path:   []byte(item.Path),
-						Unique: []byte(item.Unique),
+					Plugin: &kpprompt.PromptPlugin{
+						Path:   item.Path,
+						Unique: item.Unique,
 						Params: params,
 					},
 				}); err != nil {
@@ -217,16 +217,16 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 	}
 
 	// send prompt
-	params := map[string][]byte{}
+	params := map[string]string{}
 	for k, v := range plugin.Params {
-		params[k] = []byte(v)
+		params[k] = v
 	}
 
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
-		Plugin: &kpproto.PromptPlugin{
-			Path:   []byte(plugin.Path),
-			Unique: []byte(plugin.Unique),
+		Plugin: &kpprompt.PromptPlugin{
+			Path:   plugin.Path,
+			Unique: plugin.Unique,
 			Params: params,
 		},
 	}); err != nil {

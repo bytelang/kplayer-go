@@ -7,7 +7,7 @@ import (
 	"github.com/bytelang/kplayer/types/config"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	kpmsg "github.com/bytelang/kplayer/types/core/proto/msg"
-	"github.com/bytelang/kplayer/types/core/proto/prompt"
+	kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
 	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
@@ -63,8 +63,6 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Output,
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
-	defer p.Trigger(message)
-
 	switch message.Action {
 	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
 		p.addOutputList()
@@ -79,8 +77,8 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 			logFields = logFields.WithField("error", string(msg.Error))
 		}
 
-		if msg.Error != nil {
-			logFields.Error("output add failed")
+		if len(msg.Error) != 0 {
+			logFields.Error("output add failed. error: %s", msg.Error)
 
 			// send reconnect instance to channel
 			if p.reconnectInternal > 0 {
@@ -140,10 +138,10 @@ func (p *Provider) addOutputList() {
 func (p *Provider) addOutput(path string, unique string) error {
 	corePlayer := core.GetLibKplayerInstance()
 
-	if err := corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &prompt.EventPromptOutputAdd{
-		Output: &kpproto.PromptOutput{
-			Path:   []byte(path),
-			Unique: []byte(unique),
+	if err := corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
+		Output: &kpprompt.PromptOutput{
+			Path:   path,
+			Unique: unique,
 		},
 	}); err != nil {
 		log.Warn(err)

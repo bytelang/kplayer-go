@@ -11,16 +11,16 @@ import (
 
 type KeeperContext struct {
 	id        string
-	action    kpproto.EventAction
-	ch        chan []byte
-	validator func(msg []byte) bool
+	action    kpproto.EventMessageAction
+	ch        chan string
+	validator func(msg string) bool
 }
 
-func NewKeeperContext(id string, action kpproto.EventAction, validator func(msg []byte) bool) KeeperContext {
+func NewKeeperContext(id string, action kpproto.EventMessageAction, validator func(msg string) bool) KeeperContext {
 	return KeeperContext{
 		id:        id,
 		action:    action,
-		ch:        make(chan []byte),
+		ch:        make(chan string),
 		validator: validator,
 	}
 }

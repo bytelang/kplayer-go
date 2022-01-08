@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"github.com/bytelang/kplayer/module/play/provider"
-	"github.com/golang/protobuf/proto"
+	"github.com/bytelang/kplayer/types"
 	"net/http"
 
 	"github.com/bytelang/kplayer/types/server"
@@ -23,13 +23,11 @@ func (s *Play) Duration(r *http.Request, args *server.PlayDurationArgs, reply *s
 	if err != nil {
 		return err
 	}
-	resultBytes, err := proto.Marshal(result)
+	resultBytes, err := types.MarshalProtoMessage(result)
 	if err != nil {
 		return err
 	}
-	if err := proto.Unmarshal(resultBytes, reply); err != nil {
-		return err
-	}
+	types.UnmarshalProtoMessage(resultBytes, reply)
 
 	return nil
 }
@@ -78,14 +76,12 @@ func (s *Play) Information(r *http.Request, args *server.PlayInformationArgs, re
 		return err
 	}
 
-	msg, err := proto.Marshal(info)
+	msg, err := types.MarshalProtoMessage(info)
 	if err != nil {
 		return err
 	}
 
-	if err := proto.Unmarshal(msg, reply); err != nil {
-		return err
-	}
+	types.UnmarshalProtoMessage(msg, reply)
 
 	return nil
 }
