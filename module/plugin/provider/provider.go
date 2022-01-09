@@ -223,11 +223,20 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 	}
 
 	coreKplayer := core.GetLibKplayerInstance()
+
+	// read plugin file
+	fileContent, err := kptypes.ReadPlugin(plugin.Path)
+	if err != nil {
+		log.WithFields(log.Fields{"path": plugin.Path, "unique": plugin.Unique}).Error("read plugin file failed")
+		return err
+	}
+
 	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
 		Plugin: &kpprompt.PromptPlugin{
-			Path:   plugin.Path,
-			Unique: plugin.Unique,
-			Params: params,
+			Path:    plugin.Path,
+			Content: fileContent,
+			Unique:  plugin.Unique,
+			Params:  params,
 		},
 	}); err != nil {
 		return err

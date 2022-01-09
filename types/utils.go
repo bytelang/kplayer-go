@@ -2,12 +2,14 @@ package types
 
 import (
 	"fmt"
+	"github.com/forgoer/openssl"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/runtime/protoiface"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 )
@@ -99,4 +101,24 @@ func DownloadFile(url, filePath string) error {
 	}
 
 	return nil
+}
+
+func ReadPlugin(filePath string) ([]byte, error) {
+	fileContent, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if string(fileContent[:len(KplayerPluginSignHeader)]) == KplayerPluginSignHeader {
+		encryptData := fileContent[len(KplayerPluginSignHeader):]
+
+		// aes decrypt
+		decryptData, err := openssl.AesCBCDecrypt(encryptData, []byte(CipherKey), []byte(CipherIV), openssl.PKCS5_PADDING)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return decryptData, nil
+	}
+
+	return fileContent, nil
 }

@@ -18,6 +18,10 @@ const (
 )
 
 const (
+	KplayerPluginSignHeader = "kplayer_signature"
+)
+
+const (
 	DefaultRPCAddress string = "127.0.0.1"
 	DefaultRPCPort    uint32 = 4156
 )
