@@ -97,7 +97,7 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 	v.SetConfigType("json")
 	v.SetConfigName(configFileName)
 
-	// load config context
+	// load config context in file
 	if err := v.ReadInConfig(); err != nil && cmd.Parent().Use != "init" {
 		log.Fatal(err)
 	}
@@ -131,6 +131,11 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		if err := m.ValidateConfig(); err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	// set context before module modify
+	if err := v.Unmarshal(clientCtx.Config); err != nil {
+		log.Fatal(err)
 	}
 }
 

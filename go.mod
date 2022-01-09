@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/forgoer/openssl v1.1.1
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2

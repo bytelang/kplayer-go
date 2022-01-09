@@ -1,8 +1,10 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/forgoer/openssl"
+	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
@@ -121,4 +123,18 @@ func ReadPlugin(filePath string) ([]byte, error) {
 	}
 
 	return fileContent, nil
+}
+
+func FormatYamlProtoMessage(msg proto.Message) (string, error) {
+	jsonData, err := json.Marshal(msg)
+	if err != nil {
+		return "", err
+	}
+
+	yamlData, err := yaml.JSONToYAML(jsonData)
+	if err != nil {
+		return "", err
+	}
+
+	return string(yamlData), nil
 }
