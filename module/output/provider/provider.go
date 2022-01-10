@@ -25,7 +25,8 @@ type Provider struct {
 	module.ModuleKeeper
 
 	// module outputs
-	outputs           Outputs
+	configList        Outputs
+	list              Outputs
 	reconnectInternal int32
 
 	// reconnect
@@ -51,21 +52,27 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Output,
 			unique = kptypes.GetRandString(6)
 		}
 
-		p.outputs = append(p.outputs, moduletypes.Output{
+		if err := p.configList.AppendOutput(moduletypes.Output{
 			Path:       item.Path,
 			Unique:     unique,
 			CreateTime: uint64(time.Now().Unix()),
 			StartTime:  0,
 			EndTime:    0,
 			Connected:  false,
-		})
+		}); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
 	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
-		p.addOutputList()
+		for _, item := range p.configList.outputs {
+			if err := p.addOutput(item); err != nil {
+				log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Warn("add output failed")
+			}
+		}
 	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD:
 		msg := &kpmsg.EventMessageOutputAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
@@ -78,7 +85,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 
 		if len(msg.Error) != 0 {
-			logFields.Error("output add failed. error: %s", msg.Error)
+			logFields.Errorf("output add failed. error: %s", msg.Error)
 
 			// send reconnect instance to channel
 			if p.reconnectInternal > 0 {
@@ -93,9 +100,14 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		logFields.Info("output add success")
 
 		// update output status
-		if output := p.outputs.GetOutputByUnique(msg.Output.Unique); output != nil {
-			output.StartTime = uint64(time.Now().Unix())
+		output, _, err := p.list.GetOutputByUnique(msg.Output.Unique)
+		if err != nil {
+			logFields.WithField("error", err).Fatal("update output status failed")
 		}
+
+		output.StartTime = uint64(time.Now().Unix())
+		output.Connected = true
+		logFields.WithField("error", err).Info("output add success")
 	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_DISCONNECT:
 		msg := &kpmsg.EventMessageOutputDisconnect{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
@@ -115,9 +127,13 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 
 		// update output status
-		if output := p.outputs.GetOutputByUnique(msg.Output.Unique); output != nil {
-			output.EndTime = uint64(time.Now().Unix())
+		output, _, err := p.list.GetOutputByUnique(msg.Output.Unique)
+		if err != nil {
+			logFields.WithField("error", err).Fatal("update output status failed")
 		}
+
+		output.EndTime = uint64(time.Now().Unix())
+		output.Connected = false
 	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_ENDED:
 		p.reconnectChan <- nil
 	}
@@ -127,24 +143,26 @@ func (p *Provider) ValidateConfig() error {
 	return nil
 }
 
-func (p *Provider) addOutputList() {
-	for _, item := range p.outputs {
-		if err := p.addOutput(item.Path, item.Unique); err != nil {
-			log.Warn(err)
-		}
+func (p *Provider) addOutput(output moduletypes.Output) error {
+	// validate
+	if p.list.Exist(output.Unique) {
+		return OutputUniqueHasExist
 	}
-}
 
-func (p *Provider) addOutput(path string, unique string) error {
+	// send prompt
 	corePlayer := core.GetLibKplayerInstance()
 
 	if err := corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
 		Output: &kpprompt.PromptOutput{
-			Path:   path,
-			Unique: unique,
+			Path:   output.Path,
+			Unique: output.Unique,
 		},
 	}); err != nil {
 		log.Warn(err)
+	}
+
+	if err := p.list.AppendOutput(output); err != nil {
+		return err
 	}
 
 	return nil
@@ -165,7 +183,10 @@ func (p *Provider) StartReconnect() {
 			logFields.Infof("will be reconnect on after %d seconds", p.reconnectInternal)
 			time.Sleep(time.Second * time.Duration(p.reconnectInternal))
 
-			if err := p.addOutput(ins.Path, ins.Unique); err != nil {
+			if err := p.addOutput(moduletypes.Output{
+				Path:   ins.Path,
+				Unique: ins.Unique,
+			}); err != nil {
 				logFields.Warn("reconnect output failed. it will not try again")
 			}
 		case nil:

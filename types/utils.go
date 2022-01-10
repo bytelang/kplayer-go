@@ -9,6 +9,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/runtime/protoiface"
 	"io"
 	"io/ioutil"
@@ -137,4 +138,15 @@ func FormatYamlProtoMessage(msg proto.Message) (string, error) {
 	}
 
 	return string(yamlData), nil
+}
+
+func GetClientContextFromCommand(cmd *cobra.Command) *ClientContext {
+	var clientCtx *ClientContext
+	if ptr, err := GetCommandContext(cmd, ClientContextKey); err != nil {
+		log.Fatalf("get client context failed. error: %s", err)
+	} else {
+		clientCtx = ptr.(*ClientContext)
+	}
+
+	return clientCtx
 }

@@ -8,17 +8,17 @@ import (
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
 	kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
+	kpmodule "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
+	"time"
 )
 
 func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error) {
-	coreKplayer := core.GetLibKplayerInstance()
-
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
-		Output: &kpprompt.PromptOutput{
-			Path:   args.Output.Path,
-			Unique: args.Output.Unique,
-		},
+	if err := p.addOutput(kpmodule.Output{
+		Path:       args.Output.Path,
+		Unique:     args.Output.Unique,
+		CreateTime: uint64(time.Now().Unix()),
+		Connected:  false,
 	}); err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.Outp
 
 func (p *Provider) OutputList(args *svrproto.OutputListArgs) (*svrproto.OutputListReply, error) {
 	outputs := []*svrproto.OutputModule{}
-	for _, item := range p.outputs {
+	for _, item := range p.list.outputs {
 		outputs = append(outputs, &svrproto.OutputModule{
 			Path:       item.Path,
 			Unique:     item.Unique,
