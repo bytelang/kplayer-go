@@ -52,4 +52,5 @@ func (m AppModule) BeginRunning() {
 }
 
 func (m AppModule) EndRunning() {
+	m.Provider.EndReconnect()
 }

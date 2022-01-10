@@ -106,8 +106,8 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 
 		output.StartTime = uint64(time.Now().Unix())
+		output.EndTime = 0
 		output.Connected = true
-		logFields.WithField("error", err).Info("output add success")
 	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_DISCONNECT:
 		msg := &kpmsg.EventMessageOutputDisconnect{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
@@ -134,8 +134,6 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 
 		output.EndTime = uint64(time.Now().Unix())
 		output.Connected = false
-	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_ENDED:
-		p.reconnectChan <- nil
 	}
 }
 
@@ -183,12 +181,13 @@ func (p *Provider) StartReconnect() {
 			logFields.Infof("will be reconnect on after %d seconds", p.reconnectInternal)
 			time.Sleep(time.Second * time.Duration(p.reconnectInternal))
 
-			if err := p.addOutput(moduletypes.Output{
-				Path:   ins.Path,
-				Unique: ins.Unique,
-			}); err != nil {
-				logFields.Warn("reconnect output failed. it will not try again")
-			}
+			corePlayer := core.GetLibKplayerInstance()
+			_ = corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
+				Output: &kpprompt.PromptOutput{
+					Path:   ins.Path,
+					Unique: ins.Unique,
+				},
+			})
 		case nil:
 			log.Debug("reconnect coroutine stop")
 			return
@@ -196,4 +195,8 @@ func (p *Provider) StartReconnect() {
 			log.Fatalf("invalid type")
 		}
 	}
+}
+
+func (p *Provider) EndReconnect() {
+	p.reconnectChan <- nil
 }
