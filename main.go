@@ -102,6 +102,9 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		log.Fatal(err)
 	}
 
+	// set default value
+	setDefaultConfig(v)
+
 	clientCtx.Viper = v
 	if err := v.Unmarshal(clientCtx.Config); err != nil {
 		log.Fatal(err)
@@ -117,7 +120,7 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		m := mm.GetModule(item)
 
 		// init config and set default value
-		d, err := json.Marshal(v.Get(m.GetModuleName()))
+		d, err := json.Marshal(v.AllSettings()[m.GetModuleName()])
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -161,4 +164,24 @@ func ValidateConfig(config *config.KPConfig) error {
 	}
 
 	return nil
+}
+
+func setDefaultConfig(v *viper.Viper) {
+	v.SetDefault("play.start_point", 1)
+	v.SetDefault("play.play_model", "list")
+	v.SetDefault("play.encode_model", "rtmp")
+	v.SetDefault("play.cache_on", false)
+	v.SetDefault("play.cache_uncheck", false)
+	v.SetDefault("play.skip_invalid_resource", true)
+
+	v.SetDefault("play.rpc.on", true)
+	v.SetDefault("play.rpc.port", kptypes.DefaultRPCPort)
+	v.SetDefault("play.rpc.address", kptypes.DefaultRPCAddress)
+
+	v.SetDefault("play.encode.video_width", 780)
+	v.SetDefault("play.encode.video_height", 480)
+	v.SetDefault("play.encode.video_fps", 30)
+	v.SetDefault("play.encode.audio_channel_layout", 3)
+	v.SetDefault("play.encode.audio_channels", 2)
+	v.SetDefault("play.encode.audio_sample_rate", 48000)
 }

@@ -30,9 +30,9 @@ message Play {
 }
 
 message Rpc {
-	bool on = 6 [(gogoproto.moretags) = "mapstructure:\"rpc_on\""];
-	uint32 port = 7 [(gogoproto.moretags) = "validate:\"gt=0,lt=65535\" mapstructure:\"rpc_port\""];
-	string address = 8 [(gogoproto.moretags) = "validate:\"ipv4\" mapstructure:\"rpc_address\""];
+	bool on = 6 [(gogoproto.moretags) = "mapstructure:\"on\""];
+	uint32 port = 7 [(gogoproto.moretags) = "validate:\"gt=0,lt=65535\" mapstructure:\"port\""];
+	string address = 8 [(gogoproto.moretags) = "validate:\"ipv4\" mapstructure:\"address\""];
 }
 
 message Encode {

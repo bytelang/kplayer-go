@@ -45,21 +45,6 @@ func NewProvider() *Provider {
 
 // InitConfig set module config on kplayer started
 func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Play, homePath string) {
-	// set default value
-	if cfg.Rpc == nil {
-		cfg.Rpc = &config.Rpc{On: true}
-	}
-	if cfg.Rpc.Address == "" {
-		cfg.Rpc.Address = kptypes.DefaultRPCAddress
-	}
-	if cfg.Rpc.Port == 0 {
-		cfg.Rpc.Port = kptypes.DefaultRPCPort
-	}
-
-	if cfg.StartPoint == 0 {
-		cfg.StartPoint = 1
-	}
-
 	// set provider attribute
 	p.startPoint = cfg.StartPoint
 	p.playMode = cfg.PlayModel
