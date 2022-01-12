@@ -10,8 +10,8 @@ const (
 )
 
 const (
-	OutputUniqueNotFound OutputError = "output not found"
-	OutputUniqueHasExist OutputError = "output unique has exist"
+	OutputUniqueNotFound   OutputError = "output not found"
+	OutputUniqueHasExisted OutputError = "output unique name has existed"
 )
 
 type OutputError string
@@ -50,7 +50,7 @@ func (o *Outputs) RemoveOutputByUnique(unique string) (*moduletypes.Output, erro
 	defer o.lock.Unlock()
 
 	res, index, err := o.GetOutputByUnique(unique)
-	if res == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -69,7 +69,7 @@ func (o *Outputs) AppendOutput(output moduletypes.Output) error {
 
 	res, _, _ := o.GetOutputByUnique(output.Unique)
 	if res != nil {
-		return OutputUniqueHasExist
+		return OutputUniqueHasExisted
 	}
 
 	o.outputs = append(o.outputs, output)

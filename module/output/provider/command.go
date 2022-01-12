@@ -24,9 +24,13 @@ func GetCommand() *cobra.Command {
 
 func AddCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add [output_path] [/unique_name]",
-		Short: `add output resource. support file rtmp ftp protocol`,
-		Args:  cobra.ExactArgs(1),
+		Use:   "add <output_path> [unique_name]",
+		Short: `add output resource.`,
+		Long: `output_path:
+    support file rtmp ftp protocol
+unique_name:
+	optional argument. nickname for the output`,
+		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
@@ -67,9 +71,9 @@ func AddCommand() *cobra.Command {
 
 func RemoveCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "remove [unique_name]",
+		Use:   "remove <unique_name>",
 		Short: `remove output resource by unique name. `,
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)

@@ -60,20 +60,22 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resourc
 	p.currentIndex = p.playProvider.GetStartPoint() - 1
 
 	for _, item := range config.Lists {
-		p.inputs = append(p.inputs, moduletypes.Resource{
+		if err := p.inputs.AppendResource(moduletypes.Resource{
 			Path:       item,
 			Unique:     kptypes.GetRandString(6),
 			Seek:       0,
 			End:        -1,
 			CreateTime: uint64(time.Now().Unix()),
-		})
+		}); err != nil {
+			log.WithFields(log.Fields{"path": item, "error": err}).Error("add resource to playlist failed")
+		}
 	}
 }
 
 func (p *Provider) ValidateConfig() error {
 	if p.currentIndex < 0 {
 		return fmt.Errorf("start point invalid. cannot less than 1")
-	} else if p.currentIndex > uint32(len(p.inputs)) {
+	} else if p.currentIndex > uint32(len(p.inputs.resources)) {
 		return fmt.Errorf("start point invalid. cannot great than total resource")
 	}
 
@@ -83,7 +85,7 @@ func (p *Provider) ValidateConfig() error {
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
 	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
-		if len(p.inputs) == 0 {
+		if len(p.inputs.resources) == 0 {
 			log.Info("the resource list is empty. waiting to add a resource")
 			break
 		}
@@ -132,7 +134,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		res.EndTime = uint64(time.Now().Unix())
 
 		p.currentIndex = p.currentIndex + 1
-		if p.currentIndex >= uint32(len(p.inputs)) {
+		if p.currentIndex >= uint32(len(p.inputs.resources)) {
 			if p.playProvider.GetPlayModel() != strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LOOP)]) {
 				log.Info("the playlist has been play completed")
 				stopCorePlay()
@@ -145,12 +147,18 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 }
 
 func (p *Provider) addNextResourceToCore() {
+	currentResource, err := p.inputs.GetResourceByIndex(p.currentIndex)
+	if err != nil {
+		log.Fatal("get resource failed")
+		return
+	}
+
 	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
 		Resource: &kpproto.PromptResource{
-			Path:   p.inputs[p.currentIndex].Path,
-			Unique: p.inputs[p.currentIndex].Unique,
-			Seek:   p.inputs[p.currentIndex].Seek,
-			End:    p.inputs[p.currentIndex].End,
+			Path:   currentResource.Path,
+			Unique: currentResource.Unique,
+			Seek:   currentResource.Seek,
+			End:    currentResource.End,
 		},
 	}); err != nil {
 		log.Warn(err)

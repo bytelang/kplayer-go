@@ -157,7 +157,7 @@ func (p *Provider) ValidateConfig() error {
 func (p *Provider) addOutput(output moduletypes.Output) error {
 	// validate
 	if p.list.Exist(output.Unique) {
-		return OutputUniqueHasExist
+		return OutputUniqueHasExisted
 	}
 
 	// send prompt

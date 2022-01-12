@@ -28,16 +28,21 @@ func (p *Provider) ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.Re
 	}
 
 	// append to playlist
-	p.inputs = append(p.inputs, moduletypes.Resource{
+	if err := p.inputs.AppendResource(moduletypes.Resource{
 		Path:       resource.Path,
 		Unique:     resource.Unique,
 		Seek:       resource.Seek,
 		End:        resource.End,
 		CreateTime: uint64(time.Now().Unix()),
-	})
+	}); err != nil {
+		return nil, err
+	}
+
 	reply := &svrproto.ResourceAddReply{}
 	reply.Resource.Unique = resource.Unique
 	reply.Resource.Path = resource.Path
+	reply.Resource.Seek = resource.Seek
+	reply.Resource.End = resource.End
 
 	return reply, nil
 }
@@ -46,7 +51,12 @@ func (p *Provider) ResourceRemove(resource *svrproto.ResourceRemoveArgs) (*svrpr
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
-	if resource.Unique == p.inputs[p.currentIndex].Unique {
+	currentResource, err := p.inputs.GetResourceByIndex(p.currentIndex)
+	if err != nil {
+		return nil, err
+	}
+
+	if resource.Unique == currentResource.Unique {
 		return nil, CannotRemoveCurrentResource
 	}
 
@@ -66,10 +76,12 @@ func (p *Provider) ResourceRemove(resource *svrproto.ResourceRemoveArgs) (*svrpr
 
 func (p *Provider) ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {
 	res := []svrproto.Resource{}
-	for _, item := range p.inputs[p.currentIndex+1:] {
+	for _, item := range p.inputs.resources[p.currentIndex+1:] {
 		res = append(res, svrproto.Resource{
 			Path:       item.Path,
 			Unique:     item.Unique,
+			Seek:       item.Seek,
+			End:        item.End,
 			CreateTime: item.CreateTime,
 			StartTime:  item.StartTime,
 			EndTime:    item.EndTime,
@@ -84,10 +96,12 @@ func (p *Provider) ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceL
 
 func (p *Provider) ResourceAllList(*svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error) {
 	res := []svrproto.Resource{}
-	for _, item := range p.inputs {
+	for _, item := range p.inputs.resources {
 		res = append(res, svrproto.Resource{
 			Path:       item.Path,
 			Unique:     item.Unique,
+			Seek:       item.Seek,
+			End:        item.End,
 			CreateTime: item.CreateTime,
 			StartTime:  item.StartTime,
 			EndTime:    item.EndTime,
@@ -157,10 +171,16 @@ func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.Res
 		return nil, fmt.Errorf("%s", resourceCurrentMsg.Error)
 	}
 
-	currentRes := p.inputs[p.currentIndex]
+	currentRes, err := p.inputs.GetResourceByIndex(p.currentIndex)
+	if err != nil {
+		return nil, err
+	}
+
 	reply := &svrproto.ResourceCurrentReply{
 		Resource: svrproto.Resource{
 			Path:       resourceCurrentMsg.Resource.Path,
+			Seek:       resourceCurrentMsg.Resource.Seek,
+			End:        resourceCurrentMsg.Resource.End,
 			Unique:     resourceCurrentMsg.Resource.Unique,
 			CreateTime: currentRes.CreateTime,
 			StartTime:  currentRes.StartTime,
@@ -177,7 +197,11 @@ func (p *Provider) ResourceSeek(args *svrproto.ResourceSeekArgs) (*svrproto.Reso
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
-	currentRes := p.inputs[p.currentIndex]
+	currentRes, err := p.inputs.GetResourceByIndex(p.currentIndex)
+	if err != nil {
+		return nil, err
+	}
+
 	if currentRes.Unique != args.Unique {
 		return nil, fmt.Errorf("unique name resource has played. seek unique: %s. current resource unique: %s", args.Unique, currentRes.Unique)
 	}
@@ -187,13 +211,15 @@ func (p *Provider) ResourceSeek(args *svrproto.ResourceSeekArgs) (*svrproto.Reso
 	}
 
 	p.resetInputs[currentRes.Unique] = currentRes.Seek
-	p.inputs[p.currentIndex].Seek = args.Seek
+	currentRes.Seek = args.Seek
 	p.currentIndex = p.currentIndex - 1
 
 	reply := &svrproto.ResourceSeekReply{
 		Resource: &svrproto.Resource{
 			Path:       currentRes.Path,
 			Unique:     currentRes.Unique,
+			Seek:       currentRes.Seek,
+			End:        currentRes.End,
 			CreateTime: currentRes.CreateTime,
 			StartTime:  currentRes.StartTime,
 			EndTime:    currentRes.EndTime,
