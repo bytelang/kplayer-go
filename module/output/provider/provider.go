@@ -108,6 +108,19 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		output.StartTime = uint64(time.Now().Unix())
 		output.EndTime = 0
 		output.Connected = true
+	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_REMOVE:
+		msg := &kpmsg.EventMessageOutputRemove{}
+		kptypes.UnmarshalProtoMessage(message.Body, msg)
+		logFields := log.WithFields(log.Fields{
+			"unique": msg.Output.Unique,
+			"path":   msg.Output.Path,
+		})
+
+		if _, err := p.list.RemoveOutputByUnique(msg.Output.Unique); err != nil {
+			logFields.Fatal("remove output failed")
+		}
+
+		logFields.Info("remove output success")
 	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_DISCONNECT:
 		msg := &kpmsg.EventMessageOutputDisconnect{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)

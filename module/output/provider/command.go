@@ -16,6 +16,7 @@ func GetCommand() *cobra.Command {
 		Long:  `Kplayer output management commands. control kplayer output add,remove...`,
 	}
 	cmd.AddCommand(AddCommand())
+	cmd.AddCommand(RemoveCommand())
 	cmd.AddCommand(ListCommand())
 
 	return cmd
@@ -32,9 +33,12 @@ func AddCommand() *cobra.Command {
 
 			// args
 			var path, unique string
+
 			path = args[0]
 			if len(args) > 1 {
 				unique = args[1]
+			} else {
+				unique = kptypes.GetRandString(6)
 			}
 
 			reply := &kpserver.OutputAddReply{}
@@ -43,6 +47,39 @@ func AddCommand() *cobra.Command {
 					Path:   path,
 					Unique: unique,
 				},
+			}, reply); err != nil {
+				log.Error(err)
+				return nil
+			}
+
+			yaml, err := kptypes.FormatYamlProtoMessage(reply)
+			if err != nil {
+				return err
+			}
+			fmt.Print(yaml)
+
+			return nil
+		},
+	}
+
+	return cmd
+}
+
+func RemoveCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "remove [unique_name]",
+		Short: `remove output resource by unique name. `,
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// get client ctx
+			clientCtx := kptypes.GetClientContextFromCommand(cmd)
+
+			// args
+			uniqueName := args[0]
+
+			reply := &kpserver.OutputRemoveReply{}
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Output.Remove", &kpserver.OutputRemoveArgs{
+				Unique: uniqueName,
 			}, reply); err != nil {
 				log.Error(err)
 				return nil

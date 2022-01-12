@@ -64,5 +64,9 @@ func ClientRequest(rpc *config.Rpc, method string, request proto.Message, respon
 		return err
 	}
 
+	if res.Error != nil {
+		return fmt.Errorf("%s", *res.Error)
+	}
+
 	return nil
 }
