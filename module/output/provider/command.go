@@ -15,14 +15,14 @@ func GetCommand() *cobra.Command {
 		Short: "Output category",
 		Long:  `Kplayer output management commands. control kplayer output add,remove...`,
 	}
-	cmd.AddCommand(AddCommand())
-	cmd.AddCommand(RemoveCommand())
-	cmd.AddCommand(ListCommand())
+	cmd.AddCommand(addCommand())
+	cmd.AddCommand(removeCommand())
+	cmd.AddCommand(listCommand())
 
 	return cmd
 }
 
-func AddCommand() *cobra.Command {
+func addCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add <output_path> [unique_name]",
 		Short: `add output resource.`,
@@ -69,7 +69,7 @@ unique_name:
 	return cmd
 }
 
-func RemoveCommand() *cobra.Command {
+func removeCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove <unique_name>",
 		Short: `remove output resource by unique name. `,
@@ -102,7 +102,7 @@ func RemoveCommand() *cobra.Command {
 	return cmd
 }
 
-func ListCommand() *cobra.Command {
+func listCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "list output",

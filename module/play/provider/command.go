@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"github.com/bytelang/kplayer/types/client"
 	"io"
 	"io/ioutil"
 	"os"
@@ -14,7 +15,7 @@ import (
 
 	"github.com/bytelang/kplayer/module"
 	kptypes "github.com/bytelang/kplayer/types"
-	"github.com/bytelang/kplayer/types/server"
+	kpserver "github.com/bytelang/kplayer/types/server"
 	"github.com/sevlyar/go-daemon"
 
 	"github.com/bytelang/kplayer/core"
@@ -37,6 +38,11 @@ func GetCommand() *cobra.Command {
 	cmd.AddCommand(startCommand())
 	cmd.AddCommand(stopCommand())
 	cmd.AddCommand(statusCommand())
+	cmd.AddCommand(durationCommand())
+	cmd.AddCommand(pauseCommand())
+	cmd.AddCommand(continueCommand())
+	cmd.AddCommand(skipCommand())
+	cmd.AddCommand(versionCommand())
 
 	return cmd
 }
@@ -56,6 +62,146 @@ func statusCommand() *cobra.Command {
 			return nil
 		},
 	}
+	return cmd
+}
+
+func durationCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "duration",
+		Short: "get player duration status",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// get client ctx
+			clientCtx := kptypes.GetClientContextFromCommand(cmd)
+
+			reply := &kpserver.PlayDurationReply{}
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Duration", &kpserver.PlayDurationArgs{
+			}, reply); err != nil {
+				log.Error(err)
+				return nil
+			}
+
+			yaml, err := kptypes.FormatYamlProtoMessage(reply)
+			if err != nil {
+				return err
+			}
+			fmt.Print(yaml)
+
+			return nil
+		},
+	}
+
+	return cmd
+}
+
+func pauseCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "pause",
+		Short: "pause player",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// get client ctx
+			clientCtx := kptypes.GetClientContextFromCommand(cmd)
+
+			reply := &kpserver.PlayPauseReply{}
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{
+			}, reply); err != nil {
+				log.Error(err)
+				return nil
+			}
+
+			yaml, err := kptypes.FormatYamlProtoMessage(reply)
+			if err != nil {
+				return err
+			}
+			fmt.Print(yaml)
+
+			return nil
+		},
+	}
+
+	return cmd
+}
+
+func continueCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "continue",
+		Short: "continue player",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// get client ctx
+			clientCtx := kptypes.GetClientContextFromCommand(cmd)
+
+			reply := &kpserver.PlayPauseReply{}
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{
+			}, reply); err != nil {
+				log.Error(err)
+				return nil
+			}
+
+			yaml, err := kptypes.FormatYamlProtoMessage(reply)
+			if err != nil {
+				return err
+			}
+			fmt.Print(yaml)
+
+			return nil
+		},
+	}
+
+	return cmd
+}
+
+func skipCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "skip",
+		Short: "skip play current resource",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// get client ctx
+			clientCtx := kptypes.GetClientContextFromCommand(cmd)
+
+			reply := &kpserver.PlaySkipReply{}
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Skip", &kpserver.PlaySkipArgs{
+			}, reply); err != nil {
+				log.Error(err)
+				return nil
+			}
+
+			yaml, err := kptypes.FormatYamlProtoMessage(reply)
+			if err != nil {
+				return err
+			}
+			fmt.Print(yaml)
+
+			return nil
+		},
+	}
+
+	return cmd
+}
+
+func versionCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "info",
+		Short: "get Information play",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// get client ctx
+			clientCtx := kptypes.GetClientContextFromCommand(cmd)
+
+			reply := &kpserver.PlayInformationReply{}
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Information", &kpserver.PlayInformationArgs{
+			}, reply); err != nil {
+				log.Error(err)
+				return nil
+			}
+
+			yaml, err := kptypes.FormatYamlProtoMessage(reply)
+			if err != nil {
+				return err
+			}
+			fmt.Print(yaml)
+
+			return nil
+		},
+	}
+
 	return cmd
 }
 
@@ -225,7 +371,7 @@ func startCommand() *cobra.Command {
 			}()
 
 			go func() {
-				(svrCreator).(server.ServerCreator).StartServer(serverStopChan, mm)
+				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm)
 				waitGroup.Done()
 			}()
 

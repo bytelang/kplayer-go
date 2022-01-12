@@ -24,6 +24,10 @@ const (
 )
 
 const (
+	FlagParams = "param"
+)
+
+const (
 	PluginExtensionName = ".kpe"
 )
 
