@@ -47,10 +47,15 @@ func (m AppModule) TriggerMessage(message *kpproto.KPMessage) {
 	m.Trigger(message)
 }
 
-func (m AppModule) BeginRunning() {
+func (m AppModule) BeginRunning(option ...module.ModuleOption) {
 	go m.Provider.StartReconnect()
+	for _, item := range option {
+		if item == module.ModuleOptionGenerateCache {
+			m.Provider.EmptyOutputListFlag = true
+		}
+	}
 }
 
-func (m AppModule) EndRunning() {
+func (m AppModule) EndRunning(option ...module.ModuleOption) {
 	m.Provider.EndReconnect()
 }

@@ -13,7 +13,6 @@ import (
 	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
-	"strings"
 	"sync"
 	"time"
 )
@@ -135,7 +134,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 
 		p.currentIndex = p.currentIndex + 1
 		if p.currentIndex >= uint32(len(p.inputs.resources)) {
-			if p.playProvider.GetPlayModel() != strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LOOP)]) {
+			if p.playProvider.GetPlayModel() != config.PLAY_MODEL_LOOP {
 				log.Info("the playlist has been play completed")
 				stopCorePlay()
 				return

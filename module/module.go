@@ -9,6 +9,12 @@ import (
 	"sync"
 )
 
+type ModuleOption int
+
+const (
+	ModuleOptionGenerateCache ModuleOption = iota
+)
+
 type KeeperContext struct {
 	id        string
 	action    kpproto.EventMessageAction
@@ -90,8 +96,8 @@ type AppModule interface {
 	GetCommand() *cobra.Command
 	InitConfig(ctx *types.ClientContext, cfg json.RawMessage, homePath string) (interface{}, error)
 	ValidateConfig() error
-	BeginRunning()
-	EndRunning()
+	BeginRunning(...ModuleOption)
+	EndRunning(...ModuleOption)
 }
 
 type ModuleManager struct {

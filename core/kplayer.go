@@ -8,6 +8,7 @@ import "C"
 import (
 	"bytes"
 	"github.com/golang/protobuf/jsonpb"
+	"strings"
 	"unsafe"
 
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
@@ -55,7 +56,7 @@ func GetLibKplayerInstance() *libKplayer {
 
 // SetOptions set basic options
 func (lb *libKplayer) SetOptions(protocol string, video_width uint32, video_height uint32, video_bitrate uint32, video_qulity uint32, video_fps uint32, audio_sample_rate uint32, audio_channel_layout uint32, audio_channels uint32) error {
-	libKplayerInstance.protocol = protocol
+	libKplayerInstance.protocol = strings.ToLower(protocol)
 	libKplayerInstance.video_width = video_width
 	libKplayerInstance.video_height = video_height
 	libKplayerInstance.video_bitrate = video_bitrate

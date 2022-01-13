@@ -47,8 +47,13 @@ func (m AppModule) TriggerMessage(message *kpproto.KPMessage) {
 	m.Trigger(message)
 }
 
-func (m AppModule) BeginRunning() {
+func (m AppModule) BeginRunning(option ...module.ModuleOption) {
+	for _, item := range option {
+		if item == module.ModuleOptionGenerateCache {
+			m.GenerateCacheFlag = true
+		}
+	}
 }
 
-func (m AppModule) EndRunning() {
+func (m AppModule) EndRunning(option ...module.ModuleOption) {
 }

@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"github.com/bytelang/kplayer/types/client"
+	"github.com/bytelang/kplayer/types/config"
 	"io"
 	"io/ioutil"
 	"os"
@@ -251,7 +252,7 @@ func startCommand() *cobra.Command {
 
 			// daemon mode
 			var daemonProc *os.Process
-			if cmd.Flag(DaemonMode).Value.String() == DaemonModeYesValue {
+			if cmd.Flag(FlagDaemonMode).Value.String() == FlagYesValue {
 				var err error
 
 				if pid, err := getPID(); err == nil {
@@ -319,6 +320,12 @@ func startCommand() *cobra.Command {
 			}
 
 			cfg := clientCtx.Config
+			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
+				cfg.Play.EncodeModel = config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)]
+				cfg.Play.CacheOn = true
+				log.Info("running on generate cache model")
+			}
+
 			coreKplayer := core.GetLibKplayerInstance()
 			if err := coreKplayer.SetOptions(cfg.Play.EncodeModel,
 				cfg.Play.Encode.VideoWidth,
@@ -353,9 +360,15 @@ func startCommand() *cobra.Command {
 				coreLogLevel = 0
 			}
 
+			// module option
+			moduleOptions := []module.ModuleOption{}
+			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
+				moduleOptions = append(moduleOptions, module.ModuleOptionGenerateCache)
+			}
+
 			go func() {
 				for _, m := range mm.Modules {
-					m.BeginRunning()
+					m.BeginRunning(moduleOptions...)
 				}
 				defer func() {
 					for _, m := range mm.Modules {
@@ -376,10 +389,10 @@ func startCommand() *cobra.Command {
 			}()
 
 			// knock api
-			timeTicker := time.NewTicker(time.Minute * 6)
+			timeTicker := time.NewTicker(time.Minute * KnockIntervalMinutes)
 			defer timeTicker.Stop()
 			go func() {
-				maxRetriesCount := 5
+				maxRetriesCount := KnockMaxRetries
 				currentRetriesCount := 0
 				for {
 					if currentRetriesCount > maxRetriesCount {
@@ -402,7 +415,8 @@ func startCommand() *cobra.Command {
 		},
 	}
 
-	cmd.PersistentFlags().StringP(DaemonMode, "g", DaemonModeDefaultValue, "use daemon mode run kplayer")
+	cmd.PersistentFlags().BoolP(FlagDaemonMode, "d", false, "use daemon mode run kplayer")
+	cmd.PersistentFlags().BoolP(FlagGenerateCache, "g", false, "only generate file cache. not push to output")
 
 	return cmd
 }

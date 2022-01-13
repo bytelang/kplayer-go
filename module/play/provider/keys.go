@@ -4,8 +4,12 @@ const (
 	// module name
 	ModuleName = "play"
 
+	KnockIntervalMinutes = 6
+	KnockMaxRetries      = 5
+
 	// flag keys
-	DaemonMode             = "daemon"
-	DaemonModeDefaultValue = "no"
-	DaemonModeYesValue     = "yes"
+	FlagDaemonMode    = "daemon"
+	FlagGenerateCache = "generate_cache"
+	FlagYesValue      = "true"
+	FlagNoValue       = "false"
 )

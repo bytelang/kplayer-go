@@ -32,6 +32,9 @@ type Provider struct {
 	// reconnect
 	reconnectChan chan interface{}
 	reconnectWait sync.WaitGroup
+
+	// empty output flag for generate cache
+	EmptyOutputListFlag bool
 }
 
 var _ ProviderI = &Provider{}
@@ -155,6 +158,11 @@ func (p *Provider) ValidateConfig() error {
 }
 
 func (p *Provider) addOutput(output moduletypes.Output) error {
+	if p.EmptyOutputListFlag {
+		// empty output list
+		return nil
+	}
+
 	// validate
 	if p.list.Exist(output.Unique) {
 		return OutputUniqueHasExisted

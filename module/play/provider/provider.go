@@ -7,12 +7,13 @@ import (
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
 )
 
 type ProviderI interface {
 	GetStartPoint() uint32
-	GetPlayModel() string
+	GetPlayModel() config.PLAY_MODEL
 	GetRPCParams() config.Rpc
 	PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error)
 	PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error)
@@ -30,11 +31,14 @@ type Provider struct {
 
 	// config
 	startPoint uint32
-	playMode   string
+	playMode   config.PLAY_MODEL
 	rpc        config.Rpc
 
 	// module member
 	startTime time.Time
+
+	// empty resource list for generate cache only
+	GenerateCacheFlag bool
 }
 
 // NewProvider return provider
@@ -47,7 +51,12 @@ func NewProvider() *Provider {
 func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Play, homePath string) {
 	// set provider attribute
 	p.startPoint = cfg.StartPoint
-	p.playMode = cfg.PlayModel
+	playModel, ok := config.PLAY_MODEL_value[strings.ToUpper(cfg.PlayModel)]
+	if !ok {
+		log.Fatal("play model invalid")
+	}
+	p.playMode = config.PLAY_MODEL(playModel)
+
 	p.rpc = *cfg.Rpc
 }
 
@@ -67,6 +76,10 @@ func (p *Provider) GetStartPoint() uint32 {
 	return p.startPoint
 }
 
-func (p *Provider) GetPlayModel() string {
+func (p *Provider) GetPlayModel() config.PLAY_MODEL {
+	if p.GenerateCacheFlag {
+		return config.PLAY_MODEL_LIST
+	}
+
 	return p.playMode
 }
