@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package RPCProto;
+
+option go_package = "github.com/bytelang/kplayer/types/server";
+
+import "gogoproto/gogo.proto";
+
+// res
+message Resource {
+  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+  string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+  int64 seek = 3 [(gogoproto.moretags) = "validate:\"number\""];
+  int64 end = 4 [(gogoproto.moretags) = "validate:\"number\""];
+  uint64 create_time = 5 [(gogoproto.jsontag) = "create_time"];
+  uint64 start_time = 6 [(gogoproto.jsontag) = "start_time"];
+  uint64 end_time = 7 [(gogoproto.jsontag) = "end_time"];
+}
+
+// add
+message ResourceAddArgs {
+  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+  string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+  int64 seek = 3 [(gogoproto.moretags) = "validate:\"number\""];
+  int64 end = 4 [(gogoproto.moretags) = "validate:\"number\""];
+}
+message ResourceAddReply {
+  Resource resource = 1 [(gogoproto.nullable) = false];
+}
+
+// remove
+message ResourceRemoveArgs {
+  string unique = 1 [(gogoproto.moretags) = "validate:\"required\""];
+}
+message ResourceRemoveReply {
+  message Resource {
+    string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+    uint64 create_time = 3;
+  }
+  Resource resource = 1 [(gogoproto.nullable) = false];
+}
+
+// list
+message ResourceListArgs {}
+message ResourceListReply {
+  repeated Resource resources = 1 [(gogoproto.nullable) = false];
+}
+
+// all list
+message ResourceAllListArgs {}
+message ResourceAllListReply {
+  repeated Resource resources = 1 [(gogoproto.nullable) = false];
+}
+
+// get current resource
+message ResourceCurrentArgs {}
+message ResourceCurrentReply {
+  Resource resource = 1 [(gogoproto.nullable) = false];
+  uint64 duration = 2 [(gogoproto.jsontag) = "duration"];
+  string duration_format = 3;
+  int64 seek = 4 [(gogoproto.jsontag) = "seek"];
+  string seek_format = 5 [(gogoproto.jsontag) = "seek_format"];
+  bool hit_cache = 6 [(gogoproto.jsontag) = "hit_cache"];
+}
+
+// seek to timestamp
+message ResourceSeekArgs {
+  string unique = 1;
+  int64 seek = 2;
+}
+message ResourceSeekReply {
+  Resource resource = 1;
+}

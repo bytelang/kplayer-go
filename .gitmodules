@@ -1,0 +1,3 @@
+[submodule "proto/core/proto"]
+	path = proto/core/proto
+	url = https://github.com/bytelang/libkplayer-proto.git

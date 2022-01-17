@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package RPCProto;
+
+option go_package = "github.com/bytelang/kplayer/types/server";
+
+import "gogoproto/gogo.proto";
+import "resource.proto";
+
+// plugin
+message Plugin {
+	string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+	string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+	uint64 create_time = 3 [(gogoproto.jsontag) = "create_time"];
+	uint64 loaded_time = 4 [(gogoproto.jsontag) = "loaded_time"];
+	map<string, string> params = 5;
+}
+
+// list
+message PluginListArgs {
+}
+message PluginListReply {
+	repeated Plugin plugins = 1 [(gogoproto.nullable) = true];
+}
+
+// add
+message PluginAddArgs {
+	Plugin plugin = 1 [(gogoproto.nullable) = false];
+}
+message PluginAddReplay {
+	Plugin plugin = 1 [(gogoproto.nullable) = false];
+}
+
+// remove
+message PluginRemoveArgs {
+	string unique = 1;
+}
+message PluginRemoveReply {
+	Plugin plugin = 1 [(gogoproto.nullable) = false];
+}
+
+// Update
+message PluginUpdateArgs {
+	string unique = 1;
+	map<string, string> params = 2;
+}
+message PluginUpdateReply {
+	Plugin plugin = 1;
+}

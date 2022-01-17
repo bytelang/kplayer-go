@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package RPCProto;
+
+option go_package = "github.com/bytelang/kplayer/types/server";
+
+import "gogoproto/gogo.proto";
+import "resource.proto";
+
+message PlayStopArgs {
+}
+message PlayStopReply {
+}
+
+message PlayDurationArgs {
+}
+message PlayDurationReply {
+	string time = 1;
+	uint64 start_timestamp = 2;
+	uint64 duration_timestamp = 3;
+}
+
+message PlayPauseArgs {
+}
+message PlayPauseReply {
+}
+
+message PlaySkipArgs {
+}
+message PlaySkipReply {
+}
+
+message PlayContinueArgs {
+}
+message PlayContinueReply {
+}
+
+message PlayInformationArgs {
+}
+message PlayInformationReply {
+	string major_version = 1;
+	string libkplayer_version = 2;
+	string plugin_version = 3;
+	string license_version = 4;
+	string start_time = 5;
+	uint64 start_time_timestamp = 6;
+}

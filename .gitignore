@@ -1,2 +1,6 @@
 main
 .idea
+build
+*.flv
+test
+.DS_Store

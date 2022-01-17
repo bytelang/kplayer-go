@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package ConfigProto;
+
+option go_package = "github.com/bytelang/kplayer/types/config";
+
+import "gogoproto/gogo.proto";
+
+message Output {
+	int32 reconnect_internal = 1;
+	repeated OutputInstance lists = 2 [(gogoproto.nullable) = true];
+}
+
+message OutputInstance {
+	string path = 1;
+	string unique = 2;
+}
