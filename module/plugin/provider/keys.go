@@ -129,6 +129,8 @@ func InitPluginFile(name string, filePath string) error {
 }
 
 func InitResourceFile(resourceType string, resourceName string, filePath string) error {
+	logField := log.WithFields(log.Fields{"name": resourceName, "path": filePath})
+
 	resp, err := kptypes.GetResource(&api.ResourceInformationRequest{
 		Type: resourceType,
 		Name: resourceName,
@@ -143,6 +145,7 @@ func InitResourceFile(resourceType string, resourceName string, filePath string)
 		return err
 	}
 
+	logField.Info("resource download success")
 	return nil
 }
 
