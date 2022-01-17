@@ -13,7 +13,7 @@ build:
 	go build \
 	-gcflags="all=-trimpath=${PWD}" \
 	-asmflags "all=-trimpath=${PWD}" \
-	-ldflags "-X github.com/bytelang/kplayer/types.MAJOR_TAG=$(shell git describe --tags) \
+	-ldflags "-s -w -X github.com/bytelang/kplayer/types.MAJOR_TAG=$(shell git describe --tags) \
 			  -X github.com/bytelang/kplayer/types.MAJOR_HASH=$(shell git rev-parse --short HEAD) \
 			  -X github.com/bytelang/kplayer/types.WebSite=${KPLAYER_WEBSITE} \
 			  -X github.com/bytelang/kplayer/types.ApiHost=${KPLAYER_API_HOST} \

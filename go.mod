@@ -1,6 +1,6 @@
 module github.com/bytelang/kplayer
 
-go 1.16
+go 1.15
 
 require (
 	github.com/forgoer/openssl v1.1.1

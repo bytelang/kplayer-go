@@ -1,0 +1,27 @@
+name: build_linux_x86-64
+on: push
+
+jobs:
+  build:
+    name: build
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          submodules: true
+          fetch-depth: 0
+      - name: Make
+        run: | 
+          sudo docker run --rm -e KPLAYER_WEBSITE=${{ secrets.KPLAYER_WEBSITE }} \
+            -e KPLAYER_API_HOST=${{ secrets.KPLAYER_API_HOST }} \
+            -e KPLAYER_API_PORT=${{ secrets.KPLAYER_API_PORT }} \
+            -e KPLAYER_API_VERSION=${{ secrets.KPLAYER_API_VERSION }} \
+            -e KPLAYER_AES_KEY=${{ secrets.KPLAYER_AES_KEY }} \
+            -e KPLAYER_AES_IV=${{ secrets.KPLAYER_AES_IV }} \
+            -e KPLAYER_ROOT_CERT=${{ secrets.KPLAYER_ROOT_CERT }} \
+            -e KPLAYER_CLIENT_TOKEN=${{ secrets.KPLAYER_CLIENT_TOKEN }} \
+            -v $PWD:/kplayer-go internal/kplayer-build:latest bash -ic "source /entrypoint.sh && make build | kpgrep"
+          cd build
+          ~/.kplayer/optimize
