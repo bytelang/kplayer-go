@@ -139,6 +139,7 @@ func InitResourceFile(resourceType string, resourceName string, filePath string)
 
 	// download resource
 	if err := kptypes.DownloadFile(resp.DownloadUrl, filePath); err != nil {
+		log.WithField("file_path", filePath).Error("download file failed")
 		return err
 	}
 

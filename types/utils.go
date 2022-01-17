@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 var issueRandStr map[string]bool
@@ -91,6 +92,9 @@ func MkDir(dir string) error {
 func DownloadFile(url, filePath string) error {
 	res, err := http.Get(url)
 	if err != nil {
+		return err
+	}
+	if err := os.Mkdir(filepath.Dir(filePath), os.ModePerm); err != nil {
 		return err
 	}
 	openFile, err := os.Create(filePath)
