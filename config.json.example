@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "resource": {
+        "lists": [
+            "/video/example_1.mp4",
+            "/video/example_2.mp4",
+        ]
+    },
+    "output": {
+        "lists": [
+            {
+                "path": "rtmp://127.0.0.1:1935/push"
+            }
+        ]
+    }
+}
