@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"sync"
@@ -238,18 +237,9 @@ func startCommand() *cobra.Command {
 		Short: "Start kplayer",
 		Long:  "Start the kplayer application, use '-g' support the daemon mode. on daemon mode, kplayer with creating PID file and same directory only run once.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			homePath, err := kptypes.GetHome(cmd)
-			if err != nil {
-				return err
-			}
-			return kptypes.MkDir(filepath.Join(homePath, "log"))
+			return kptypes.MkDir("log")
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			homePath, err := kptypes.GetHome(cmd)
-			if err != nil {
-				return err
-			}
-
 			// daemon mode
 			var daemonProc *os.Process
 			if cmd.Flag(FlagDaemonMode).Value.String() == FlagYesValue {
@@ -261,9 +251,9 @@ func startCommand() *cobra.Command {
 				}
 
 				cntxt := &daemon.Context{
-					PidFileName: filepath.Join(homePath, pidFilePath),
+					PidFileName: pidFilePath,
 					PidFilePerm: 0644,
-					LogFileName: filepath.Join(homePath, logFilePath),
+					LogFileName: logFilePath,
 					LogFilePerm: 0644,
 					WorkDir:     "./",
 					Env:         os.Environ(),
@@ -376,7 +366,7 @@ func startCommand() *cobra.Command {
 					}
 				}()
 
-				coreKplayer.SetLogLevel(path.Join(homePath, "log/core.log"), coreLogLevel)
+				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
 				coreKplayer.Run()
 				serverStopChan <- true
 

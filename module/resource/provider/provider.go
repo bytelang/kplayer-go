@@ -13,6 +13,7 @@ import (
 	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -54,7 +55,7 @@ func NewProvider(playProvider playprovider.ProviderI) *Provider {
 	}
 }
 
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource, homePath string) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource) {
 	// initialize attribute
 	p.currentIndex = p.playProvider.GetStartPoint() - 1
 
@@ -114,10 +115,13 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
 		msg := &kpmsg.EventMessageResourceFinish{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
+
+		logFields := log.WithFields(log.Fields{"unique": msg.Resource.Unique, "path": msg.Resource.Path})
+
 		if len(msg.Error) != 0 {
-			log.WithFields(log.Fields{"error": msg.Error}).Warn("play resource failed")
+			logFields.WithFields(log.Fields{"error": msg.Error}).Warn("play resource failed")
 		} else {
-			log.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique}).
+			logFields.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique}).
 				Info("finish play resource")
 		}
 
@@ -127,7 +131,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		// get resource
 		res, _, err := p.inputs.GetResourceByUnique(msg.Resource.Unique)
 		if err != nil {
-			log.WithFields(log.Fields{"unique": msg.Resource.Unique, "path": msg.Resource.Path}).Warn(err)
+			logFields.Warn(err)
 			break
 		}
 		res.EndTime = uint64(time.Now().Unix())
@@ -152,9 +156,20 @@ func (p *Provider) addNextResourceToCore() {
 		return
 	}
 
+	encodePath := currentResource.Path
+
+	// protocol url encode
+	pathUrl, err := url.Parse(currentResource.Path)
+	if err == nil {
+		if pathUrl.Scheme == "http" || pathUrl.Scheme == "https" {
+			pathUrl.Query().Encode()
+			encodePath = pathUrl.String()
+		}
+	}
+
 	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
 		Resource: &kpproto.PromptResource{
-			Path:   currentResource.Path,
+			Path:   encodePath,
 			Unique: currentResource.Unique,
 			Seek:   currentResource.Seek,
 			End:    currentResource.End,
