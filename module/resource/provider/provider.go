@@ -13,6 +13,7 @@ import (
 	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -152,9 +153,20 @@ func (p *Provider) addNextResourceToCore() {
 		return
 	}
 
+	encodePath := currentResource.Path
+
+	// protocol url encode
+	pathUrl, err := url.Parse(currentResource.Path)
+	if err == nil {
+		if pathUrl.Scheme == "http" || pathUrl.Scheme == "https" {
+			pathUrl.Query().Encode()
+			encodePath = pathUrl.String()
+		}
+	}
+
 	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
 		Resource: &kpproto.PromptResource{
-			Path:   currentResource.Path,
+			Path:   encodePath,
 			Unique: currentResource.Unique,
 			Seek:   currentResource.Seek,
 			End:    currentResource.End,

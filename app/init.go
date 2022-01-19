@@ -7,6 +7,7 @@ import (
 	"github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/config"
 	"github.com/manifoldco/promptui"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
@@ -30,7 +31,7 @@ func addInitDefaultCommands() *cobra.Command {
 			cfg := getDefaultConfig()
 
 			// export file
-			return exportConfigFile(cfg, home+DefaultConfigFileName)
+			return exportConfigFile(cfg, filepath.Join(home, DefaultConfigFileName))
 		},
 	}
 
@@ -68,10 +69,11 @@ func exportConfigFile(cfg *config.KPConfig, path string) error {
 	}
 
 	var indentCfg bytes.Buffer
-	if err := json.Indent(&indentCfg, d, "", "    "); err != nil {
+	if err := json.Indent(&indentCfg, d, "", "  "); err != nil {
 		return err
 	}
 
+	defer log.WithField("path", path).Info("config file create success")
 	return ioutil.WriteFile(path, indentCfg.Bytes(), 0666)
 }
 
@@ -79,7 +81,7 @@ func getDefaultConfig() *config.KPConfig {
 	return &config.KPConfig{
 		Version: ConfigVersion,
 		Resource: config.Resource{
-			Lists: []string{},
+			Lists: []string{"/video/example.mp4"},
 		},
 		Play: config.Play{
 			PlayModel:   strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LIST)]),
@@ -100,7 +102,13 @@ func getDefaultConfig() *config.KPConfig {
 			},
 		},
 		Output: config.Output{
-			Lists: []*config.OutputInstance{},
+			Lists: func() (list []*config.OutputInstance) {
+				list = append(list, &config.OutputInstance{
+					Path:   "rtmp://127.0.0.1:1935/live",
+					Unique: "test_output",
+				})
+				return
+			}(),
 		},
 		Plugin: config.Plugin{
 			Lists: []*config.PluginInstance{},
@@ -163,10 +171,10 @@ func initInteractionConfig() (*config.KPConfig, error) {
 		},
 	})
 	interActions = append(interActions, interActionContent{
-		Label: "Whether to open jsonrpc yes/no? [default: no]",
+		Label: "Whether to open jsonrpc yes/no? [default: yes]",
 		Func: func(line string) error {
-			if line == "yes" {
-				// cfg.Play.Jsonrpc = true
+			if line == "no" {
+				cfg.Play.Rpc.On = false
 			}
 			return nil
 		},

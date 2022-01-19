@@ -97,8 +97,13 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 	v.SetConfigType("json")
 	v.SetConfigName(configFileName)
 
+	// skip on init stage
+	if cmd.Parent().Use == "init" {
+		return
+	}
+
 	// load config context in file
-	if err := v.ReadInConfig(); err != nil && cmd.Parent().Use != "init" {
+	if err := v.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
 
