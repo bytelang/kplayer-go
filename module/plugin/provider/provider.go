@@ -26,9 +26,6 @@ type ProviderI interface {
 type Provider struct {
 	module.ModuleKeeper
 
-	// flag
-	home string
-
 	// config
 	configList Plugins
 	list       Plugins
@@ -40,9 +37,7 @@ func NewProvider() *Provider {
 	return &Provider{}
 }
 
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin, homePath string) {
-	p.home = homePath
-
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin) {
 	// set plugin list
 	for _, item := range config.Lists {
 		uniqueName := item.Unique
@@ -51,7 +46,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin,
 		}
 
 		if err := p.configList.AppendPlugin(moduletypes.Plugin{
-			Path:       GetPluginPath(item.Path, homePath),
+			Path:       GetPluginPath(item.Path),
 			Unique:     uniqueName,
 			CreateTime: uint64(time.Now().Unix()),
 			LoadedTime: 0,
@@ -67,12 +62,6 @@ func (p *Provider) ValidateConfig() error {
 	kptypes.GetCorePluginVersion()
 
 	// init plugin
-	if len(p.configList.plugins) > 0 {
-		if err := kptypes.MkDir(filepath.Join(p.home, "plugin")); err != nil {
-			return err
-		}
-	}
-
 	for _, item := range p.configList.plugins {
 		pluginName := strings.TrimSuffix(filepath.Base(item.Path), filepath.Ext(item.Path))
 
@@ -88,11 +77,6 @@ func (p *Provider) ValidateConfig() error {
 	}
 
 	// init resource
-	if len(p.configList.plugins) > 0 {
-		if err := kptypes.MkDir(filepath.Join(p.home, "resource")); err != nil {
-			return err
-		}
-	}
 	resources := []map[string]string{
 		{
 			"type": "font",
@@ -104,7 +88,7 @@ func (p *Provider) ValidateConfig() error {
 
 		var resourceFilePath string
 		if item["type"] == "font" {
-			resourceFilePath = filepath.Join(p.home, "resource/font.ttf")
+			resourceFilePath = filepath.Join("resource/font.ttf")
 		}
 
 		if !kptypes.FileExists(resourceFilePath) {

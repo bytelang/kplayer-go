@@ -94,7 +94,8 @@ func DownloadFile(url, filePath string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.Mkdir(filepath.Dir(filePath), os.ModePerm); err != nil {
+	if err := MkDir(filepath.Dir(filePath)); err != nil {
+		log.WithFields(log.Fields{"file path": filePath}).Error(err)
 		return err
 	}
 	openFile, err := os.Create(filePath)

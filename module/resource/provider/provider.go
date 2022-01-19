@@ -55,7 +55,7 @@ func NewProvider(playProvider playprovider.ProviderI) *Provider {
 	}
 }
 
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource, homePath string) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource) {
 	// initialize attribute
 	p.currentIndex = p.playProvider.GetStartPoint() - 1
 
@@ -115,10 +115,13 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
 		msg := &kpmsg.EventMessageResourceFinish{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
+
+		logFields := log.WithFields(log.Fields{"unique": msg.Resource.Unique, "path": msg.Resource.Path})
+
 		if len(msg.Error) != 0 {
-			log.WithFields(log.Fields{"error": msg.Error}).Warn("play resource failed")
+			logFields.WithFields(log.Fields{"error": msg.Error}).Warn("play resource failed")
 		} else {
-			log.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique}).
+			logFields.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique}).
 				Info("finish play resource")
 		}
 
@@ -128,7 +131,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		// get resource
 		res, _, err := p.inputs.GetResourceByUnique(msg.Resource.Unique)
 		if err != nil {
-			log.WithFields(log.Fields{"unique": msg.Resource.Unique, "path": msg.Resource.Path}).Warn(err)
+			logFields.Warn(err)
 			break
 		}
 		res.EndTime = uint64(time.Now().Unix())
