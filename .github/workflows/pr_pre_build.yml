@@ -2,8 +2,7 @@ name: pr_pre_build
 on:
   pull_request:
     branches:
-      - "master"
-      - "develop"
+      - "*"
 
 jobs:
   build:
