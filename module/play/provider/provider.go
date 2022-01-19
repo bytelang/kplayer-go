@@ -48,7 +48,7 @@ func NewProvider() *Provider {
 }
 
 // InitConfig set module config on kplayer started
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Play, homePath string) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Play) {
 	// set provider attribute
 	p.startPoint = cfg.StartPoint
 	playModel, ok := config.PLAY_MODEL_value[strings.ToUpper(cfg.PlayModel)]

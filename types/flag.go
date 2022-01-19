@@ -3,13 +3,7 @@ package types
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"path"
 )
-
-func GetHome(cmd *cobra.Command) (string, error) {
-	home, err := cmd.Flags().GetString(FlagHome)
-	return path.Join(home), err
-}
 
 func GetConfigFileName(cmd *cobra.Command) (string, error) {
 	return cmd.Flags().GetString(FlagConfigFileName)

@@ -15,7 +15,7 @@ import (
 
 func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error) {
 	if err := p.addPlugin(moduletypes.Plugin{
-		Path:       GetPluginPath(args.Plugin.Path, p.home),
+		Path:       GetPluginPath(args.Plugin.Path),
 		Unique:     args.Plugin.Unique,
 		CreateTime: uint64(time.Now().Unix()),
 		Params:     args.Plugin.Params,

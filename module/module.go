@@ -94,7 +94,7 @@ type AppModule interface {
 	BasicAppModule
 	GetModuleName() string
 	GetCommand() *cobra.Command
-	InitConfig(ctx *types.ClientContext, cfg json.RawMessage, homePath string) (interface{}, error)
+	InitConfig(ctx *types.ClientContext, cfg json.RawMessage) (interface{}, error)
 	ValidateConfig() error
 	BeginRunning(...ModuleOption)
 	EndRunning(...ModuleOption)
