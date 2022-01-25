@@ -88,6 +88,8 @@ func getDefaultConfig() *config.KPConfig {
 				AudioSampleRate:    48000,
 				AudioChannelLayout: 3,
 				AudioChannels:      2,
+				BitRate:            0,
+				AvgQuality:         0,
 			},
 		},
 		Output: config.Output{
