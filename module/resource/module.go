@@ -29,13 +29,13 @@ func (m AppModule) GetCommand() *cobra.Command {
 	return provider.GetCommand()
 }
 
-func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage, homePath string) (interface{}, error) {
+func (m AppModule) InitConfig(ctx *kptypes.ClientContext, data json.RawMessage) (interface{}, error) {
 	var cfg config.Resource
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
 
-	m.InitModule(ctx, &cfg, homePath)
+	m.InitModule(ctx, &cfg)
 
 	return cfg, nil
 }

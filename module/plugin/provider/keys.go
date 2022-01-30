@@ -93,8 +93,8 @@ func (ps *Plugins) AppendPlugin(plugin moduletypes.Plugin) error {
 	return nil
 }
 
-func GetPluginPath(name string, homePath string) string {
-	return path.Join(homePath, "plugin", name+PluginExtensionName)
+func GetPluginPath(name string) string {
+	return path.Join("plugin", name+PluginExtensionName)
 }
 
 func InitPluginFile(name string, filePath string) error {

@@ -55,8 +55,19 @@ func Execute(rootCmd *cobra.Command, defaultHome string, defaultFile string) err
 	rootCmd.PersistentFlags().StringP(kptypes.FlagHome, "", defaultHome, "directory for config and data")
 	rootCmd.PersistentFlags().StringP(kptypes.FlagConfigFileName, "c", defaultFile, "config file name")
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		InitGlobalContextConfig(cmd)
+		// set home path
+		homePath, err := cmd.Flags().GetString(kptypes.FlagHome)
+		if err != nil {
+			return err
+		}
+		if homePath != "" {
+			if err := os.Chdir(homePath); err != nil {
+				log.WithField("error", err).Fatal("chdir failed")
+			}
+		}
 
+		// init context
+		InitGlobalContextConfig(cmd)
 		return nil
 	}
 
@@ -72,10 +83,6 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 	mm := cmd.Context().Value(kptypes.ModuleManagerContextKey).(module.ModuleManager)
 	clientCtx := cmd.Context().Value(kptypes.ClientContextKey).(*kptypes.ClientContext)
 
-	home, err := kptypes.GetHome(cmd)
-	if err != nil {
-		log.Fatal(err)
-	}
 	configFileName, err := kptypes.GetConfigFileName(cmd)
 	if err != nil {
 		log.Fatal(err)
@@ -93,12 +100,17 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 
 	// viper
 	v := viper.New()
-	v.AddConfigPath(home)
+	v.AddConfigPath(".")
 	v.SetConfigType("json")
 	v.SetConfigName(configFileName)
 
+	// skip on init stage
+	if cmd.Parent().Use == "init" {
+		return
+	}
+
 	// load config context in file
-	if err := v.ReadInConfig(); err != nil && cmd.Parent().Use != "init" {
+	if err := v.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -124,7 +136,7 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		modifyData, err := m.InitConfig(clientCtx, d, home)
+		modifyData, err := m.InitConfig(clientCtx, d)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -184,4 +196,6 @@ func setDefaultConfig(v *viper.Viper) {
 	v.SetDefault("play.encode.audio_channel_layout", 3)
 	v.SetDefault("play.encode.audio_channels", 2)
 	v.SetDefault("play.encode.audio_sample_rate", 48000)
+	v.SetDefault("play.encode.bit_rate", 0)
+	v.SetDefault("play.encode.avg_quality", 0)
 }

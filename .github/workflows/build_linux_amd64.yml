@@ -7,7 +7,10 @@ on:
 jobs:
   build:
     name: build
-    runs-on: self-hosted
+    runs-on: |
+      self-hosted
+      linux
+      x64
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -25,11 +28,11 @@ jobs:
             -e KPLAYER_AES_IV=${{ secrets.KPLAYER_AES_IV }} \
             -e KPLAYER_ROOT_CERT=${{ secrets.KPLAYER_ROOT_CERT }} \
             -e KPLAYER_CLIENT_TOKEN=${{ secrets.KPLAYER_CLIENT_TOKEN }} \
-            -v $PWD:/kplayer-go internal/kplayer-build:latest bash -ic "source /entrypoint.sh && make build | kpgrep"
+            -v $PWD:/kplayer-go internal/kplayer-build:amd64 bash -ic "source /entrypoint.sh && make build | kpgrep"
           cd build
           ~/.kplayer/optimize
           cd ../ && mkdir kplayer && cp build/kplayer kplayer/ && cp config.json.example kplayer/
-          tar zcvf kplayer-${{ github.ref_name }}-x86_64-linux.tar.gz kplayer
+          tar zcvf kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
       - name: Release
         id: create_release
         uses: actions/create-release@v1
@@ -47,6 +50,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: kplayer-${{ github.ref_name }}-x86_64-linux.tar.gz
-          asset_name: kplayer-${{ github.ref_name }}-x86_64-linux.tar.gz
+          asset_path: kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz
+          asset_name: kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz
           asset_content_type: application/x-gzip
+      - name: Upload
+        uses: hujiulong/action-qiniu-upload@master
+        with:
+          access_key: ${{ secrets.QINIU_ACCESS_KEY }}
+          secret_key: ${{ secrets.QINIU_SECRET_KEY }}
+          bucket: ${{ secrets.QINIU_BUCKET }}
+          source_dir: kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz
+          dest_dir: '/'
