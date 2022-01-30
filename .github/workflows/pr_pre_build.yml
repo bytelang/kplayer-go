@@ -9,8 +9,8 @@ jobs:
     name: build
     runs-on: |
       self-hosted
-      linux
-      x64
+      Linux
+      X64
     steps:
       - name: Checkout
         uses: actions/checkout@v2
