@@ -31,36 +31,14 @@ jobs:
             -v $PWD:/kplayer-go internal/kplayer-build:amd64 bash -ic "source /entrypoint.sh && make build | kpgrep"
           cd build
           ~/.kplayer/optimize
-          cd ../ && mkdir kplayer && cp build/kplayer kplayer/ && cp config.json.example kplayer/
-          tar zcvf kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
-      - name: Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          cd ../ && mkdir kplayer archive && cp build/kplayer kplayer/ && cp config.json.example kplayer/
+          tar zcvf archive/kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
+      - name: Artifact
+        uses: actions/upload-artifact@v2
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-      - name: Publish
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
-          asset_name: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
-          asset_content_type: application/x-gzip
-      - name: Upload
-        uses: hujiulong/action-qiniu-upload@master
-        with:
-          access_key: ${{ secrets.QINIU_ACCESS_KEY }}
-          secret_key: ${{ secrets.QINIU_SECRET_KEY }}
-          bucket: ${{ secrets.QINIU_BUCKET }}
-          source_dir: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
-          dest_dir: '/'
+          name: archive-file
+          path: archive
+          retention-days: 1
   build-arm64:
     name: build-arm64
     runs-on:
@@ -87,23 +65,54 @@ jobs:
             -v $PWD:/kplayer-go internal/kplayer-build:arm64 bash -ic "source /entrypoint.sh && make build | kpgrep"
           cd build
           ~/.kplayer/optimize
-          cd ../ && mkdir kplayer && cp build/kplayer kplayer/ && cp config.json.example kplayer/
-          tar zcvf kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
-      - name: Publish
-        id: upload-release-asset
+          cd ../ && mkdir kplayer archive && cp build/kplayer kplayer/ && cp config.json.example kplayer/
+          tar zcvf archive/kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
+      - name: Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: archive-file
+          path: archive
+          retention-days: 1
+  release:
+    name: Release
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+    needs:
+      - build-amd64
+      - build-arm64
+    steps:
+      - name: Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: archive-file
+          path: archive
+      - name: Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+      - name: Publish-amd64
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
+          asset_path: archive/kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
+          asset_name: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
+          asset_content_type: application/x-gzip
+      - name: Publish-arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: archive/kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_name: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_content_type: application/x-gzip
-      - name: Upload
-        uses: hujiulong/action-qiniu-upload@master
-        with:
-          access_key: ${{ secrets.QINIU_ACCESS_KEY }}
-          secret_key: ${{ secrets.QINIU_SECRET_KEY }}
-          bucket: ${{ secrets.QINIU_BUCKET }}
-          source_dir: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
-          dest_dir: '/'
