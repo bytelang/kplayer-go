@@ -1,4 +1,4 @@
-name: build_linux_x86-64
+name: build_linux_arm64
 on:
   push:
     tags:
@@ -8,9 +8,9 @@ jobs:
   build:
     name: build
     runs-on:
-      self-hosted
-      Linux
-      ARM64
+      - self-hosted
+      - Linux
+      - ARM64
     steps:
       - name: Checkout
         uses: actions/checkout@v2
