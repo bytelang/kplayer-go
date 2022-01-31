@@ -5,8 +5,8 @@ on:
       - "v*"
 
 jobs:
-  build:
-    name: build
+  build-amd64:
+    name: build-amd64
     runs-on:
       - self-hosted
       - Linux
@@ -60,4 +60,50 @@ jobs:
           secret_key: ${{ secrets.QINIU_SECRET_KEY }}
           bucket: ${{ secrets.QINIU_BUCKET }}
           source_dir: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
+          dest_dir: '/'
+  build-arm64:
+    name: build-arm64
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          submodules: true
+          fetch-depth: 0
+      - name: Make
+        run: |
+          sudo docker run --rm -e KPLAYER_WEBSITE=${{ secrets.KPLAYER_WEBSITE }} \
+            -e KPLAYER_API_HOST=${{ secrets.KPLAYER_API_HOST }} \
+            -e KPLAYER_API_PORT=${{ secrets.KPLAYER_API_PORT }} \
+            -e KPLAYER_API_VERSION=${{ secrets.KPLAYER_API_VERSION }} \
+            -e KPLAYER_AES_KEY=${{ secrets.KPLAYER_AES_KEY }} \
+            -e KPLAYER_AES_IV=${{ secrets.KPLAYER_AES_IV }} \
+            -e KPLAYER_ROOT_CERT=${{ secrets.KPLAYER_ROOT_CERT }} \
+            -e KPLAYER_CLIENT_TOKEN=${{ secrets.KPLAYER_CLIENT_TOKEN }} \
+            -v $PWD:/kplayer-go internal/kplayer-build:arm64 bash -ic "source /entrypoint.sh && make build | kpgrep"
+          cd build
+          ~/.kplayer/optimize
+          cd ../ && mkdir kplayer && cp build/kplayer kplayer/ && cp config.json.example kplayer/
+          tar zcvf kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
+      - name: Publish
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
+          asset_name: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
+          asset_content_type: application/x-gzip
+      - name: Upload
+        uses: hujiulong/action-qiniu-upload@master
+        with:
+          access_key: ${{ secrets.QINIU_ACCESS_KEY }}
+          secret_key: ${{ secrets.QINIU_SECRET_KEY }}
+          bucket: ${{ secrets.QINIU_BUCKET }}
+          source_dir: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           dest_dir: '/'
