@@ -115,3 +115,17 @@ jobs:
           asset_path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_name: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_content_type: application/x-gzip
+      - name: Upload-amd64
+        uses: hujiulong/action-qiniu-upload@master
+        with:
+          access_key: ${{ secrets.QINIU_ACCESS_KEY }}
+          secret_key: ${{ secrets.QINIU_SECRET_KEY }}
+          bucket: ${{ secrets.QINIU_BUCKET }}
+          source_dir: kplayer-${{ github.ref_name }}-Linux-amd64.tar.gz
+      - name: Upload-arm64
+        uses: hujiulong/action-qiniu-upload@master
+        with:
+          access_key: ${{ secrets.QINIU_ACCESS_KEY }}
+          secret_key: ${{ secrets.QINIU_SECRET_KEY }}
+          bucket: ${{ secrets.QINIU_BUCKET }}
+          source_dir: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
