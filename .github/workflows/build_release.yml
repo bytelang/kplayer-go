@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: archive-file
-          path: amd64/kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
+          path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
           retention-days: 1
   build-arm64:
     name: build-arm64
@@ -71,7 +71,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: archive-file
-          path: arm64/kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
+          path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           retention-days: 1
   release:
     name: Release
