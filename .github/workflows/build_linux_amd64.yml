@@ -1,4 +1,4 @@
-name: build_linux_x86-64
+name: build_linux_amd64
 on:
   push:
     tags:
