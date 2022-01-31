@@ -32,12 +32,12 @@ jobs:
           cd build
           ~/.kplayer/optimize
           cd ../ && mkdir kplayer archive && cp build/kplayer kplayer/ && cp config.json.example kplayer/
-          tar zcvf archive/kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
+          tar zcvf kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
       - name: Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: archive-file
-          path: archive/amd64
+          name: archive-file-amd64
+          path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
           retention-days: 1
   build-arm64:
     name: build-arm64
@@ -70,8 +70,8 @@ jobs:
       - name: Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: archive-file
-          path: archive/arm64
+          name: archive-file-arm64
+          path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           retention-days: 1
   release:
     name: Release
@@ -83,11 +83,16 @@ jobs:
       - build-amd64
       - build-arm64
     steps:
-      - name: Artifact
+      - name: Artifact-amd64
         uses: actions/upload-artifact@v2
         with:
-          name: archive-file
-          path: archive
+          name: archive-file-amd64
+          path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
+      - name: Artifact-arm64
+        uses: actions/upload-artifact@v2
+        with:
+          name: archive-file-arm64
+          path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
       - name: Release
         id: create_release
         uses: actions/create-release@v1
@@ -104,7 +109,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: archive/amd64
+          asset_path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
           asset_name: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
           asset_content_type: application/x-gzip
       - name: Publish-arm64
@@ -113,6 +118,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: archive/arm64
+          asset_path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_name: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_content_type: application/x-gzip
