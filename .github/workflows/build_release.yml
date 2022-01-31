@@ -84,12 +84,12 @@ jobs:
       - build-arm64
     steps:
       - name: Artifact-amd64
-        uses: actions/upload-artifact@v2
+        uses: actions/download-artifact@v2
         with:
           name: archive-file-amd64
           path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
       - name: Artifact-arm64
-        uses: actions/upload-artifact@v2
+        uses: actions/download-artifact@v2
         with:
           name: archive-file-arm64
           path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
