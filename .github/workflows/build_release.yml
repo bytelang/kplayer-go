@@ -103,7 +103,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: archive-file/kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
+          asset_path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
           asset_name: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
           asset_content_type: application/x-gzip
       - name: Publish-arm64
@@ -112,6 +112,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: archive-file/kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
+          asset_path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_name: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_content_type: application/x-gzip
