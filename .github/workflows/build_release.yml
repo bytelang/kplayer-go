@@ -31,7 +31,7 @@ jobs:
             -v $PWD:/kplayer-go internal/kplayer-build:amd64 bash -ic "source /entrypoint.sh && make build | kpgrep"
           cd build
           ~/.kplayer/optimize
-          cd ../ && mkdir kplayer archive && cp build/kplayer kplayer/ && cp config.json.example kplayer/
+          cd ../ && mkdir kplayer && cp build/kplayer kplayer/ && cp config.json.example kplayer/
           tar zcvf kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
       - name: Artifact
         uses: actions/upload-artifact@v2
@@ -65,7 +65,7 @@ jobs:
             -v $PWD:/kplayer-go internal/kplayer-build:arm64 bash -ic "source /entrypoint.sh && make build | kpgrep"
           cd build
           ~/.kplayer/optimize
-          cd ../ && mkdir kplayer archive && cp build/kplayer kplayer/ && cp config.json.example kplayer/
+          cd ../ && mkdir kplayer && cp build/kplayer kplayer/ && cp config.json.example kplayer/
           tar zcvf kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer
       - name: Artifact
         uses: actions/upload-artifact@v2
