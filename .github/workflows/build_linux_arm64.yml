@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: build
-    runs-on: |
+    runs-on:
       self-hosted
       Linux
       ARM64
