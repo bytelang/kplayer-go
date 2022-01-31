@@ -7,10 +7,10 @@ on:
 jobs:
   build:
     name: build
-    runs-on: |
+    runs-on:
       self-hosted
-      linux
-      arm64
+      Linux
+      ARM64
     steps:
       - name: Checkout
         uses: actions/checkout@v2
