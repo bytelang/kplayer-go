@@ -122,6 +122,8 @@ jobs:
           secret_key: ${{ secrets.QINIU_SECRET_KEY }}
           bucket: ${{ secrets.QINIU_BUCKET }}
           source_dir: kplayer-${{ github.ref_name }}-Linux-amd64.tar.gz
+          dest_dir: /
+          overwrite: true
       - name: Upload-arm64
         uses: hujiulong/action-qiniu-upload@master
         with:
@@ -129,3 +131,5 @@ jobs:
           secret_key: ${{ secrets.QINIU_SECRET_KEY }}
           bucket: ${{ secrets.QINIU_BUCKET }}
           source_dir: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
+          dest_dir: /
+          overwrite: true
