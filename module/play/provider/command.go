@@ -74,8 +74,7 @@ func durationCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlayDurationReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Duration", &kpserver.PlayDurationArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Duration", &kpserver.PlayDurationArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -102,8 +101,7 @@ func pauseCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlayPauseReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -130,8 +128,7 @@ func continueCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlayPauseReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -158,8 +155,7 @@ func skipCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlaySkipReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Skip", &kpserver.PlaySkipArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Skip", &kpserver.PlaySkipArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -186,8 +182,7 @@ func versionCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlayInformationReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Information", &kpserver.PlayInformationArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Information", &kpserver.PlayInformationArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}

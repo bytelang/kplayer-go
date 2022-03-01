@@ -89,6 +89,30 @@ func MkDir(dir string) error {
 	return fmt.Errorf("plugin directory can not be avaiable")
 }
 
+func GetDirectorFiles(dir string) ([]string, error) {
+	stat, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		return nil, err
+	}
+	if !stat.IsDir() {
+		return nil, fmt.Errorf("not directory")
+	}
+
+	filesInfo, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	files := []string{}
+	for _, item := range filesInfo {
+		if !item.IsDir() {
+			files = append(files, filepath.Join(dir, item.Name()))
+		}
+	}
+
+	return files, nil
+}
+
 func DownloadFile(url, filePath string) error {
 	res, err := http.Get(url)
 	if err != nil {
@@ -154,4 +178,14 @@ func GetClientContextFromCommand(cmd *cobra.Command) *ClientContext {
 	}
 
 	return clientCtx
+}
+
+func ArrayInString(arr []string, search string) bool {
+	for _, item := range arr {
+		if item == search {
+			return true
+		}
+	}
+
+	return false
 }

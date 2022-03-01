@@ -14,6 +14,7 @@ import (
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
 	"net/url"
+	"path/filepath"
 	"sync"
 	"time"
 )
@@ -36,8 +37,9 @@ type Provider struct {
 	playProvider playprovider.ProviderI
 
 	// module member
-	currentIndex uint32
-	inputs       Resources
+	currentIndex    uint32
+	inputs          Resources
+	allowExtensions []string
 
 	// will reset seek attribute
 	// set resource seek on replayed need set the resource attribute
@@ -58,8 +60,34 @@ func NewProvider(playProvider playprovider.ProviderI) *Provider {
 func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource) {
 	// initialize attribute
 	p.currentIndex = p.playProvider.GetStartPoint() - 1
+	p.allowExtensions = config.Extensions
 
 	for _, item := range config.Lists {
+		// add resource directory
+		if files, err := kptypes.GetDirectorFiles(item); err == nil {
+			for _, f := range files {
+				ext := filepath.Ext(f)
+				if len(ext) > 1 {
+					ext = ext[1:]
+				}
+				if p.allowExtensions != nil && !kptypes.ArrayInString(p.allowExtensions, ext) {
+					continue
+				}
+
+				if err := p.inputs.AppendResource(moduletypes.Resource{
+					Path:       f,
+					Unique:     kptypes.GetRandString(6),
+					Seek:       0,
+					End:        -1,
+					CreateTime: uint64(time.Now().Unix()),
+				}); err != nil {
+					log.WithFields(log.Fields{"path": item, "error": err}).Error("add resource to playlist failed")
+				}
+			}
+			continue
+		}
+
+		// add resource file
 		if err := p.inputs.AppendResource(moduletypes.Resource{
 			Path:       item,
 			Unique:     kptypes.GetRandString(6),
