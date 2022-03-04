@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/url"
 	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 )
@@ -65,6 +66,9 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resourc
 	for _, item := range config.Lists {
 		// add resource directory
 		if files, err := kptypes.GetDirectorFiles(item); err == nil {
+			// sort file
+			sort.Strings(files)
+
 			for _, f := range files {
 				ext := filepath.Ext(f)
 				if len(ext) > 1 {
