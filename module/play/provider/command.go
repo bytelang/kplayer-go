@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
 	"syscall"
 	"time"
 
@@ -326,8 +325,6 @@ func startCommand() *cobra.Command {
 			coreKplayer.SetCacheOn(cfg.Play.CacheOn)
 			coreKplayer.SetSkipInvalidResource(cfg.Play.SkipInvalidResource)
 
-			waitGroup := sync.WaitGroup{}
-			waitGroup.Add(2)
 			serverStopChan := make(chan bool)
 
 			var coreLogLevel int = 0
@@ -351,28 +348,6 @@ func startCommand() *cobra.Command {
 				moduleOptions = append(moduleOptions, module.ModuleOptionGenerateCache)
 			}
 
-			go func() {
-				for _, m := range mm.Modules {
-					m.BeginRunning(moduleOptions...)
-				}
-				defer func() {
-					for _, m := range mm.Modules {
-						m.EndRunning()
-					}
-				}()
-
-				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
-				coreKplayer.Run()
-				serverStopChan <- true
-
-				waitGroup.Done()
-			}()
-
-			go func() {
-				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm)
-				waitGroup.Done()
-			}()
-
 			// knock api
 			timeTicker := time.NewTicker(time.Minute * KnockIntervalMinutes)
 			defer timeTicker.Stop()
@@ -381,7 +356,7 @@ func startCommand() *cobra.Command {
 				currentRetriesCount := 0
 				for {
 					if currentRetriesCount > maxRetriesCount {
-						log.Fatal("knock failed. cannot connection api server on max retries")
+						log.Fatal("knock failed. cannot connection api server on max retries1")
 					}
 
 					<-timeTicker.C
@@ -395,7 +370,26 @@ func startCommand() *cobra.Command {
 				}
 			}()
 
-			waitGroup.Wait()
+			go func() {
+				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm)
+			}()
+
+			// start core
+			{
+				for _, m := range mm.Modules {
+					m.BeginRunning(moduleOptions...)
+				}
+				defer func() {
+					for _, m := range mm.Modules {
+						m.EndRunning()
+					}
+				}()
+
+				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
+				coreKplayer.Run()
+				serverStopChan <- true
+			}
+
 			return nil
 		},
 	}

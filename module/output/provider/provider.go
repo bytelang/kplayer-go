@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
 	kptypes "github.com/bytelang/kplayer/types"
@@ -154,6 +155,12 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 }
 
 func (p *Provider) ValidateConfig() error {
+	for _, item := range p.configList.outputs {
+		if item.Path == "" {
+			return fmt.Errorf("output path cannot be empty")
+		}
+	}
+
 	return nil
 }
 
