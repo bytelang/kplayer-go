@@ -28,7 +28,7 @@ func GetTlsHttpClient() *http.Client {
 		TLSClientConfig: config,
 	}
 
-	return &http.Client{Transport: transPort, Timeout: time.Duration(time.Second * 10)}
+	return &http.Client{Transport: transPort, Timeout: time.Second * 10}
 }
 
 func GetApiRequestUrl(path string) string {
