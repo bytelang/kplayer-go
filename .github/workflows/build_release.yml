@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - name: Make
         run: |
-          sudo docker run --rm -e KPLAYER_WEBSITE=${{ secrets.KPLAYER_WEBSITE }} \
+          sudo docker run --rm --user $(id -u github):$(id -g github) -e KPLAYER_WEBSITE=${{ secrets.KPLAYER_WEBSITE }} \
             -e KPLAYER_API_HOST=${{ secrets.KPLAYER_API_HOST }} \
             -e KPLAYER_API_PORT=${{ secrets.KPLAYER_API_PORT }} \
             -e KPLAYER_API_VERSION=${{ secrets.KPLAYER_API_VERSION }} \
@@ -39,6 +39,14 @@ jobs:
           name: archive-file
           path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
           retention-days: 1
+      - name: Upload
+        run: ~/.kplayer/qshell fput -w bytelang-kplayer kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz
+      - name: Docker
+        run: |
+          sudo docker build -t bytelang:kplayer:${{ github.ref_name }} .
+          docker tag bytelang:kplayer:${{ github.ref_name }} bytelang:kplayer:latest
+          docker push bytelang:kplayer:${{ github.ref_name }}
+          docker push bytelang:kplayer:latest
   build-arm64:
     name: build-arm64
     runs-on:
@@ -54,7 +62,7 @@ jobs:
           fetch-depth: 0
       - name: Make
         run: |
-          sudo docker run --rm -e KPLAYER_WEBSITE=${{ secrets.KPLAYER_WEBSITE }} \
+          sudo docker run --rm --user $(id -u github):$(id -g github) -e KPLAYER_WEBSITE=${{ secrets.KPLAYER_WEBSITE }} \
             -e KPLAYER_API_HOST=${{ secrets.KPLAYER_API_HOST }} \
             -e KPLAYER_API_PORT=${{ secrets.KPLAYER_API_PORT }} \
             -e KPLAYER_API_VERSION=${{ secrets.KPLAYER_API_VERSION }} \
@@ -73,6 +81,14 @@ jobs:
           name: archive-file
           path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           retention-days: 1
+      - name: Upload
+        run: ~/.kplayer/qshell fput -w bytelang-kplayer kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz
+      - name: Docker
+        run: |
+          sudo docker build -t bytelang:kplayer:${{ github.ref_name }} .
+          docker tag bytelang:kplayer:${{ github.ref_name }} bytelang:kplayer:latest
+          docker push bytelang:kplayer:${{ github.ref_name }}
+          docker push bytelang:kplayer:latest
   release:
     name: Release
     runs-on:
@@ -115,21 +131,3 @@ jobs:
           asset_path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_name: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           asset_content_type: application/x-gzip
-      - name: Upload-amd64
-        uses: hujiulong/action-qiniu-upload@master
-        with:
-          access_key: ${{ secrets.QINIU_ACCESS_KEY }}
-          secret_key: ${{ secrets.QINIU_SECRET_KEY }}
-          bucket: ${{ secrets.QINIU_BUCKET }}
-          source_dir: kplayer-${{ github.ref_name }}-Linux-amd64.tar.gz
-          dest_dir: /
-          overwrite: true
-      - name: Upload-arm64
-        uses: hujiulong/action-qiniu-upload@master
-        with:
-          access_key: ${{ secrets.QINIU_ACCESS_KEY }}
-          secret_key: ${{ secrets.QINIU_SECRET_KEY }}
-          bucket: ${{ secrets.QINIU_BUCKET }}
-          source_dir: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
-          dest_dir: /
-          overwrite: true
