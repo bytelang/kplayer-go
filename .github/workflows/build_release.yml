@@ -40,10 +40,10 @@ jobs:
           path: kplayer-${{ github.ref_name }}-Linux-x86_64.tar.gz
           retention-days: 1
       - name: Upload
-        run: ~/.kplayer/qshell fput -w bytelang-kplayer kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz
+        run: ~/.kplayer/qshell fput -w bytelang-kplayer kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz 1>/dev/null
       - name: Docker
         run: |
-          sudo docker build -t bytelang:kplayer:${{ github.ref_name }} .
+          sudo docker build -t bytelang/kplayer:${{ github.ref_name }} .
           docker tag bytelang:kplayer:${{ github.ref_name }} bytelang:kplayer:latest
           docker push bytelang:kplayer:${{ github.ref_name }}
           docker push bytelang:kplayer:latest
@@ -82,10 +82,10 @@ jobs:
           path: kplayer-${{ github.ref_name }}-Linux-aarch64.tar.gz
           retention-days: 1
       - name: Upload
-        run: ~/.kplayer/qshell fput -w bytelang-kplayer kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz
+        run: ~/.kplayer/qshell fput -w bytelang-kplayer kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz kplayer-${{ github.ref_name }}-$(uname -s)-$(uname -m).tar.gz 1>/dev/null
       - name: Docker
         run: |
-          sudo docker build -t bytelang:kplayer:${{ github.ref_name }} .
+          sudo docker build -t bytelang/kplayer:${{ github.ref_name }} .
           docker tag bytelang:kplayer:${{ github.ref_name }} bytelang:kplayer:latest
           docker push bytelang:kplayer:${{ github.ref_name }}
           docker push bytelang:kplayer:latest
