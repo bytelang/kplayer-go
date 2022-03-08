@@ -44,9 +44,9 @@ jobs:
       - name: Docker
         run: |
           sudo docker build -t bytelang/kplayer:${{ github.ref_name }} .
-          docker tag bytelang:kplayer:${{ github.ref_name }} bytelang:kplayer:latest
-          docker push bytelang:kplayer:${{ github.ref_name }}
-          docker push bytelang:kplayer:latest
+          docker tag bytelang/kplayer:${{ github.ref_name }} bytelang/kplayer:latest
+          docker push bytelang/kplayer:${{ github.ref_name }}
+          docker push bytelang/kplayer:latest
   build-arm64:
     name: build-arm64
     runs-on:
@@ -86,9 +86,9 @@ jobs:
       - name: Docker
         run: |
           sudo docker build -t bytelang/kplayer:${{ github.ref_name }} .
-          docker tag bytelang:kplayer:${{ github.ref_name }} bytelang:kplayer:latest
-          docker push bytelang:kplayer:${{ github.ref_name }}
-          docker push bytelang:kplayer:latest
+          docker tag bytelang/kplayer:${{ github.ref_name }} bytelang/kplayer:latest
+          docker push bytelang/kplayer:${{ github.ref_name }}
+          docker push bytelang/kplayer:latest
   release:
     name: Release
     runs-on:
