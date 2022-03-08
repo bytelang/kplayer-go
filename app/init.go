@@ -70,12 +70,16 @@ func getDefaultConfig() *config.KPConfig {
 	return &config.KPConfig{
 		Version: ConfigVersion,
 		Resource: config.Resource{
-			Lists: []string{"/video/example.mp4"},
+			Lists:      []string{"/video/example.mp4"},
+			Extensions: []string{"mp4", "flv"},
 		},
 		Play: config.Play{
-			PlayModel:   strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LIST)]),
-			EncodeModel: strings.ToLower(config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_RTMP)]),
-			CacheOn:     false,
+			StartPoint:          1,
+			PlayModel:           strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LIST)]),
+			EncodeModel:         strings.ToLower(config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_RTMP)]),
+			CacheOn:             false,
+			CacheUncheck:        false,
+			SkipInvalidResource: false,
 			Rpc: &config.Rpc{
 				On:      true,
 				Address: types.DefaultRPCAddress,
@@ -93,6 +97,7 @@ func getDefaultConfig() *config.KPConfig {
 			},
 		},
 		Output: config.Output{
+			ReconnectInternal: -1,
 			Lists: func() (list []*config.OutputInstance) {
 				list = append(list, &config.OutputInstance{
 					Path:   "rtmp://127.0.0.1:1935/live",

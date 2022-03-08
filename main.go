@@ -184,7 +184,7 @@ func setDefaultConfig(v *viper.Viper) {
 	v.SetDefault("play.encode_model", "rtmp")
 	v.SetDefault("play.cache_on", false)
 	v.SetDefault("play.cache_uncheck", false)
-	v.SetDefault("play.skip_invalid_resource", true)
+	v.SetDefault("play.skip_invalid_resource", false)
 
 	v.SetDefault("play.rpc.on", true)
 	v.SetDefault("play.rpc.port", kptypes.DefaultRPCPort)

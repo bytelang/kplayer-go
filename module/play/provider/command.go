@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
 	"syscall"
 	"time"
 
@@ -74,8 +73,7 @@ func durationCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlayDurationReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Duration", &kpserver.PlayDurationArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Duration", &kpserver.PlayDurationArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -102,8 +100,7 @@ func pauseCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlayPauseReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -130,8 +127,7 @@ func continueCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlayPauseReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -158,8 +154,7 @@ func skipCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlaySkipReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Skip", &kpserver.PlaySkipArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Skip", &kpserver.PlaySkipArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -186,8 +181,7 @@ func versionCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PlayInformationReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Information", &kpserver.PlayInformationArgs{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Information", &kpserver.PlayInformationArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -331,8 +325,6 @@ func startCommand() *cobra.Command {
 			coreKplayer.SetCacheOn(cfg.Play.CacheOn)
 			coreKplayer.SetSkipInvalidResource(cfg.Play.SkipInvalidResource)
 
-			waitGroup := sync.WaitGroup{}
-			waitGroup.Add(2)
 			serverStopChan := make(chan bool)
 
 			var coreLogLevel int = 0
@@ -356,28 +348,6 @@ func startCommand() *cobra.Command {
 				moduleOptions = append(moduleOptions, module.ModuleOptionGenerateCache)
 			}
 
-			go func() {
-				for _, m := range mm.Modules {
-					m.BeginRunning(moduleOptions...)
-				}
-				defer func() {
-					for _, m := range mm.Modules {
-						m.EndRunning()
-					}
-				}()
-
-				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
-				coreKplayer.Run()
-				serverStopChan <- true
-
-				waitGroup.Done()
-			}()
-
-			go func() {
-				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm)
-				waitGroup.Done()
-			}()
-
 			// knock api
 			timeTicker := time.NewTicker(time.Minute * KnockIntervalMinutes)
 			defer timeTicker.Stop()
@@ -386,7 +356,7 @@ func startCommand() *cobra.Command {
 				currentRetriesCount := 0
 				for {
 					if currentRetriesCount > maxRetriesCount {
-						log.Fatal("knock failed. cannot connection api server on max retries")
+						log.Fatal("knock failed. cannot connection api server on max retries1")
 					}
 
 					<-timeTicker.C
@@ -400,7 +370,26 @@ func startCommand() *cobra.Command {
 				}
 			}()
 
-			waitGroup.Wait()
+			go func() {
+				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm)
+			}()
+
+			// start core
+			{
+				for _, m := range mm.Modules {
+					m.BeginRunning(moduleOptions...)
+				}
+				defer func() {
+					for _, m := range mm.Modules {
+						m.EndRunning()
+					}
+				}()
+
+				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
+				coreKplayer.Run()
+				serverStopChan <- true
+			}
+
 			return nil
 		},
 	}
