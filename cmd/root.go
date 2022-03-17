@@ -33,7 +33,7 @@ func NewRootCmd() *cobra.Command {
 	terminalWidth, _, err := terminal.Dimensions()
 	if err != nil {
 		log.Warn("open terminal failed")
-		terminalWidth = 0
+		terminalWidth = terminalCharsetMaxCount
 	}
 	if terminalWidth > terminalCharsetMaxCount {
 		terminalWidth = terminalCharsetMaxCount
