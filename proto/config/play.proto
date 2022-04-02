@@ -20,12 +20,12 @@ enum PLAY_MODEL {
 
 message Play {
   uint32 start_point = 1 [(gogoproto.moretags) = "validate:\"required,gt=0\" mapstructure:\"start_point\""];
-  string play_model = 2 [(gogoproto.moretags) = "validate:\"oneof=list,random,queue,loop\" mapstructure:\"play_model\""];
-  string encode_model = 3 [(gogoproto.moretags) = "validate:\"oneof=rtmp,file\" mapstructure:\"encode_model\""];
+  string play_model = 2 [(gogoproto.moretags) = "validate:\"oneof=list random queue loop\" mapstructure:\"play_model\""];
+  string encode_model = 3 [(gogoproto.moretags) = "validate:\"oneof=rtmp file\" mapstructure:\"encode_model\""];
   bool cache_on = 4 [(gogoproto.moretags) = "mapstructure:\"cache_on\""];
   bool cache_uncheck = 5 [(gogoproto.moretags) = "mapstructure:\"cache_uncheck\""];
   Rpc rpc = 6 [(gogoproto.moretags) = "mapstructure:\"rpc\""];
-  bool skip_invalid_resource = 9 [(gogoproto.moretags) = "validate:\"bool\" mapstructure:\"skip_invalid_resource\""];
+  bool skip_invalid_resource = 9 [(gogoproto.moretags) = "validate:\"\" mapstructure:\"skip_invalid_resource\""];
   Encode encode = 10 [(gogoproto.nullable) = true, (gogoproto.moretags) = "validate:\"required\""];
   uint32 delay_queue_size = 11 [(gogoproto.moretags) = "validate:\"numeric,max=32767,min=1\" mapstructure:\"delay_queue_size\""];
 }
@@ -42,7 +42,7 @@ message Encode {
   uint32 video_fps = 3 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"video_fps\""];
   uint32 audio_channel_layout = 4 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"audio_channel_layout\""];
   uint32 audio_channels = 5 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"audio_channels\""];
-  uint32 audio_sample_rate = 6 [(gogoproto.moretags) = "validate:\"gt=0,oneof=48000,44100\" mapstructure:\"audio_sample_rate\""];
-  uint32 bit_rate = 7 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"bit_rate\""];
-  uint32 avg_quality = 8 [(gogoproto.moretags) = "validate:\"gt=0,lt=20\" mapstructure:\"avg_quality\""];
+  uint32 audio_sample_rate = 6 [(gogoproto.moretags) = "validate:\"gt=0,oneof=48000 44100\" mapstructure:\"audio_sample_rate\""];
+  uint32 bit_rate = 7 [(gogoproto.moretags) = "validate:\"gte=0\" mapstructure:\"bit_rate\""];
+  uint32 avg_quality = 8 [(gogoproto.moretags) = "validate:\"gte=0,lt=20\" mapstructure:\"avg_quality\""];
 }

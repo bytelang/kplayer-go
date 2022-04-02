@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/bytelang/kplayer/types/config"
 	errortypes "github.com/bytelang/kplayer/types/error"
+	"github.com/go-playground/validator/v10"
 	"io/ioutil"
 	"os"
 	"runtime"
@@ -140,6 +141,14 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// validator
+		validate := validator.New()
+		if err := validate.Struct(modifyData); err != nil {
+			log.Fatal(err)
+		}
+
+		// set modify data
 		v.Set(m.GetModuleName(), modifyData)
 
 		// validate config
