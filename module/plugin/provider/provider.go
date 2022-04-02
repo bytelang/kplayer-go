@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
 	kptypes "github.com/bytelang/kplayer/types"
@@ -64,6 +65,9 @@ func (p *Provider) ValidateConfig() error {
 	// init plugin
 	for _, item := range p.configList.plugins {
 		pluginName := strings.TrimSuffix(filepath.Base(item.Path), filepath.Ext(item.Path))
+		if pluginName == "" {
+			return fmt.Errorf("plugin path cannot be empty")
+		}
 
 		logField := log.WithFields(log.Fields{"name": pluginName, "path": item.Path})
 		if err := InitPluginFile(pluginName, item.Path); err != nil {
