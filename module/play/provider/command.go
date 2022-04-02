@@ -319,7 +319,8 @@ func startCommand() *cobra.Command {
 				cfg.Play.Encode.VideoFps,
 				cfg.Play.Encode.AudioSampleRate,
 				cfg.Play.Encode.AudioChannelLayout,
-				cfg.Play.Encode.AudioChannels); err != nil {
+				cfg.Play.Encode.AudioChannels,
+				cfg.Play.DelayQueueSize); err != nil {
 				log.Fatal(err)
 			}
 			coreKplayer.SetCacheOn(cfg.Play.CacheOn)
