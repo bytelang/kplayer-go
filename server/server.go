@@ -67,7 +67,7 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 
 	go func() {
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		log.Info("rpc server hutdown success")

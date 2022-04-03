@@ -43,8 +43,7 @@ type Provider struct {
 
 // NewProvider return provider
 func NewProvider() *Provider {
-	return &Provider{
-	}
+	return &Provider{}
 }
 
 // InitConfig set module config on kplayer started

@@ -10,6 +10,7 @@ import (
 	kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
 	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
+	"net/url"
 	"os"
 	"time"
 )
@@ -18,10 +19,17 @@ func (p *Provider) ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.Re
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
-	// determine whether the file exists
-	_, err := os.Stat(resource.Path)
-	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("file not exists. path: %s", resource.Path)
+	// uri scheme parse
+	parseUrl, err := url.Parse(resource.Path)
+	if err != nil {
+		return nil, fmt.Errorf("uri scheme invalid. path: %s", resource.Path)
+	}
+	if parseUrl.Scheme == "" {
+		// determine whether the file exists
+		_, err := os.Stat(resource.Path)
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("file not exists. path: %s", resource.Path)
+		}
 	}
 	if resource.End < resource.Seek {
 		return nil, fmt.Errorf("end timestamp can not be less than start timestamp")
@@ -197,32 +205,27 @@ func (p *Provider) ResourceSeek(args *svrproto.ResourceSeekArgs) (*svrproto.Reso
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
-	currentRes, err := p.inputs.GetResourceByIndex(p.currentIndex)
+	seekRes, searchIndex, err := p.inputs.GetResourceByUnique(args.Unique)
 	if err != nil {
 		return nil, err
 	}
 
-	if currentRes.Unique != args.Unique {
-		return nil, fmt.Errorf("unique name resource has played. seek unique: %s. current resource unique: %s", args.Unique, currentRes.Unique)
-	}
+	p.resetInputs[seekRes.Unique] = seekRes.Seek
+	p.currentIndex = uint32(searchIndex)
 
 	if _, err := p.playProvider.PlaySkip(&svrproto.PlaySkipArgs{}); err != nil {
 		return nil, err
 	}
 
-	p.resetInputs[currentRes.Unique] = currentRes.Seek
-	currentRes.Seek = args.Seek
-	p.currentIndex = p.currentIndex - 1
-
 	reply := &svrproto.ResourceSeekReply{
 		Resource: &svrproto.Resource{
-			Path:       currentRes.Path,
-			Unique:     currentRes.Unique,
-			Seek:       currentRes.Seek,
-			End:        currentRes.End,
-			CreateTime: currentRes.CreateTime,
-			StartTime:  currentRes.StartTime,
-			EndTime:    currentRes.EndTime,
+			Path:       seekRes.Path,
+			Unique:     seekRes.Unique,
+			Seek:       seekRes.Seek,
+			End:        seekRes.End,
+			CreateTime: seekRes.CreateTime,
+			StartTime:  seekRes.StartTime,
+			EndTime:    seekRes.EndTime,
 		},
 	}
 	return reply, nil

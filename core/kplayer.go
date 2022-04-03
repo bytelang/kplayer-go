@@ -47,6 +47,9 @@ type libKplayer struct {
 
 	// event message receiver
 	callbackFn func(action int, message string)
+
+	// delay queue size
+	delay_queue_size uint16
 }
 
 // GetLibKplayer return singleton LibKplayer instance
@@ -55,7 +58,7 @@ func GetLibKplayerInstance() *libKplayer {
 }
 
 // SetOptions set basic options
-func (lb *libKplayer) SetOptions(protocol string, video_width uint32, video_height uint32, video_bitrate uint32, video_qulity uint32, video_fps uint32, audio_sample_rate uint32, audio_channel_layout uint32, audio_channels uint32) error {
+func (lb *libKplayer) SetOptions(protocol string, video_width uint32, video_height uint32, video_bitrate uint32, video_qulity uint32, video_fps uint32, audio_sample_rate uint32, audio_channel_layout uint32, audio_channels uint32, delay_queue_size uint32) error {
 	libKplayerInstance.protocol = strings.ToLower(protocol)
 	libKplayerInstance.video_width = video_width
 	libKplayerInstance.video_height = video_height
@@ -65,6 +68,9 @@ func (lb *libKplayer) SetOptions(protocol string, video_width uint32, video_heig
 	libKplayerInstance.audio_sample_rate = audio_sample_rate
 	libKplayerInstance.audio_channel_layout = audio_channel_layout
 	libKplayerInstance.audio_channels = audio_channels
+
+	// other params
+	libKplayerInstance.delay_queue_size = uint16(delay_queue_size)
 
 	return nil
 }
@@ -112,7 +118,8 @@ func (lb *libKplayer) Run() {
 		C.int(lb.video_fps),
 		C.int(lb.audio_sample_rate),
 		C.int(lb.audio_channel_layout),
-		C.int(lb.audio_channels))
+		C.int(lb.audio_channels),
+		C.short(lb.delay_queue_size))
 
 	if lb.cache_on {
 		C.SetCacheOn(C.int(1))
