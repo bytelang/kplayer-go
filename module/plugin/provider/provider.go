@@ -71,6 +71,11 @@ func (p *Provider) ValidateConfig() error {
 
 		logField := log.WithFields(log.Fields{"name": pluginName, "path": item.Path})
 		if err := InitPluginFile(pluginName, item.Path); err != nil {
+			if _, ok := err.(kptypes.ApiError); ok {
+				logField.Error("plugin request information failed")
+				return err
+			}
+
 			if !kptypes.FileExists(item.Path) {
 				logField.Error("plugin initialization failed")
 				return err
