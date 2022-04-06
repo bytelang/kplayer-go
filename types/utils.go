@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var issueRandStr map[string]bool
@@ -188,4 +189,11 @@ func ArrayInString(arr []string, search string) bool {
 	}
 
 	return false
+}
+
+func TrimCRLF(replaceStr string) string {
+	replaceStr = strings.ReplaceAll(replaceStr, "\n", "\\n")
+	replaceStr = strings.ReplaceAll(replaceStr, "\r", "")
+
+	return replaceStr
 }
