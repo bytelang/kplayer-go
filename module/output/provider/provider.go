@@ -53,7 +53,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Output)
 	for _, item := range config.Lists {
 		unique := item.Unique
 		if unique == "" {
-			unique = kptypes.GetRandString(6)
+			unique = kptypes.GetUniqueString(item.Path)
 		}
 
 		if err := p.configList.AppendOutput(moduletypes.Output{
@@ -71,12 +71,6 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Output)
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
-	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
-		for _, item := range p.configList.outputs {
-			if err := p.addOutput(item); err != nil {
-				log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Warn("add output failed")
-			}
-		}
 	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD:
 		msg := &kpmsg.EventMessageOutputAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
@@ -104,7 +98,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		logFields.Info("output add success")
 
 		// update output status
-		output, _, err := p.list.GetOutputByUnique(msg.Output.Unique)
+		output, _, err := p.configList.GetOutputByUnique(msg.Output.Unique)
 		if err != nil {
 			logFields.WithField("error", err).Fatal("update output status failed")
 		}
@@ -221,6 +215,19 @@ func (p *Provider) StartReconnect() {
 			return
 		default:
 			log.Fatalf("invalid type")
+		}
+	}
+}
+
+func (p *Provider) BeginRunning() {
+	for _, item := range p.configList.outputs {
+		if err := core.GetLibKplayerInstance().AddOutput(&kpprompt.EventPromptOutputAdd{
+			Output: &kpprompt.PromptOutput{
+				Path:   item.Path,
+				Unique: item.Unique,
+			},
+		}); err != nil {
+			log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Fatal("add output failed")
 		}
 	}
 }

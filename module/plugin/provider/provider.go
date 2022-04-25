@@ -28,8 +28,7 @@ type Provider struct {
 	module.ModuleKeeper
 
 	// config
-	configList Plugins
-	list       Plugins
+	list Plugins
 }
 
 var _ ProviderI = &Provider{}
@@ -46,7 +45,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin)
 			uniqueName = kptypes.GetRandString(6)
 		}
 
-		if err := p.configList.AppendPlugin(moduletypes.Plugin{
+		if err := p.list.AppendPlugin(moduletypes.Plugin{
 			Path:       GetPluginPath(item.Path),
 			Unique:     uniqueName,
 			CreateTime: uint64(time.Now().Unix()),
@@ -63,7 +62,7 @@ func (p *Provider) ValidateConfig() error {
 	kptypes.GetCorePluginVersion()
 
 	// init plugin
-	for _, item := range p.configList.plugins {
+	for _, item := range p.list.plugins {
 		pluginName := strings.TrimSuffix(filepath.Base(item.Path), filepath.Ext(item.Path))
 		if pluginName == "" {
 			return fmt.Errorf("plugin path cannot be empty")
@@ -81,7 +80,7 @@ func (p *Provider) ValidateConfig() error {
 				return err
 			}
 
-			logField.Warn("plugin file exist, but plugin is no registration.")
+			logField.Warn(fmt.Sprintf("plugin file exist, but plugin is no registration. %s", err))
 		}
 	}
 
@@ -113,12 +112,6 @@ func (p *Provider) ValidateConfig() error {
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
-	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
-		for _, item := range p.configList.plugins {
-			if err := p.addPlugin(item); err != nil {
-				log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Warn("add plugin failed")
-			}
-		}
 	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD:
 		msg := &kpmsg.EventMessagePluginAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
@@ -196,6 +189,27 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 					log.WithFields(log.Fields{"path": item.Path, "unique": item.Unique, "error": err}).Warn("reload plugin failed")
 				}
 			}
+		}
+	}
+}
+
+func (p *Provider) BeginRunning() {
+	for _, item := range p.list.plugins {
+		// read plugin file
+		fileContent, err := kptypes.ReadPlugin(item.Path)
+		if err != nil {
+			log.WithFields(log.Fields{"path": item.Path, "unique": item.Unique}).Fatal("read plugin file failed")
+		}
+
+		if err := core.GetLibKplayerInstance().AddPlugin(&kpprompt.EventPromptPluginAdd{
+			Plugin: &kpprompt.PromptPlugin{
+				Path:    item.Path,
+				Content: fileContent,
+				Unique:  item.Unique,
+				Params:  item.Params,
+			},
+		}); err != nil {
+			log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Warn("add plugin failed")
 		}
 	}
 }

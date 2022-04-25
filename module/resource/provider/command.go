@@ -52,7 +52,7 @@ end:
 			if len(args) > 1 {
 				unique = args[1]
 			} else {
-				unique = kptypes.GetRandString(6)
+				unique = kptypes.GetUniqueString(path)
 			}
 
 			if len(args) > 2 {

@@ -352,14 +352,14 @@ func startCommand() *cobra.Command {
 			}
 
 			// knock api
-			timeTicker := time.NewTicker(time.Minute * KnockIntervalMinutes)
+			timeTicker := time.NewTicker(time.Second * (KnockIntervalMinutes * 60))
 			defer timeTicker.Stop()
 			go func() {
 				maxRetriesCount := KnockMaxRetries
 				currentRetriesCount := 0
 				for {
 					if currentRetriesCount > maxRetriesCount {
-						log.Fatal("knock failed. cannot connection api server on max retries1")
+						log.Fatal("knock failed. cannot connection api server on max retries")
 					}
 
 					<-timeTicker.C
@@ -379,6 +379,12 @@ func startCommand() *cobra.Command {
 
 			// start core
 			{
+				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
+
+				// initialize
+				coreKplayer.Initialization()
+
+				// begin running
 				for _, m := range mm.Modules {
 					m.BeginRunning(moduleOptions...)
 				}
@@ -388,7 +394,7 @@ func startCommand() *cobra.Command {
 					}
 				}()
 
-				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
+				// start core
 				coreKplayer.Run()
 				serverStopChan <- true
 			}

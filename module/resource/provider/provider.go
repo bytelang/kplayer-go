@@ -80,7 +80,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resourc
 
 				if err := p.inputs.AppendResource(moduletypes.Resource{
 					Path:       f,
-					Unique:     kptypes.GetRandString(6),
+					Unique:     kptypes.GetUniqueString(f),
 					Seek:       0,
 					End:        -1,
 					CreateTime: uint64(time.Now().Unix()),
@@ -94,7 +94,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resourc
 		// add resource file
 		if err := p.inputs.AppendResource(moduletypes.Resource{
 			Path:       item,
-			Unique:     kptypes.GetRandString(6),
+			Unique:     kptypes.GetUniqueString(item),
 			Seek:       0,
 			End:        -1,
 			CreateTime: uint64(time.Now().Unix()),
