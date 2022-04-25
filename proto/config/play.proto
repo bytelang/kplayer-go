@@ -18,6 +18,11 @@ enum PLAY_MODEL {
   LOOP = 3;
 }
 
+enum PLAY_FILL_STRATEGY {
+  TILE = 0;
+  RATIO = 1;
+}
+
 message Play {
   uint32 start_point = 1 [(gogoproto.moretags) = "validate:\"required,gt=0\" mapstructure:\"start_point\""];
   string play_model = 2 [(gogoproto.moretags) = "validate:\"oneof=list random queue loop\" mapstructure:\"play_model\""];
@@ -28,6 +33,7 @@ message Play {
   bool skip_invalid_resource = 9 [(gogoproto.moretags) = "validate:\"\" mapstructure:\"skip_invalid_resource\""];
   Encode encode = 10 [(gogoproto.nullable) = true, (gogoproto.moretags) = "validate:\"required\""];
   uint32 delay_queue_size = 11 [(gogoproto.moretags) = "validate:\"numeric,max=32767,min=1\" mapstructure:\"delay_queue_size\""];
+  string fill_strategy = 12 [(gogoproto.moretags) = "validate:\"oneof=tile ratio\" mapstructure:\"fill_strategy\""];
 }
 
 message Rpc {

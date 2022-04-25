@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -320,7 +321,8 @@ func startCommand() *cobra.Command {
 				cfg.Play.Encode.AudioSampleRate,
 				cfg.Play.Encode.AudioChannelLayout,
 				cfg.Play.Encode.AudioChannels,
-				cfg.Play.DelayQueueSize); err != nil {
+				cfg.Play.DelayQueueSize,
+				config.PLAY_FILL_STRATEGY_value[strings.ToUpper(cfg.Play.FillStrategy)]); err != nil {
 				log.Fatal(err)
 			}
 			coreKplayer.SetCacheOn(cfg.Play.CacheOn)
