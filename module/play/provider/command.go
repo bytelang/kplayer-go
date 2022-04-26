@@ -305,9 +305,13 @@ func startCommand() *cobra.Command {
 			}
 
 			cfg := clientCtx.Config
+
+			// override only generate cache config
 			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
 				cfg.Play.EncodeModel = config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)]
 				cfg.Play.CacheOn = true
+				cfg.Play.DelayQueueSize = 500
+				cfg.Play.SkipInvalidResource = false
 				log.Info("running on generate cache model")
 			}
 

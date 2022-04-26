@@ -111,6 +111,15 @@ func (p *Provider) ValidateConfig() error {
 		return fmt.Errorf("start point invalid. cannot great than total resource")
 	}
 
+	existName := []string{}
+	for _, item := range p.inputs.resources {
+		if kptypes.ArrayInString(existName, item.Unique) {
+			return ResourceUniqueHasExisted
+		}
+
+		existName = append(existName, item.Unique)
+	}
+
 	return nil
 }
 
