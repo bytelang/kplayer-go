@@ -60,12 +60,16 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Plugin)
 func (p *Provider) ValidateConfig() error {
 	// get version
 	kptypes.GetCorePluginVersion()
+	existName := []string{}
 
 	// init plugin
 	for _, item := range p.list.plugins {
 		pluginName := strings.TrimSuffix(filepath.Base(item.Path), filepath.Ext(item.Path))
 		if pluginName == "" {
 			return fmt.Errorf("plugin path cannot be empty")
+		}
+		if kptypes.ArrayInString(existName, item.Unique) {
+			return PluginUniqueHasExist
 		}
 
 		logField := log.WithFields(log.Fields{"name": pluginName, "path": item.Path})
@@ -82,6 +86,8 @@ func (p *Provider) ValidateConfig() error {
 
 			logField.Warn(fmt.Sprintf("plugin file exist, but plugin is no registration. %s", err))
 		}
+
+		existName = append(existName, item.Unique)
 	}
 
 	// init resource
@@ -209,7 +215,7 @@ func (p *Provider) BeginRunning() {
 				Params:  item.Params,
 			},
 		}); err != nil {
-			log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Warn("add plugin failed")
+			log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Trace("add plugin failed")
 		}
 	}
 }

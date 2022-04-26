@@ -149,10 +149,16 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 }
 
 func (p *Provider) ValidateConfig() error {
+	existName := []string{}
 	for _, item := range p.configList.outputs {
+		if kptypes.ArrayInString(existName, item.Unique) {
+			return OutputUniqueHasExisted
+		}
+
 		if item.Path == "" {
 			return fmt.Errorf("output path cannot be empty")
 		}
+		existName = append(existName, item.Unique)
 	}
 
 	return nil
@@ -227,7 +233,7 @@ func (p *Provider) BeginRunning() {
 				Unique: item.Unique,
 			},
 		}); err != nil {
-			log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Fatal("add output failed")
+			log.WithFields(log.Fields{"unique": item.Unique, "path": item.Path, "error": err}).Trace("add output failed")
 		}
 	}
 }
