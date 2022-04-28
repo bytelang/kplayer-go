@@ -61,8 +61,11 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 	m.Handle("/rpc", s)
 	m.Handle("/websocket", websocket.Handler(wsClientHandler))
 	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", rpcParams.Address, rpcParams.Port),
-		Handler: m,
+		Addr:              fmt.Sprintf("%s:%d", rpcParams.Address, rpcParams.Port),
+		Handler:           m,
+		ReadTimeout:       time.Second * 10,
+		ReadHeaderTimeout: time.Second * 10,
+		WriteTimeout:      time.Second * 10,
 	}
 
 	go func() {

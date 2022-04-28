@@ -182,8 +182,7 @@ func initInteractionConfig() (*config.KPConfig, error) {
 				return fmt.Errorf("output path cannot be empty")
 			}
 			outputInstances := &config.OutputInstance{
-				Path:   line,
-				Unique: types.GetRandString(6),
+				Path: line,
 			}
 			cfg.Output.Lists = append(cfg.Output.Lists, outputInstances)
 			return nil

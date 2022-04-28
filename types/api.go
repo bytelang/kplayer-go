@@ -18,6 +18,12 @@ var (
 	ApiVersion string = ""
 )
 
+type ApiError string
+
+func (ae ApiError) Error() string {
+	return string(ae)
+}
+
 func GetTlsHttpClient() *http.Client {
 	config, err := GetTlsClientConfig()
 	if err != nil {
@@ -58,13 +64,16 @@ func RequestHttpGet(host string, params proto.Message, message proto.Message) er
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("response status code: %d", resp.StatusCode)
-	}
-
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("response status code: %d. message: %s", resp.StatusCode, TrimCRLF(string(respBody)))
+		}
+		return ApiError(fmt.Sprintf("response status code: %d. message: %s", resp.StatusCode, TrimCRLF(string(respBody))))
 	}
 
 	// unmarshal

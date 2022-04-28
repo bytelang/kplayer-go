@@ -195,6 +195,7 @@ func setDefaultConfig(v *viper.Viper) {
 	v.SetDefault("play.cache_uncheck", false)
 	v.SetDefault("play.skip_invalid_resource", false)
 	v.SetDefault("play.delay_queue_size", 50)
+	v.SetDefault("play.fill_strategy", "tile")
 
 	v.SetDefault("play.rpc.on", true)
 	v.SetDefault("play.rpc.port", kptypes.DefaultRPCPort)

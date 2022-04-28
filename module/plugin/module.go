@@ -48,6 +48,7 @@ func (m AppModule) TriggerMessage(message *kpproto.KPMessage) {
 }
 
 func (m AppModule) BeginRunning(option ...module.ModuleOption) {
+	m.Provider.BeginRunning()
 }
 
 func (m AppModule) EndRunning(option ...module.ModuleOption) {

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -304,9 +305,14 @@ func startCommand() *cobra.Command {
 			}
 
 			cfg := clientCtx.Config
+
+			// override only generate cache config
 			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
+				cfg.Play.PlayModel = config.PLAY_FILL_STRATEGY_name[int32(config.PLAY_MODEL_LIST)]
 				cfg.Play.EncodeModel = config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)]
 				cfg.Play.CacheOn = true
+				cfg.Play.DelayQueueSize = 500
+				cfg.Play.SkipInvalidResource = false
 				log.Info("running on generate cache model")
 			}
 
@@ -320,7 +326,8 @@ func startCommand() *cobra.Command {
 				cfg.Play.Encode.AudioSampleRate,
 				cfg.Play.Encode.AudioChannelLayout,
 				cfg.Play.Encode.AudioChannels,
-				cfg.Play.DelayQueueSize); err != nil {
+				cfg.Play.DelayQueueSize,
+				config.PLAY_FILL_STRATEGY_value[strings.ToUpper(cfg.Play.FillStrategy)]); err != nil {
 				log.Fatal(err)
 			}
 			coreKplayer.SetCacheOn(cfg.Play.CacheOn)
@@ -350,14 +357,14 @@ func startCommand() *cobra.Command {
 			}
 
 			// knock api
-			timeTicker := time.NewTicker(time.Minute * KnockIntervalMinutes)
+			timeTicker := time.NewTicker(time.Second * (KnockIntervalMinutes * 60))
 			defer timeTicker.Stop()
 			go func() {
 				maxRetriesCount := KnockMaxRetries
 				currentRetriesCount := 0
 				for {
 					if currentRetriesCount > maxRetriesCount {
-						log.Fatal("knock failed. cannot connection api server on max retries1")
+						log.Fatal("knock failed. cannot connection api server on max retries")
 					}
 
 					<-timeTicker.C
@@ -377,6 +384,12 @@ func startCommand() *cobra.Command {
 
 			// start core
 			{
+				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
+
+				// initialize
+				coreKplayer.Initialization()
+
+				// begin running
 				for _, m := range mm.Modules {
 					m.BeginRunning(moduleOptions...)
 				}
@@ -386,7 +399,7 @@ func startCommand() *cobra.Command {
 					}
 				}()
 
-				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
+				// start core
 				coreKplayer.Run()
 				serverStopChan <- true
 			}
