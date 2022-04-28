@@ -13,12 +13,18 @@ import (
 	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
+	"math/rand"
 	"net/url"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 type ProviderI interface {
 	ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error)
@@ -47,6 +53,10 @@ type Provider struct {
 	resetInputs map[string]int64
 
 	input_mutex sync.Mutex
+
+	// random history list
+	randomModeUniqueNameList    []string
+	randomModeUniqueNameHistory []string
 }
 
 var _ ProviderI = &Provider{}
@@ -58,12 +68,12 @@ func NewProvider(playProvider playprovider.ProviderI) *Provider {
 	}
 }
 
-func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resource) {
+func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) {
 	// initialize attribute
 	p.currentIndex = p.playProvider.GetStartPoint() - 1
-	p.allowExtensions = config.Extensions
+	p.allowExtensions = cfg.Extensions
 
-	for _, item := range config.Lists {
+	for _, item := range cfg.Lists {
 		// add resource directory
 		if files, err := kptypes.GetDirectorFiles(item); err == nil {
 			// sort file
@@ -102,12 +112,16 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Resourc
 			log.WithFields(log.Fields{"path": item, "error": err}).Error("add resource to playlist failed")
 		}
 	}
+
+	if p.playProvider.GetPlayModel() == config.PLAY_MODEL_RANDOM {
+		p.currentIndex = uint32(rand.Intn(len(p.inputs.resources)))
+	}
 }
 
 func (p *Provider) ValidateConfig() error {
 	if p.currentIndex < 0 {
 		return fmt.Errorf("start point invalid. cannot less than 1")
-	} else if p.currentIndex > uint32(len(p.inputs.resources)) {
+	} else if p.currentIndex >= uint32(len(p.inputs.resources)) {
 		return fmt.Errorf("start point invalid. cannot great than total resource")
 	}
 
@@ -178,13 +192,37 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		res.EndTime = uint64(time.Now().Unix())
 
 		p.currentIndex = p.currentIndex + 1
-		if p.currentIndex >= uint32(len(p.inputs.resources)) {
-			if p.playProvider.GetPlayModel() != config.PLAY_MODEL_LOOP {
+
+		// play_model
+		switch p.playProvider.GetPlayModel() {
+		case config.PLAY_MODEL_LIST:
+			if p.currentIndex >= uint32(len(p.inputs.resources)) {
 				log.Info("the playlist has been play completed")
 				stopCorePlay()
 				return
 			}
-			p.currentIndex = 0
+		case config.PLAY_MODEL_LOOP:
+			if p.currentIndex >= uint32(len(p.inputs.resources)) {
+				p.currentIndex = 0
+				log.Infof("Running mode on [%s]. will a new loop will take place...", strings.ToLower(p.playProvider.GetPlayModel().String()))
+			}
+		case config.PLAY_MODEL_QUEUE:
+			if p.currentIndex >= uint32(len(p.inputs.resources)) {
+				log.Infof("Running mode on [%s]. wait for the resource file to be added...", strings.ToLower(p.playProvider.GetPlayModel().String()))
+				return // wait for new resource
+			}
+		case config.PLAY_MODEL_RANDOM:
+			// refresh list
+			p.randomModeUniqueNameList = []string{}
+			for _, item := range p.inputs.resources {
+				if !kptypes.ArrayInString(p.randomModeUniqueNameHistory, item.Unique) {
+					p.randomModeUniqueNameList = append(p.randomModeUniqueNameList, item.Unique)
+				}
+			}
+
+			// random index
+			p.randomModeUniqueNameHistory = append(p.randomModeUniqueNameHistory, p.inputs.resources[p.currentIndex].Unique)
+			p.currentIndex = uint32(rand.Intn(len(p.randomModeUniqueNameList)))
 		}
 		p.addNextResourceToCore()
 	}

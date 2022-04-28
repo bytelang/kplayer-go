@@ -308,6 +308,7 @@ func startCommand() *cobra.Command {
 
 			// override only generate cache config
 			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
+				cfg.Play.PlayModel = config.PLAY_FILL_STRATEGY_name[int32(config.PLAY_MODEL_LIST)]
 				cfg.Play.EncodeModel = config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)]
 				cfg.Play.CacheOn = true
 				cfg.Play.DelayQueueSize = 500

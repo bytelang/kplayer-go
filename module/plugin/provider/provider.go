@@ -121,7 +121,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD:
 		msg := &kpmsg.EventMessagePluginAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path})
+		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path, "author": msg.Plugin.Author})
 		if len(msg.Error) != 0 {
 			logFields.WithField("error", msg.Error).Warn("add plugin failed")
 			break
