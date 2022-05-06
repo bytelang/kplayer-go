@@ -191,22 +191,23 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 		res.EndTime = uint64(time.Now().Unix())
 
-		p.currentIndex = p.currentIndex + 1
-
 		// play_model
 		switch p.playProvider.GetPlayModel() {
 		case config.PLAY_MODEL_LIST:
+			p.currentIndex = p.currentIndex + 1
 			if p.currentIndex >= uint32(len(p.inputs.resources)) {
 				log.Info("the playlist has been play completed")
 				stopCorePlay()
 				return
 			}
 		case config.PLAY_MODEL_LOOP:
+			p.currentIndex = p.currentIndex + 1
 			if p.currentIndex >= uint32(len(p.inputs.resources)) {
 				p.currentIndex = 0
 				log.Infof("Running mode on [%s]. will a new loop will take place...", strings.ToLower(p.playProvider.GetPlayModel().String()))
 			}
 		case config.PLAY_MODEL_QUEUE:
+			p.currentIndex = p.currentIndex + 1
 			if p.currentIndex >= uint32(len(p.inputs.resources)) {
 				log.Infof("Running mode on [%s]. wait for the resource file to be added...", strings.ToLower(p.playProvider.GetPlayModel().String()))
 				return // wait for new resource
@@ -214,9 +215,15 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		case config.PLAY_MODEL_RANDOM:
 			// refresh list
 			p.randomModeUniqueNameList = []string{}
-			for _, item := range p.inputs.resources {
-				if !kptypes.ArrayInString(p.randomModeUniqueNameHistory, item.Unique) {
-					p.randomModeUniqueNameList = append(p.randomModeUniqueNameList, item.Unique)
+			for len(p.randomModeUniqueNameList) == 0 {
+				for _, item := range p.inputs.resources {
+					if !kptypes.ArrayInString(p.randomModeUniqueNameHistory, item.Unique) {
+						p.randomModeUniqueNameList = append(p.randomModeUniqueNameList, item.Unique)
+					}
+				}
+
+				if len(p.randomModeUniqueNameList) == 0 {
+					p.randomModeUniqueNameHistory = []string{}
 				}
 			}
 
