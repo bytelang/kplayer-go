@@ -201,7 +201,7 @@ func setDefaultConfig(v *viper.Viper) {
 	v.SetDefault("play.rpc.port", kptypes.DefaultRPCPort)
 	v.SetDefault("play.rpc.address", kptypes.DefaultRPCAddress)
 
-	v.SetDefault("play.encode.video_width", 780)
+	v.SetDefault("play.encode.video_width", 854)
 	v.SetDefault("play.encode.video_height", 480)
 	v.SetDefault("play.encode.video_fps", 30)
 	v.SetDefault("play.encode.audio_channel_layout", 3)

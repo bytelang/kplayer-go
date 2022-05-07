@@ -3,8 +3,7 @@
 </h1>
 <p align="center">KPlayer帮助你不依赖GUI快速的在服务器上进行视频资源的直播推流</p>
 
-<p align="center"><a href="https://pkg.go.dev/github.com/create-go-app/cli/v3?tab=doc" 
-target="_blank"><img src="https://img.shields.io/badge/Go-1.17+-00ADD8?style=for-the-badge&logo=go" alt="go version" /></a>&nbsp;<a href="https://gocover.io/github.com/create-go-app/cli/pkg/cgapp" target="_blank"><img src="https://img.shields.io/badge/Go_Cover-88.3%25-success?style=for-the-badge&logo=none" alt="go cover" /></a>&nbsp;<a href="https://goreportcard.com/report/github.com/create-go-app/cli" target="_blank"><img src="https://img.shields.io/badge/Go_report-A+-success?style=for-the-badge&logo=none" alt="go report" /></a>&nbsp;<img src="https://img.shields.io/badge/license-apache_2.0-red?style=for-the-badge&logo=none" alt="license" /></p>
+<p align="center"><img src="https://img.shields.io/badge/Go-1.15+-00ADD8?style=for-the-badge&logo=go" alt="go version" />&nbsp;<img src="https://img.shields.io/badge/Go_Cover-88.3%25-success?style=for-the-badge&logo=none" alt="go cover" />&nbsp;<img src="https://img.shields.io/badge/Go_report-A+-success?style=for-the-badge&logo=none" alt="go report" />&nbsp;<img src="https://img.shields.io/badge/license-apache_2.0-red?style=for-the-badge&logo=none" alt="license" /></p>
 
 ### ⚡️ 快速开始
 KPlayer可以帮助你快速的在服务器上进行视频资源的循环直播推流，只需要简单对配置文件进行自定义即可开启直播推流
@@ -13,7 +12,7 @@ KPlayer可以帮助你快速的在服务器上进行视频资源的循环直播�
 
 运行以下命令即可把最新版本的kplayer下载至你的服务器上，并修改对应的`config.json`配置文件运行即可推流
 ```shell
-# 配置文件详细文档请访问：[https://kplayer.net/p/1](https://kplayer.net/p/1) 
+# 配置文件详细文档请访问：https://kplayer.net/p/1 
 
 curl -fsSL get.kplayer.net | bash
 ```

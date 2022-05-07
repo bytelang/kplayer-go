@@ -313,6 +313,7 @@ func startCommand() *cobra.Command {
 				cfg.Play.CacheOn = true
 				cfg.Play.DelayQueueSize = 500
 				cfg.Play.SkipInvalidResource = false
+				cfg.Output.Lists = []*config.OutputInstance{}
 				log.Info("running on generate cache model")
 			}
 
