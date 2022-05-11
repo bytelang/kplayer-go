@@ -86,7 +86,7 @@ func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.Outp
 
 func (p *Provider) OutputList(args *svrproto.OutputListArgs) (*svrproto.OutputListReply, error) {
 	outputs := []*svrproto.OutputModule{}
-	for _, item := range p.list.outputs {
+	for _, item := range p.configList.outputs {
 		outputs = append(outputs, &svrproto.OutputModule{
 			Path:       item.Path,
 			Unique:     item.Unique,

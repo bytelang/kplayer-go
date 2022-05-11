@@ -27,7 +27,6 @@ type Provider struct {
 
 	// module outputs
 	configList        Outputs
-	list              Outputs
 	reconnectInternal int32
 
 	// reconnect
@@ -114,7 +113,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 			"path":   msg.Output.Path,
 		})
 
-		if _, err := p.list.RemoveOutputByUnique(msg.Output.Unique); err != nil {
+		if _, err := p.configList.RemoveOutputByUnique(msg.Output.Unique); err != nil {
 			logFields.Fatal("remove output failed")
 		}
 
@@ -138,7 +137,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 
 		// update output status
-		output, _, err := p.list.GetOutputByUnique(msg.Output.Unique)
+		output, _, err := p.configList.GetOutputByUnique(msg.Output.Unique)
 		if err != nil {
 			logFields.WithField("error", err).Fatal("update output status failed")
 		}
@@ -171,7 +170,7 @@ func (p *Provider) addOutput(output moduletypes.Output) error {
 	}
 
 	// validate
-	if p.list.Exist(output.Unique) {
+	if p.configList.Exist(output.Unique) {
 		return OutputUniqueHasExisted
 	}
 
@@ -187,7 +186,7 @@ func (p *Provider) addOutput(output moduletypes.Output) error {
 		log.Warn(err)
 	}
 
-	if err := p.list.AppendOutput(output); err != nil {
+	if err := p.configList.AppendOutput(output); err != nil {
 		return err
 	}
 

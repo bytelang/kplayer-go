@@ -3,6 +3,7 @@ package core
 // #cgo LDFLAGS: -lkplayer -lkpcodec -lkputil -lkpadapter -lkpplugin
 // #include "extra.h"
 // void goCallBackMessage(int, char*);
+// void goCallBackProgress(double, int);
 import "C"
 
 import (
@@ -23,11 +24,18 @@ import (
 func goCallBackMessage(action C.int, msgRaw *C.char) {
 	msg := C.GoString(msgRaw)
 	ac := int(action)
-	libKplayerInstance.callbackFn(ac, msg)
+	libKplayerInstance.callbackMessageFn(ac, msg)
+}
+
+//export goCallBackProgress
+// goCallBackProgress define libkplayer callback function
+func goCallBackProgress(percent C.double, bitRate C.int) {
+	libKplayerInstance.callbackProgressFn(float64(percent), int(bitRate))
 }
 
 var libKplayerInstance *libKplayer = &libKplayer{
-	callbackFn: func(action int, message string) {},
+	callbackMessageFn:  func(action int, message string) {},
+	callbackProgressFn: func(percent float64, bitRate int) {},
 }
 
 // libKplayer
@@ -48,7 +56,8 @@ type libKplayer struct {
 	skip_invalid_resource bool
 
 	// event message receiver
-	callbackFn func(action int, message string)
+	callbackMessageFn  func(action int, message string)
+	callbackProgressFn func(percent float64, bitRate int)
 
 	// delay queue size
 	delay_queue_size uint16
@@ -90,7 +99,11 @@ func (lb *libKplayer) SetOptions(protocol string,
 }
 
 func (lb *libKplayer) SetCallBackMessage(fn func(action int, message string)) {
-	lb.callbackFn = fn
+	lb.callbackMessageFn = fn
+}
+
+func (lb *libKplayer) SetCallbackProgress(fn func(percent float64, bitRate int)) {
+	lb.callbackProgressFn = fn
 }
 
 func (lb *libKplayer) GetInformation() *kpproto.Information {
@@ -166,6 +179,7 @@ func (lb *libKplayer) Initialization() {
 	}
 
 	C.ReceiveMessage(C.MessageCallBack(C.goCallBackMessage))
+	C.ProgressCallback(C.ProgressCallBack(C.goCallBackProgress))
 
 	C.Initialization(C.CString(lb.protocol),
 		C.int(lb.video_width),

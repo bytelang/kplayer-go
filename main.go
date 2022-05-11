@@ -4,21 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/bytelang/kplayer/types/config"
-	errortypes "github.com/bytelang/kplayer/types/error"
-	"github.com/go-playground/validator/v10"
-	"io/ioutil"
-	"os"
-	"runtime"
-
 	"github.com/bytelang/kplayer/app"
 	"github.com/bytelang/kplayer/cmd"
 	"github.com/bytelang/kplayer/module"
 	"github.com/bytelang/kplayer/server"
 	kptypes "github.com/bytelang/kplayer/types"
+	"github.com/bytelang/kplayer/types/config"
+	errortypes "github.com/bytelang/kplayer/types/error"
+	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
+	"os"
+	"runtime"
 )
 
 func init() {
