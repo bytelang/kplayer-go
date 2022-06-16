@@ -124,12 +124,12 @@ func (p *Provider) ResourceAllList(*svrproto.ResourceAllListArgs) (*svrproto.Res
 
 func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_LIST, &kpprompt.EventPromptResourceList{}); err != nil {
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_LIST, &kpprompt.EventPromptResourceList{}); err != nil {
 		return nil, err
 	}
 
 	resourceListMsg := &msg.EventMessageResourceList{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_LIST, func(msg string) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_LIST, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, resourceListMsg)
 		return true
 	})
@@ -158,12 +158,12 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 
 func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_CURRENT, &kpprompt.EventPromptResourceCurrent{}); err != nil {
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_CURRENT, &kpprompt.EventPromptResourceCurrent{}); err != nil {
 		return nil, err
 	}
 
 	resourceCurrentMsg := &msg.EventMessageResourceCurrent{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_RESOURCE_CURRENT, func(msg string) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_CURRENT, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, resourceCurrentMsg)
 		return true
 	})
@@ -211,7 +211,7 @@ func (p *Provider) ResourceSeek(args *svrproto.ResourceSeekArgs) (*svrproto.Reso
 	}
 
 	p.resetInputs[seekRes.Unique] = seekRes.Seek
-	p.currentIndex = uint32(searchIndex)
+	p.currentIndex = searchIndex - 1
 
 	if _, err := p.playProvider.PlaySkip(&svrproto.PlaySkipArgs{}); err != nil {
 		return nil, err

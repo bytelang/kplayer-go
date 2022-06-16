@@ -25,7 +25,7 @@ func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddR
 
 	// wait for message
 	pluginAddMsg := &msg.EventMessagePluginAdd{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pluginAddMsg)
 		return pluginAddMsg.Plugin.Unique == args.Plugin.Unique
 	})
@@ -66,14 +66,14 @@ func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.Plug
 
 	// send prompt
 	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_REMOVE, &kpprompt.EventPromptPluginRemove{
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_REMOVE, &kpprompt.EventPromptPluginRemove{
 		Unique: args.Unique,
 	}); err != nil {
 		return nil, err
 	}
 
 	pluginRemoveMsg := &msg.EventMessagePluginRemove{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_REMOVE, func(msg string) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_REMOVE, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pluginRemoveMsg)
 		return pluginRemoveMsg.Plugin.Unique == args.Unique
 	})
@@ -117,12 +117,12 @@ func (p *Provider) PluginList(plugin *svrproto.PluginListArgs) (*svrproto.Plugin
 
 func (p *Provider) PluginListFromCore(args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_LIST, &kpprompt.EventPromptPluginList{}); err != nil {
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_LIST, &kpprompt.EventPromptPluginList{}); err != nil {
 		return nil, err
 	}
 
 	pluginListMsg := &msg.EventMessagePluginList{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_LIST, func(msg string) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_LIST, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pluginListMsg)
 		return true
 	})
@@ -168,7 +168,7 @@ func (p *Provider) PluginUpdate(args *svrproto.PluginUpdateArgs) (*svrproto.Plug
 	for k, v := range args.Params {
 		argParams[k] = v
 	}
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_UPDATE, &kpprompt.EventPromptPluginUpdate{
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_UPDATE, &kpprompt.EventPromptPluginUpdate{
 		Unique: args.Unique,
 		Params: argParams,
 	}); err != nil {
@@ -176,7 +176,7 @@ func (p *Provider) PluginUpdate(args *svrproto.PluginUpdateArgs) (*svrproto.Plug
 	}
 
 	pluginUpdateMsg := &msg.EventMessagePluginUpdate{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLUGIN_UPDATE, func(msg string) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_UPDATE, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, pluginUpdateMsg)
 		return true
 	})

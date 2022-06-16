@@ -44,7 +44,7 @@ type Provider struct {
 	playProvider playprovider.ProviderI
 
 	// module member
-	currentIndex    uint32
+	currentIndex    int
 	inputs          Resources
 	allowExtensions []string
 
@@ -70,7 +70,7 @@ func NewProvider(playProvider playprovider.ProviderI) *Provider {
 
 func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) {
 	// initialize attribute
-	p.currentIndex = p.playProvider.GetStartPoint() - 1
+	p.currentIndex = int(p.playProvider.GetStartPoint()) - 1
 	p.allowExtensions = cfg.Extensions
 
 	for _, item := range cfg.Lists {
@@ -114,14 +114,14 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) 
 	}
 
 	if p.playProvider.GetPlayModel() == config.PLAY_MODEL_RANDOM {
-		p.currentIndex = uint32(rand.Intn(len(p.inputs.resources)))
+		p.currentIndex = rand.Intn(len(p.inputs.resources))
 	}
 }
 
 func (p *Provider) ValidateConfig() error {
 	if p.currentIndex < 0 {
 		return fmt.Errorf("start point invalid. cannot less than 1")
-	} else if p.currentIndex >= uint32(len(p.inputs.resources)) {
+	} else if p.currentIndex >= len(p.inputs.resources) {
 		return fmt.Errorf("start point invalid. cannot great than total resource")
 	}
 
@@ -139,7 +139,7 @@ func (p *Provider) ValidateConfig() error {
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
-	case kpproto.EVENT_MESSAGE_ACTION_PLAYER_STARTED:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_STARTED:
 		if len(p.inputs.resources) == 0 {
 			log.Info("the resource list is empty. waiting to add a resource")
 			break
@@ -148,7 +148,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		p.input_mutex.Lock()
 		defer p.input_mutex.Unlock()
 		p.addNextResourceToCore()
-	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_START:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_START:
 		msg := &kpmsg.EventMessageResourceStart{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		log.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique}).
@@ -167,7 +167,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		if seek, ok := p.resetInputs[msg.Resource.Unique]; ok {
 			res.Seek = seek
 		}
-	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
 		msg := &kpmsg.EventMessageResourceFinish{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 
@@ -195,20 +195,20 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		switch p.playProvider.GetPlayModel() {
 		case config.PLAY_MODEL_LIST:
 			p.currentIndex = p.currentIndex + 1
-			if p.currentIndex >= uint32(len(p.inputs.resources)) {
+			if p.currentIndex >= len(p.inputs.resources) {
 				log.Info("the playlist has been play completed")
 				stopCorePlay()
 				return
 			}
 		case config.PLAY_MODEL_LOOP:
 			p.currentIndex = p.currentIndex + 1
-			if p.currentIndex >= uint32(len(p.inputs.resources)) {
+			if p.currentIndex >= len(p.inputs.resources) {
 				p.currentIndex = 0
 				log.Infof("Running mode on [%s]. will a new loop will take place...", strings.ToLower(p.playProvider.GetPlayModel().String()))
 			}
 		case config.PLAY_MODEL_QUEUE:
 			p.currentIndex = p.currentIndex + 1
-			if p.currentIndex >= uint32(len(p.inputs.resources)) {
+			if p.currentIndex >= len(p.inputs.resources) {
 				log.Infof("Running mode on [%s]. wait for the resource file to be added...", strings.ToLower(p.playProvider.GetPlayModel().String()))
 				return // wait for new resource
 			}
@@ -229,7 +229,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 
 			// random index
 			p.randomModeUniqueNameHistory = append(p.randomModeUniqueNameHistory, p.inputs.resources[p.currentIndex].Unique)
-			p.currentIndex = uint32(rand.Intn(len(p.randomModeUniqueNameList)))
+			p.currentIndex = rand.Intn(len(p.randomModeUniqueNameList))
 		}
 		p.addNextResourceToCore()
 	}
@@ -253,7 +253,7 @@ func (p *Provider) addNextResourceToCore() {
 		}
 	}
 
-	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
+	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
 		Resource: &kpproto.PromptResource{
 			Path:   encodePath,
 			Unique: currentResource.Unique,
@@ -266,7 +266,7 @@ func (p *Provider) addNextResourceToCore() {
 }
 
 func stopCorePlay() {
-	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLAYER_STOP, &prompt.EventPromptPlayerStop{}); err != nil {
+	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_STOP, &prompt.EventPromptPlayerStop{}); err != nil {
 		log.Warn(err)
 	}
 }

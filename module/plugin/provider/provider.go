@@ -118,7 +118,7 @@ func (p *Provider) ValidateConfig() error {
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
-	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD:
 		msg := &kpmsg.EventMessagePluginAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path, "author": msg.Plugin.Author})
@@ -135,7 +135,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		plugin.LoadedTime = uint64(time.Now().Unix())
 
 		logFields.Info("add plugin success")
-	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_REMOVE:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_REMOVE:
 		msg := &kpmsg.EventMessagePluginRemove{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path})
@@ -150,7 +150,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 
 		logFields.Info("remove plugin success")
-	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_UPDATE:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_UPDATE:
 		msg := &kpmsg.EventMessagePluginUpdate{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path})
@@ -171,7 +171,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		plugin.Params = params
 
 		logFields.Info("update plugin success")
-	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
 		// reload failed plugin
 		p.list.lock.Lock()
 		defer p.list.lock.Unlock()
@@ -185,7 +185,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 				}
 
 				coreKplayer := core.GetLibKplayerInstance()
-				if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
+				if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
 					Plugin: &kpprompt.PromptPlugin{
 						Path:   item.Path,
 						Unique: item.Unique,
@@ -244,7 +244,7 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 		return err
 	}
 
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
 		Plugin: &kpprompt.PromptPlugin{
 			Path:    plugin.Path,
 			Content: fileContent,

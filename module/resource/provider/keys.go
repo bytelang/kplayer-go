@@ -35,8 +35,8 @@ func (rs *Resources) GetResourceByUnique(unique string) (*moduletypes.Resource, 
 	return nil, 0, ResourceNotFound
 }
 
-func (rs *Resources) GetResourceByIndex(index uint32) (*moduletypes.Resource, error) {
-	if index > uint32(len(rs.resources)) {
+func (rs *Resources) GetResourceByIndex(index int) (*moduletypes.Resource, error) {
+	if index > len(rs.resources) {
 		return nil, ResourceNotFound
 	}
 

@@ -20,6 +20,7 @@ type KeeperContext struct {
 	action    kpproto.EventMessageAction
 	ch        chan string
 	validator func(msg string) bool
+	dirty     bool
 }
 
 func NewKeeperContext(id string, action kpproto.EventMessageAction, validator func(msg string) bool) KeeperContext {
@@ -28,6 +29,7 @@ func NewKeeperContext(id string, action kpproto.EventMessageAction, validator fu
 		action:    action,
 		ch:        make(chan string),
 		validator: validator,
+		dirty:     false,
 	}
 }
 
@@ -61,6 +63,7 @@ func (m *ModuleKeeper) GetKeeperContext(id string) *KeeperContext {
 func (m *ModuleKeeper) RegisterKeeperChannel(ctx KeeperContext) error {
 	m.triggerMutex.Lock()
 	defer m.triggerMutex.Unlock()
+
 	if m.GetKeeperContext(ctx.id) != nil {
 		return fmt.Errorf("id has existed: %s", ctx.id)
 	}
@@ -73,11 +76,20 @@ func (m *ModuleKeeper) Trigger(message *kpproto.KPMessage) {
 	m.triggerMutex.Lock()
 	defer m.triggerMutex.Unlock()
 
+	// delete dirty object
+	washingKeeper := []KeeperContext{}
+	for _, item := range m.keeper {
+		if item.dirty == false {
+			washingKeeper = append(washingKeeper, item)
+		}
+	}
+	m.keeper = washingKeeper
+
 	for key, item := range m.keeper {
 		if item.action == message.Action {
 			if item.validator(message.Body) {
 				item.ch <- message.Body
-				m.keeper = append(m.keeper[:key], m.keeper[key+1:]...)
+				m.keeper[key].dirty = true
 			}
 		}
 	}

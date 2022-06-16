@@ -70,7 +70,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Output)
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
-	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_OUTPUT_ADD:
 		msg := &kpmsg.EventMessageOutputAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 
@@ -105,7 +105,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		output.StartTime = uint64(time.Now().Unix())
 		output.EndTime = 0
 		output.Connected = true
-	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_REMOVE:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_OUTPUT_REMOVE:
 		msg := &kpmsg.EventMessageOutputRemove{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{
@@ -118,7 +118,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 
 		logFields.Info("remove output success")
-	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_DISCONNECT:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_OUTPUT_DISCONNECT:
 		msg := &kpmsg.EventMessageOutputDisconnect{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 
@@ -177,7 +177,7 @@ func (p *Provider) addOutput(output moduletypes.Output) error {
 	// send prompt
 	corePlayer := core.GetLibKplayerInstance()
 
-	if err := corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
+	if err := corePlayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
 		Output: &kpprompt.PromptOutput{
 			Path:   output.Path,
 			Unique: output.Unique,
@@ -209,7 +209,7 @@ func (p *Provider) StartReconnect() {
 			time.Sleep(time.Second * time.Duration(p.reconnectInternal))
 
 			corePlayer := core.GetLibKplayerInstance()
-			_ = corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
+			_ = corePlayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
 				Output: &kpprompt.PromptOutput{
 					Path:   ins.Path,
 					Unique: ins.Unique,

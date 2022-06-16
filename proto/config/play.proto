@@ -32,7 +32,6 @@ message Play {
   Rpc rpc = 6 [(gogoproto.moretags) = "mapstructure:\"rpc\""];
   bool skip_invalid_resource = 9 [(gogoproto.moretags) = "validate:\"\" mapstructure:\"skip_invalid_resource\""];
   Encode encode = 10 [(gogoproto.nullable) = true, (gogoproto.moretags) = "validate:\"required\""];
-  uint32 delay_queue_size = 11 [(gogoproto.moretags) = "validate:\"numeric,max=32767,min=1\" mapstructure:\"delay_queue_size\""];
   string fill_strategy = 12 [(gogoproto.moretags) = "validate:\"oneof=tile ratio\" mapstructure:\"fill_strategy\""];
 }
 

@@ -311,24 +311,23 @@ func startCommand() *cobra.Command {
 				cfg.Play.PlayModel = config.PLAY_FILL_STRATEGY_name[int32(config.PLAY_MODEL_LIST)]
 				cfg.Play.EncodeModel = config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)]
 				cfg.Play.CacheOn = true
-				cfg.Play.DelayQueueSize = 500
 				cfg.Play.SkipInvalidResource = false
 				cfg.Output.Lists = []*config.OutputInstance{}
 				log.Info("running on generate cache model")
 			}
 
 			coreKplayer := core.GetLibKplayerInstance()
-			if err := coreKplayer.SetOptions(cfg.Play.EncodeModel,
-				cfg.Play.Encode.VideoWidth,
-				cfg.Play.Encode.VideoHeight,
-				cfg.Play.Encode.BitRate,
-				cfg.Play.Encode.AvgQuality,
-				cfg.Play.Encode.VideoFps,
-				cfg.Play.Encode.AudioSampleRate,
-				cfg.Play.Encode.AudioChannelLayout,
-				cfg.Play.Encode.AudioChannels,
-				cfg.Play.DelayQueueSize,
-				config.PLAY_FILL_STRATEGY_value[strings.ToUpper(cfg.Play.FillStrategy)]); err != nil {
+			if err := coreKplayer.SetOptions(map[core.CoreKplayerOption]interface{}{
+				core.ProtocolOption:     cfg.Play.EncodeModel,
+				core.VideoWidthOption:   cfg.Play.Encode.VideoWidth,
+				core.VideoHeightOption:  cfg.Play.Encode.VideoHeight,
+				core.VideoBitrateOption: cfg.Play.Encode.BitRate,
+				core.VideoQualityOption: cfg.Play.Encode.AvgQuality,
+				core.VideoFillStrategy:  cfg.Play.Encode.VideoFps,
+				core.AudioSampleRate:    cfg.Play.Encode.AudioSampleRate,
+				core.AudioChannelLayout: cfg.Play.Encode.AudioChannelLayout,
+				core.AudioChannels:      cfg.Play.Encode.AudioChannels,
+				core.VideoFillStrategy:  config.PLAY_FILL_STRATEGY_value[strings.ToUpper(cfg.Play.FillStrategy)]}); err != nil {
 				log.Fatal(err)
 			}
 			coreKplayer.SetCacheOn(cfg.Play.CacheOn)
@@ -336,7 +335,7 @@ func startCommand() *cobra.Command {
 
 			serverStopChan := make(chan bool)
 
-			var coreLogLevel int = 0
+			var coreLogLevel int
 			level, err := cmd.Flags().GetString(kptypes.FlagLogLevel)
 			if err != nil {
 				log.Fatal(err)
@@ -344,11 +343,13 @@ func startCommand() *cobra.Command {
 			logLevel, err := log.ParseLevel(level)
 			switch logLevel {
 			case log.TraceLevel:
-				coreLogLevel = 2
+				coreLogLevel = 0
 			case log.DebugLevel:
 				coreLogLevel = 1
+			case log.ErrorLevel:
+				coreLogLevel = 3
 			default:
-				coreLogLevel = 0
+				coreLogLevel = 2
 			}
 
 			// module option
