@@ -24,6 +24,7 @@ type ProviderI interface {
 
 type Provider struct {
 	module.ModuleKeeper
+	svrproto.UnimplementedOutputGreeterServer
 
 	// module outputs
 	configList        Outputs

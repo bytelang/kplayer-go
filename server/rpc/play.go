@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"github.com/bytelang/kplayer/module/play/provider"
 	"github.com/bytelang/kplayer/types"
 	"net/http"
@@ -19,7 +20,7 @@ func NewPlay(pi provider.ProviderI) *Play {
 
 // Duration
 func (s *Play) Duration(r *http.Request, args *server.PlayDurationArgs, reply *server.PlayDurationReply) error {
-	result, err := s.pi.PlayDuration(args)
+	result, err := s.pi.PlayDuration(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -34,7 +35,7 @@ func (s *Play) Duration(r *http.Request, args *server.PlayDurationArgs, reply *s
 
 // Stop  stop player on idle
 func (s *Play) Stop(r *http.Request, args *server.PlayStopArgs, reply *server.PlayStopReply) error {
-	_, err := s.pi.PlayStop(args)
+	_, err := s.pi.PlayStop(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -44,7 +45,7 @@ func (s *Play) Stop(r *http.Request, args *server.PlayStopArgs, reply *server.Pl
 
 // Pause
 func (s *Play) Pause(r *http.Request, args *server.PlayPauseArgs, reply *server.PlayPauseReply) error {
-	_, err := s.pi.PlayPause(args)
+	_, err := s.pi.PlayPause(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -53,7 +54,7 @@ func (s *Play) Pause(r *http.Request, args *server.PlayPauseArgs, reply *server.
 
 // Continue
 func (s *Play) Continue(r *http.Request, args *server.PlayContinueArgs, reply *server.PlayContinueReply) error {
-	_, err := s.pi.PlayContinue(args)
+	_, err := s.pi.PlayContinue(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func (s *Play) Continue(r *http.Request, args *server.PlayContinueArgs, reply *s
 
 // Skip
 func (s *Play) Skip(r *http.Request, args *server.PlaySkipArgs, reply *server.PlaySkipReply) error {
-	_, err := s.pi.PlaySkip(args)
+	_, err := s.pi.PlaySkip(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -71,7 +72,7 @@ func (s *Play) Skip(r *http.Request, args *server.PlaySkipArgs, reply *server.Pl
 }
 
 func (s *Play) Information(r *http.Request, args *server.PlayInformationArgs, reply *server.PlayInformationReply) error {
-	info, err := s.pi.PlayInformation(args)
+	info, err := s.pi.PlayInformation(context.TODO(), args)
 	if err != nil {
 		return err
 	}

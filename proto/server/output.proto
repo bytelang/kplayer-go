@@ -5,6 +5,7 @@ package RPCProto;
 option go_package = "github.com/bytelang/kplayer/types/server";
 
 import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
 
 message Output {
   string path = 1 [(gogoproto.moretags) = "validate:\"required\""];

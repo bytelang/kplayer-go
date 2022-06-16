@@ -74,7 +74,7 @@ func Execute(rootCmd *cobra.Command, defaultHome string, defaultFile string) err
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, kptypes.ClientContextKey, kptypes.DefaultClientContext())
 	ctx = context.WithValue(ctx, kptypes.ModuleManagerContextKey, app.ModuleManager)
-	ctx = context.WithValue(ctx, kptypes.ServerCreatorContextKey, server.NewJsonRPCServer())
+	ctx = context.WithValue(ctx, kptypes.ServerCreatorContextKey, server.NewHttpServer())
 
 	return kptypes.SetCommandContextAndExecute(rootCmd, ctx)
 }
@@ -197,7 +197,8 @@ func setDefaultConfig(v *viper.Viper) {
 	v.SetDefault("play.fill_strategy", "tile")
 
 	v.SetDefault("play.rpc.on", true)
-	v.SetDefault("play.rpc.port", kptypes.DefaultRPCPort)
+	v.SetDefault("play.rpc.http_port", kptypes.DefaultHttpPort)
+	v.SetDefault("play.rpc.grpc_port", kptypes.DefaultRPCPort)
 	v.SetDefault("play.rpc.address", kptypes.DefaultRPCAddress)
 
 	v.SetDefault("play.encode.video_width", 854)

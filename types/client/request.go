@@ -23,8 +23,8 @@ type result struct {
 	Id     string        `json:"id"`
 }
 
-func ClientRequest(rpc *config.Rpc, method string, request proto.Message, response proto.Message) error {
-	if !rpc.On {
+func ClientRequest(server *config.Server, method string, request proto.Message, response proto.Message) error {
+	if !server.On {
 		return fmt.Errorf("rpc server not start up")
 	}
 
@@ -39,7 +39,7 @@ func ClientRequest(rpc *config.Rpc, method string, request proto.Message, respon
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://127.0.0.1:%d/rpc", rpc.Port), strings.NewReader(string(bodyContent)))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://127.0.0.1:%d/rpc", server.GrpcPort), strings.NewReader(string(bodyContent)))
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -13,7 +14,7 @@ import (
 	"time"
 )
 
-func (p *Provider) PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error) {
+func (p *Provider) PlayStop(ctx context.Context, args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_STOP, &prompt.EventPromptPlayerStop{}); err != nil {
 		return nil, err
@@ -40,7 +41,7 @@ func (p *Provider) PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopRepl
 	return &svrproto.PlayStopReply{}, nil
 }
 
-func (p *Provider) PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error) {
+func (p *Provider) PlayPause(ctx context.Context, args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_PAUSE, &prompt.EventPromptPlayerPause{}); err != nil {
 		return nil, err
@@ -67,7 +68,7 @@ func (p *Provider) PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseR
 	return &svrproto.PlayPauseReply{}, nil
 }
 
-func (p *Provider) PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error) {
+func (p *Provider) PlaySkip(ctx context.Context, args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error) {
 	// send skip prompt
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_SKIP, &prompt.EventPromptPlayerSkip{}); err != nil {
@@ -95,7 +96,7 @@ func (p *Provider) PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipRepl
 	return &svrproto.PlaySkipReply{}, nil
 }
 
-func (p *Provider) PlayContinue(args *svrproto.PlayContinueArgs) (*svrproto.PlayContinueReply, error) {
+func (p *Provider) PlayContinue(ctx context.Context, args *svrproto.PlayContinueArgs) (*svrproto.PlayContinueReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_CONTINUE, &prompt.EventPromptPlayerContinue{}); err != nil {
 		return nil, err
@@ -122,7 +123,7 @@ func (p *Provider) PlayContinue(args *svrproto.PlayContinueArgs) (*svrproto.Play
 	return &svrproto.PlayContinueReply{}, nil
 }
 
-func (p *Provider) PlayDuration(args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error) {
+func (p *Provider) PlayDuration(ctx context.Context, args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error) {
 	reply := &svrproto.PlayDurationReply{
 		Time:              p.startTime.String(),
 		StartTimestamp:    uint64(p.startTime.Unix()),
@@ -131,7 +132,7 @@ func (p *Provider) PlayDuration(args *svrproto.PlayDurationArgs) (*svrproto.Play
 	return reply, nil
 }
 
-func (p *Provider) PlayInformation(args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error) {
+func (p *Provider) PlayInformation(ctx context.Context, args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
 	// get core information
 	info := coreKplayer.GetInformation()
@@ -148,6 +149,6 @@ func (p *Provider) PlayInformation(args *svrproto.PlayInformationArgs) (*svrprot
 	return reply, nil
 }
 
-func (p *Provider) GetRPCParams() config.Rpc {
+func (p *Provider) GetRPCParams() config.Server {
 	return p.rpc
 }

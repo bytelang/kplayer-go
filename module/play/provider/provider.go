@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"github.com/bytelang/kplayer/module"
 	kptypes "github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/config"
@@ -14,13 +15,13 @@ import (
 type ProviderI interface {
 	GetStartPoint() uint32
 	GetPlayModel() config.PLAY_MODEL
-	GetRPCParams() config.Rpc
-	PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error)
-	PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error)
-	PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error)
-	PlayContinue(args *svrproto.PlayContinueArgs) (*svrproto.PlayContinueReply, error)
-	PlayDuration(args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error)
-	PlayInformation(args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error)
+	GetRPCParams() config.Server
+	PlayStop(ctx context.Context, args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error)
+	PlayPause(ctx context.Context, args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error)
+	PlaySkip(ctx context.Context, args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error)
+	PlayContinue(ctx context.Context, args *svrproto.PlayContinueArgs) (*svrproto.PlayContinueReply, error)
+	PlayDuration(ctx context.Context, args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error)
+	PlayInformation(ctx context.Context, args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error)
 }
 
 var _ ProviderI = &Provider{}
@@ -32,7 +33,7 @@ type Provider struct {
 	// config
 	startPoint uint32
 	playMode   config.PLAY_MODEL
-	rpc        config.Rpc
+	rpc        config.Server
 
 	// module member
 	startTime time.Time

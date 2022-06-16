@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package RPCProto;
+
+option go_package = "github.com/bytelang/kplayer/types/server";
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "play.proto";
+import "output.proto";
+import "plugin.proto";
+import "resource.proto";
+
+
+service PlayGreeter {
+  // Player
+  rpc PlayStop(PlayStopArgs) returns (PlayStopReply){
+    option (google.api.http) = {
+      post: "/play/stop"
+    };
+  }
+  rpc PlayDuration(PlayDurationArgs) returns (PlayDurationReply){
+    option (google.api.http) = {
+      get: "/play/duration"
+    };
+  }
+  rpc PlayPause(PlayPauseArgs) returns (PlayPauseReply){
+    option (google.api.http) = {
+      post: "/play/pause"
+    };
+  }
+  rpc PlayContinue(PlayContinueArgs) returns (PlayContinueReply){
+    option (google.api.http) = {
+      post: "/play/continue"
+    };
+  }
+  rpc PlayInformation(PlayInformationArgs) returns (PlayInformationReply){
+    option (google.api.http) = {
+      get: "/play/information"
+    };
+  }
+}
+
+service OutputGreeter {
+  // Output
+  rpc OutputAdd(OutputAddArgs) returns (OutputAddReply){
+    option (google.api.http) = {
+      post: "/output/add"
+    };
+  }
+  rpc OutputRemove(OutputRemoveArgs) returns (OutputRemoveReply){
+    option (google.api.http) = {
+      delete: "/output/remove"
+    };
+  }
+  rpc OutputList(OutputListArgs) returns (OutputListReply){
+    option (google.api.http) = {
+      get: "/output/list"
+    };
+  }
+}
+
+service PluginGreeter {
+  // Plugin
+  rpc PluginList(PluginListArgs) returns (PluginListReply){
+    option (google.api.http) = {
+      get: "/plugin/list"
+    };
+  }
+  rpc PluginAdd(PluginAddArgs) returns (PluginAddReplay){
+    option (google.api.http) = {
+      post: "/plugin/add"
+    };
+  }
+  rpc PluginRemove(PluginRemoveArgs) returns (PluginRemoveReply){
+    option (google.api.http) = {
+      delete: "/plugin/remove"
+    };
+  }
+  rpc PluginUpdate(PluginUpdateArgs) returns (PluginUpdateReply){
+    option (google.api.http) = {
+      patch: "/plugin/update"
+    };
+  }
+}
+
+service ResourceGreeter {
+  // Resource
+  rpc ResourceAdd(ResourceAddArgs) returns (ResourceAddReply){
+    option (google.api.http) = {
+      post: "/resource/add"
+    };
+  }
+  rpc ResourceRemove(ResourceRemoveArgs) returns (ResourceRemoveReply){
+    option (google.api.http) = {
+      delete: "/resource/remove"
+    };
+  }
+  rpc ResourceList(ResourceListArgs) returns (ResourceListReply){
+    option (google.api.http) = {
+      get: "/resource/list"
+    };
+  }
+  rpc ResourceListAll(ResourceAllListArgs) returns (ResourceAllListReply){
+    option (google.api.http) = {
+      get: "/resource/list-all"
+    };
+  }
+  rpc ResourceCurrent(ResourceCurrentArgs) returns (ResourceCurrentReply){
+    option (google.api.http) = {
+      get: "/resource/current"
+    };
+  }
+  rpc ResourceSeek(ResourceSeekArgs) returns (ResourceSeekReply){
+    option (google.api.http) = {
+      post: "/resource/seek"
+    };
+  }
+}

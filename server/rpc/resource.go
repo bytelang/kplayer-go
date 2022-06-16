@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/module/resource/provider"
 	svrproto "github.com/bytelang/kplayer/types/server"
@@ -19,7 +20,7 @@ func NewResource(ri provider.ProviderI) *Resource {
 
 // Add add Resource to core
 func (s *Resource) Add(r *http.Request, args *svrproto.ResourceAddArgs, reply *svrproto.ResourceAddReply) (err error) {
-	addResult, err := s.pi.ResourceAdd(args)
+	addResult, err := s.pi.ResourceAdd(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -29,7 +30,7 @@ func (s *Resource) Add(r *http.Request, args *svrproto.ResourceAddArgs, reply *s
 }
 
 func (s *Resource) Seek(r *http.Request, args *svrproto.ResourceSeekArgs, reply *svrproto.ResourceSeekReply) (err error) {
-	seekResult, err := s.pi.ResourceSeek(args)
+	seekResult, err := s.pi.ResourceSeek(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -39,7 +40,7 @@ func (s *Resource) Seek(r *http.Request, args *svrproto.ResourceSeekArgs, reply 
 
 // Remove remove Resource to core
 func (s *Resource) Remove(r *http.Request, args *svrproto.ResourceRemoveArgs, reply *svrproto.ResourceRemoveReply) (err error) {
-	removeResult, err := s.pi.ResourceRemove(args)
+	removeResult, err := s.pi.ResourceRemove(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -50,7 +51,7 @@ func (s *Resource) Remove(r *http.Request, args *svrproto.ResourceRemoveArgs, re
 
 // List get untreated resource list
 func (s *Resource) List(r *http.Request, args *svrproto.ResourceListArgs, reply *svrproto.ResourceListReply) (err error) {
-	listResult, err := s.pi.ResourceList(args)
+	listResult, err := s.pi.ResourceList(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -61,7 +62,7 @@ func (s *Resource) List(r *http.Request, args *svrproto.ResourceListArgs, reply 
 
 // AllList get all resource list
 func (s *Resource) AllList(r *http.Request, args *svrproto.ResourceAllListArgs, reply *svrproto.ResourceAllListReply) (err error) {
-	listResult, err := s.pi.ResourceAllList(args)
+	listResult, err := s.pi.ResourceAllList(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -72,7 +73,7 @@ func (s *Resource) AllList(r *http.Request, args *svrproto.ResourceAllListArgs, 
 
 // Current get current play resource
 func (s *Resource) Current(r *http.Request, args *svrproto.ResourceCurrentArgs, reply *svrproto.ResourceCurrentReply) (err error) {
-	currentResource, err := s.pi.ResourceCurrent(args)
+	currentResource, err := s.pi.ResourceCurrent(context.TODO(), args)
 	if err != nil {
 		return err
 	}

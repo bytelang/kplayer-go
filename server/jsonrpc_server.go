@@ -61,7 +61,7 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 	m.Handle("/rpc", s)
 	m.Handle("/websocket", websocket.Handler(wsClientHandler))
 	server := &http.Server{
-		Addr:              fmt.Sprintf("%s:%d", rpcParams.Address, rpcParams.Port),
+		Addr:              fmt.Sprintf("%s:%d", rpcParams.Address, rpcParams.HttpPort),
 		Handler:           m,
 		ReadTimeout:       time.Second * 10,
 		ReadHeaderTimeout: time.Second * 10,
@@ -73,11 +73,11 @@ func (jrs *jsonRPCServer) StartServer(stopChan chan bool, mm module.ModuleManage
 			log.Fatal(err)
 		}
 
-		log.Info("rpc server hutdown success")
+		log.Info("rpc server shutdown success")
 		stopChan <- true
 	}()
 
-	log.WithFields(log.Fields{"address": rpcParams.Address, "port": rpcParams.Port}).Info("rpc server listening")
+	log.WithFields(log.Fields{"address": rpcParams.Address, "port": rpcParams.HttpPort}).Info("rpc server listening")
 
 	<-stopChan
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

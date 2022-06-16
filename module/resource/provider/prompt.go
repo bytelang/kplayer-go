@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -15,7 +16,7 @@ import (
 	"time"
 )
 
-func (p *Provider) ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error) {
+func (p *Provider) ResourceAdd(ctx context.Context, resource *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error) {
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
@@ -55,7 +56,7 @@ func (p *Provider) ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.Re
 	return reply, nil
 }
 
-func (p *Provider) ResourceRemove(resource *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error) {
+func (p *Provider) ResourceRemove(ctx context.Context, resource *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error) {
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
@@ -82,7 +83,7 @@ func (p *Provider) ResourceRemove(resource *svrproto.ResourceRemoveArgs) (*svrpr
 	return reply, nil
 }
 
-func (p *Provider) ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {
+func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {
 	res := []svrproto.Resource{}
 	for _, item := range p.inputs.resources[p.currentIndex+1:] {
 		res = append(res, svrproto.Resource{
@@ -102,7 +103,7 @@ func (p *Provider) ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceL
 	return reply, nil
 }
 
-func (p *Provider) ResourceAllList(*svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error) {
+func (p *Provider) ResourceAllList(ctx context.Context, args *svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error) {
 	res := []svrproto.Resource{}
 	for _, item := range p.inputs.resources {
 		res = append(res, svrproto.Resource{
@@ -156,7 +157,7 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 	return reply, nil
 }
 
-func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error) {
+func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_CURRENT, &kpprompt.EventPromptResourceCurrent{}); err != nil {
 		return nil, err
@@ -201,7 +202,7 @@ func (p *Provider) ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.Res
 	return reply, nil
 }
 
-func (p *Provider) ResourceSeek(args *svrproto.ResourceSeekArgs) (*svrproto.ResourceSeekReply, error) {
+func (p *Provider) ResourceSeek(ctx context.Context, args *svrproto.ResourceSeekArgs) (*svrproto.ResourceSeekReply, error) {
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
@@ -213,7 +214,7 @@ func (p *Provider) ResourceSeek(args *svrproto.ResourceSeekArgs) (*svrproto.Reso
 	p.resetInputs[seekRes.Unique] = seekRes.Seek
 	p.currentIndex = searchIndex - 1
 
-	if _, err := p.playProvider.PlaySkip(&svrproto.PlaySkipArgs{}); err != nil {
+	if _, err := p.playProvider.PlaySkip(ctx, &svrproto.PlaySkipArgs{}); err != nil {
 		return nil, err
 	}
 

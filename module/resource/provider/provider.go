@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -27,12 +28,12 @@ func init() {
 }
 
 type ProviderI interface {
-	ResourceAdd(resource *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error)
-	ResourceRemove(resource *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error)
-	ResourceList(*svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error)
-	ResourceAllList(*svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error)
-	ResourceCurrent(*svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error)
-	ResourceSeek(*svrproto.ResourceSeekArgs) (*svrproto.ResourceSeekReply, error)
+	ResourceAdd(context.Context, *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error)
+	ResourceRemove(context.Context, *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error)
+	ResourceList(context.Context, *svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error)
+	ResourceAllList(context.Context, *svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error)
+	ResourceCurrent(context.Context, *svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error)
+	ResourceSeek(context.Context, *svrproto.ResourceSeekArgs) (*svrproto.ResourceSeekReply, error)
 }
 
 var _ ProviderI = &Provider{}
