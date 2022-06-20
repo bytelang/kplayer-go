@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -13,7 +14,7 @@ import (
 	"time"
 )
 
-func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error) {
+func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error) {
 	if err := p.addPlugin(moduletypes.Plugin{
 		Path:       GetPluginPath(args.Plugin.Path),
 		Unique:     args.Plugin.Unique,
@@ -58,7 +59,7 @@ func (p *Provider) PluginAdd(args *svrproto.PluginAddArgs) (*svrproto.PluginAddR
 	return reply, nil
 }
 
-func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error) {
+func (p *Provider) PluginRemove(ctx context.Context, args *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error) {
 	// validate
 	if !p.list.Exist(args.Unique) {
 		return nil, PluginUniqueNotFound
@@ -100,7 +101,7 @@ func (p *Provider) PluginRemove(args *svrproto.PluginRemoveArgs) (*svrproto.Plug
 	return reply, nil
 }
 
-func (p *Provider) PluginList(plugin *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
+func (p *Provider) PluginList(ctx context.Context, plugin *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
 	reply := &svrproto.PluginListReply{}
 	for _, item := range p.list.plugins {
 		reply.Plugins = append(reply.Plugins, &svrproto.Plugin{
@@ -115,7 +116,7 @@ func (p *Provider) PluginList(plugin *svrproto.PluginListArgs) (*svrproto.Plugin
 	return reply, nil
 }
 
-func (p *Provider) PluginListFromCore(args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
+func (p *Provider) PluginListFromCore(ctx context.Context, args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_LIST, &kpprompt.EventPromptPluginList{}); err != nil {
 		return nil, err
@@ -155,7 +156,7 @@ func (p *Provider) PluginListFromCore(args *svrproto.PluginListArgs) (*svrproto.
 	return reply, nil
 }
 
-func (p *Provider) PluginUpdate(args *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error) {
+func (p *Provider) PluginUpdate(ctx context.Context, args *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error) {
 	// validate
 	if !p.list.Exist(args.Unique) {
 		return nil, PluginUniqueNotFound

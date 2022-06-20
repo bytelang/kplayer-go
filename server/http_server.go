@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/module"
+	outputprovider "github.com/bytelang/kplayer/module/output/provider"
 	playprovider "github.com/bytelang/kplayer/module/play/provider"
+	pluginprovider "github.com/bytelang/kplayer/module/plugin/provider"
+	resourceprovider "github.com/bytelang/kplayer/module/resource/provider"
 	"github.com/bytelang/kplayer/types/server"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	log "github.com/sirupsen/logrus"
@@ -25,6 +28,9 @@ var _ server.ServerCreator = &httpServer{}
 
 func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 	playModule := mm.GetModule(playprovider.ModuleName).(playprovider.ProviderI)
+	outputModule := mm.GetModule(outputprovider.ModuleName).(outputprovider.ProviderI)
+	pluginModule := mm.GetModule(pluginprovider.ModuleName).(pluginprovider.ProviderI)
+	resourceModule := mm.GetModule(resourceprovider.ModuleName).(resourceprovider.ProviderI)
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -42,7 +48,10 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 			log.WithField("error", err).Panic("start grpc gateway server failed")
 		}
 
+		server.RegisterOutputGreeterServer(grpcSvc, outputModule)
 		server.RegisterPlayGreeterServer(grpcSvc, playModule)
+		server.RegisterPluginGreeterServer(grpcSvc, pluginModule)
+		server.RegisterResourceGreeterServer(grpcSvc, resourceModule)
 
 		err = grpcSvc.Serve(listen)
 		if err != nil {
@@ -52,6 +61,7 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 	}()
 
 	go func() {
+		// grpc-gateway server
 		ctx := context.Background()
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
@@ -84,5 +94,5 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 
 	<-stopChan
 	grpcSvc.Stop()
-	httpSvc.Close()
+	_ = httpSvc.Close()
 }

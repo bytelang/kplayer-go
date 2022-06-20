@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -18,14 +19,15 @@ import (
 )
 
 type ProviderI interface {
-	PluginAdd(plugin *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error)
-	PluginRemove(plugin *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error)
-	PluginList(plugin *svrproto.PluginListArgs) (*svrproto.PluginListReply, error)
-	PluginUpdate(plugin *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error)
+	PluginAdd(ctx context.Context, plugin *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error)
+	PluginRemove(ctx context.Context, plugin *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error)
+	PluginList(ctx context.Context, plugin *svrproto.PluginListArgs) (*svrproto.PluginListReply, error)
+	PluginUpdate(ctx context.Context, plugin *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error)
 }
 
 type Provider struct {
 	module.ModuleKeeper
+	svrproto.UnimplementedPluginGreeterServer
 
 	// config
 	list Plugins

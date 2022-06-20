@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -17,9 +18,9 @@ import (
 )
 
 type ProviderI interface {
-	OutputAdd(output *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error)
-	OutputRemove(output *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error)
-	OutputList(output *svrproto.OutputListArgs) (*svrproto.OutputListReply, error)
+	OutputAdd(ctx context.Context, output *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error)
+	OutputRemove(ctx context.Context, output *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error)
+	OutputList(ctx context.Context, output *svrproto.OutputListArgs) (*svrproto.OutputListReply, error)
 }
 
 type Provider struct {

@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/module/output/provider"
 	svrproto "github.com/bytelang/kplayer/types/server"
@@ -45,7 +46,7 @@ func (o *Output) Add(r *http.Request, args *svrproto.OutputAddArgs, reply *svrpr
 	}
 
 	// call provider add
-	addResource, err := o.pi.OutputAdd(args)
+	addResource, err := o.pi.OutputAdd(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -57,7 +58,7 @@ func (o *Output) Add(r *http.Request, args *svrproto.OutputAddArgs, reply *svrpr
 
 // Remove
 func (o *Output) Remove(r *http.Request, args *svrproto.OutputRemoveArgs, reply *svrproto.OutputRemoveReply) error {
-	removeResource, err := o.pi.OutputRemove(args)
+	removeResource, err := o.pi.OutputRemove(context.TODO(), args)
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,7 @@ func (o *Output) Remove(r *http.Request, args *svrproto.OutputRemoveArgs, reply 
 
 // List
 func (o *Output) List(r *http.Request, args *svrproto.OutputListArgs, reply *svrproto.OutputListReply) error {
-	listResource, err := o.pi.OutputList(args)
+	listResource, err := o.pi.OutputList(context.TODO(), args)
 	if err != nil {
 		return err
 	}

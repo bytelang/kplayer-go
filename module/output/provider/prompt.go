@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -13,7 +14,7 @@ import (
 	"time"
 )
 
-func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error) {
+func (p *Provider) OutputAdd(ctx context.Context, args *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error) {
 	outputUnique := args.Output.Unique
 	outputPath := args.Output.Path
 	if outputUnique == "" {
@@ -56,7 +57,7 @@ func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddR
 	}, nil
 }
 
-func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error) {
+func (p *Provider) OutputRemove(ctx context.Context, args *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error) {
 	if !p.configList.Exist(args.Unique) {
 		return nil, OutputUniqueNotFound
 	}
@@ -111,7 +112,7 @@ func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.Outp
 	}, nil
 }
 
-func (p *Provider) OutputList(args *svrproto.OutputListArgs) (*svrproto.OutputListReply, error) {
+func (p *Provider) OutputList(ctx context.Context, args *svrproto.OutputListArgs) (*svrproto.OutputListReply, error) {
 	outputs := []*svrproto.OutputModule{}
 	for _, item := range p.configList.outputs {
 		outputs = append(outputs, &svrproto.OutputModule{

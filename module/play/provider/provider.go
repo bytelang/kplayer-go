@@ -29,6 +29,7 @@ var _ ProviderI = &Provider{}
 // Provider play module provider
 type Provider struct {
 	module.ModuleKeeper
+	svrproto.UnimplementedPlayGreeterServer
 
 	// config
 	startPoint uint32
