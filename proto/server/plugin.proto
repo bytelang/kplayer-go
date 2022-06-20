@@ -21,15 +21,15 @@ message Plugin {
 message PluginListArgs {
 }
 message PluginListReply {
-  repeated Plugin plugins = 1 [(gogoproto.nullable) = true];
+  repeated Plugin plugins = 1;
 }
 
 // add
 message PluginAddArgs {
-  Plugin plugin = 1 [(gogoproto.nullable) = false];
+  Plugin plugin = 1;
 }
 message PluginAddReplay {
-  Plugin plugin = 1 [(gogoproto.nullable) = false];
+  Plugin plugin = 1;
 }
 
 // remove
@@ -37,7 +37,7 @@ message PluginRemoveArgs {
   string unique = 1;
 }
 message PluginRemoveReply {
-  Plugin plugin = 1 [(gogoproto.nullable) = false];
+  Plugin plugin = 1;
 }
 
 // Update

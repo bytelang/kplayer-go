@@ -61,7 +61,7 @@ func (s *Resource) List(r *http.Request, args *svrproto.ResourceListArgs, reply 
 }
 
 // AllList get all resource list
-func (s *Resource) AllList(r *http.Request, args *svrproto.ResourceAllListArgs, reply *svrproto.ResourceAllListReply) (err error) {
+func (s *Resource) AllList(r *http.Request, args *svrproto.ResourceListAllArgs, reply *svrproto.ResourceListAllReply) (err error) {
 	listResult, err := s.pi.ResourceListAll(context.TODO(), args)
 	if err != nil {
 		return err

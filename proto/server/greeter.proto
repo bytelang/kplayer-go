@@ -19,6 +19,11 @@ service PlayGreeter {
       post: "/play/stop"
     };
   }
+  rpc PlaySkip(PlaySkipArgs) returns (PlaySkipReply){
+    option (google.api.http) = {
+      post: "/play/skip"
+    };
+  }
   rpc PlayDuration(PlayDurationArgs) returns (PlayDurationReply){
     option (google.api.http) = {
       get: "/play/duration"
@@ -101,7 +106,7 @@ service ResourceGreeter {
       get: "/resource/list"
     };
   }
-  rpc ResourceListAll(ResourceAllListArgs) returns (ResourceAllListReply){
+  rpc ResourceListAll(ResourceListAllArgs) returns (ResourceListAllReply){
     option (google.api.http) = {
       get: "/resource/list-all"
     };

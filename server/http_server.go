@@ -32,10 +32,6 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 	pluginModule := mm.GetModule(pluginprovider.ModuleName).(pluginprovider.ProviderI)
 	resourceModule := mm.GetModule(resourceprovider.ModuleName).(resourceprovider.ProviderI)
 
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
 	grpcEndpoint := fmt.Sprintf("%s:%d", playModule.GetRPCParams().Address, playModule.GetRPCParams().GrpcPort)
 	httpEndpoint := fmt.Sprintf("%s:%d", playModule.GetRPCParams().Address, playModule.GetRPCParams().HttpPort)
 	grpcSvc := grpc.NewServer()
@@ -77,7 +73,19 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 		opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 		err = server.RegisterPlayGreeterHandlerFromEndpoint(ctx, mux, grpcEndpoint, opts)
 		if err != nil {
-			log.WithField("error", err).Panic("start grpc gateway server failed")
+			log.WithField("error", err).Panic("register grpc gateway server failed")
+		}
+		err = server.RegisterOutputGreeterHandlerFromEndpoint(ctx, mux, grpcEndpoint, opts)
+		if err != nil {
+			log.WithField("error", err).Panic("register grpc gateway server failed")
+		}
+		err = server.RegisterPluginGreeterHandlerFromEndpoint(ctx, mux, grpcEndpoint, opts)
+		if err != nil {
+			log.WithField("error", err).Panic("register grpc gateway server failed")
+		}
+		err = server.RegisterResourceGreeterHandlerFromEndpoint(ctx, mux, grpcEndpoint, opts)
+		if err != nil {
+			log.WithField("error", err).Panic("register grpc gateway server failed")
 		}
 
 		httpSvc.Handler = mux

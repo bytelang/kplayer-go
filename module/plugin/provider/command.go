@@ -57,7 +57,7 @@ unique:
 			// request
 			reply := &kpserver.PluginAddReplay{}
 			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Plugin.Add", &kpserver.PluginAddReplay{
-				Plugin: kpserver.Plugin{
+				Plugin: &kpserver.Plugin{
 					Path:   name,
 					Unique: unique,
 					Params: params,
@@ -124,8 +124,7 @@ func ListCommand() *cobra.Command {
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
 			reply := &kpserver.PluginListReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Plugin.List", &kpserver.PluginListReply{
-			}, reply); err != nil {
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Plugin.List", &kpserver.PluginListReply{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}

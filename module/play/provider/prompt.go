@@ -22,7 +22,7 @@ func (p *Provider) PlayStop(ctx context.Context, args *svrproto.PlayStopArgs) (*
 
 	// register prompt
 	endedMsg := &msg.EventMessagePlayerEnded{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_ENDED, func(msg string) bool {
+	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_STOP, func(msg string) bool {
 		types.UnmarshalProtoMessage(msg, endedMsg)
 		return true
 	})

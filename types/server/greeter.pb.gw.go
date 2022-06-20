@@ -51,6 +51,24 @@ func local_request_PlayGreeter_PlayStop_0(ctx context.Context, marshaler runtime
 
 }
 
+func request_PlayGreeter_PlaySkip_0(ctx context.Context, marshaler runtime.Marshaler, client PlayGreeterClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq PlaySkipArgs
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.PlaySkip(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_PlayGreeter_PlaySkip_0(ctx context.Context, marshaler runtime.Marshaler, server PlayGreeterServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq PlaySkipArgs
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.PlaySkip(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 func request_PlayGreeter_PlayDuration_0(ctx context.Context, marshaler runtime.Marshaler, client PlayGreeterClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq PlayDurationArgs
 	var metadata runtime.ServerMetadata
@@ -430,7 +448,7 @@ func local_request_ResourceGreeter_ResourceList_0(ctx context.Context, marshaler
 }
 
 func request_ResourceGreeter_ResourceListAll_0(ctx context.Context, marshaler runtime.Marshaler, client ResourceGreeterClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ResourceAllListArgs
+	var protoReq ResourceListAllArgs
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.ResourceListAll(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -439,7 +457,7 @@ func request_ResourceGreeter_ResourceListAll_0(ctx context.Context, marshaler ru
 }
 
 func local_request_ResourceGreeter_ResourceListAll_0(ctx context.Context, marshaler runtime.Marshaler, server ResourceGreeterServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ResourceAllListArgs
+	var protoReq ResourceListAllArgs
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.ResourceListAll(ctx, &protoReq)
@@ -527,6 +545,29 @@ func RegisterPlayGreeterHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		}
 
 		forward_PlayGreeter_PlayStop_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_PlayGreeter_PlaySkip_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_PlayGreeter_PlaySkip_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_PlayGreeter_PlaySkip_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1009,6 +1050,26 @@ func RegisterPlayGreeterHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
+	mux.Handle("POST", pattern_PlayGreeter_PlaySkip_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_PlayGreeter_PlaySkip_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_PlayGreeter_PlaySkip_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("GET", pattern_PlayGreeter_PlayDuration_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -1095,6 +1156,8 @@ func RegisterPlayGreeterHandlerClient(ctx context.Context, mux *runtime.ServeMux
 var (
 	pattern_PlayGreeter_PlayStop_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"play", "stop"}, "", runtime.AssumeColonVerbOpt(true)))
 
+	pattern_PlayGreeter_PlaySkip_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"play", "skip"}, "", runtime.AssumeColonVerbOpt(true)))
+
 	pattern_PlayGreeter_PlayDuration_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"play", "duration"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_PlayGreeter_PlayPause_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"play", "pause"}, "", runtime.AssumeColonVerbOpt(true)))
@@ -1106,6 +1169,8 @@ var (
 
 var (
 	forward_PlayGreeter_PlayStop_0 = runtime.ForwardResponseMessage
+
+	forward_PlayGreeter_PlaySkip_0 = runtime.ForwardResponseMessage
 
 	forward_PlayGreeter_PlayDuration_0 = runtime.ForwardResponseMessage
 

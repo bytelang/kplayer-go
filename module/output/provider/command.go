@@ -47,7 +47,7 @@ unique_name:
 
 			reply := &kpserver.OutputAddReply{}
 			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Output.Add", &kpserver.OutputAddArgs{
-				Output: kpserver.Output{
+				Output: &kpserver.Output{
 					Path:   path,
 					Unique: unique,
 				},

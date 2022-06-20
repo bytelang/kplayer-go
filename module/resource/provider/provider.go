@@ -31,7 +31,7 @@ type ProviderI interface {
 	ResourceAdd(context.Context, *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error)
 	ResourceRemove(context.Context, *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error)
 	ResourceList(context.Context, *svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error)
-	ResourceListAll(context.Context, *svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error)
+	ResourceListAll(context.Context, *svrproto.ResourceListAllArgs) (*svrproto.ResourceListAllReply, error)
 	ResourceCurrent(context.Context, *svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error)
 	ResourceSeek(context.Context, *svrproto.ResourceSeekArgs) (*svrproto.ResourceSeekReply, error)
 }

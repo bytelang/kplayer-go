@@ -14,10 +14,10 @@ message Output {
 
 // add
 message OutputAddArgs {
-  Output output = 1 [(gogoproto.nullable) = false, (gogoproto.moretags) = "validate:\"required\""];
+  Output output = 1 [(gogoproto.moretags) = "validate:\"required\""];
 }
 message OutputAddReply {
-  Output output = 1 [(gogoproto.nullable) = false];
+  Output output = 1;
 }
 
 // remove

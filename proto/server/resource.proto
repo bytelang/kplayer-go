@@ -26,7 +26,7 @@ message ResourceAddArgs {
   int64 end = 4 [(gogoproto.moretags) = "validate:\"number\""];
 }
 message ResourceAddReply {
-  Resource resource = 1 [(gogoproto.nullable) = false];
+  Resource resource = 1;
 }
 
 // remove
@@ -39,25 +39,25 @@ message ResourceRemoveReply {
     string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
     uint64 create_time = 3;
   }
-  Resource resource = 1 [(gogoproto.nullable) = false];
+  Resource resource = 1;
 }
 
 // list
 message ResourceListArgs {}
 message ResourceListReply {
-  repeated Resource resources = 1 [(gogoproto.nullable) = false];
+  repeated Resource resources = 1;
 }
 
 // all list
-message ResourceAllListArgs {}
-message ResourceAllListReply {
-  repeated Resource resources = 1 [(gogoproto.nullable) = false];
+message ResourceListAllArgs {}
+message ResourceListAllReply {
+  repeated Resource resources = 1;
 }
 
 // get current resource
 message ResourceCurrentArgs {}
 message ResourceCurrentReply {
-  Resource resource = 1 [(gogoproto.nullable) = false];
+  Resource resource = 1;
   uint64 duration = 2 [(gogoproto.jsontag) = "duration"];
   string duration_format = 3;
   int64 seek = 4 [(gogoproto.jsontag) = "seek"];

@@ -161,8 +161,8 @@ func AllCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.ResourceAllListReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Resource.AllList", &kpserver.ResourceAllListArgs{}, reply); err != nil {
+			reply := &kpserver.ResourceListAllReply{}
+			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Resource.AllList", &kpserver.ResourceListAllArgs{}, reply); err != nil {
 				log.Error(err)
 				return nil
 			}

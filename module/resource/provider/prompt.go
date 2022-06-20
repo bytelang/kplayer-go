@@ -84,9 +84,9 @@ func (p *Provider) ResourceRemove(ctx context.Context, resource *svrproto.Resour
 }
 
 func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {
-	res := []svrproto.Resource{}
+	res := []*svrproto.Resource{}
 	for _, item := range p.inputs.resources[p.currentIndex+1:] {
-		res = append(res, svrproto.Resource{
+		res = append(res, &svrproto.Resource{
 			Path:       item.Path,
 			Unique:     item.Unique,
 			Seek:       item.Seek,
@@ -103,10 +103,10 @@ func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceList
 	return reply, nil
 }
 
-func (p *Provider) ResourceAllList(ctx context.Context, args *svrproto.ResourceAllListArgs) (*svrproto.ResourceAllListReply, error) {
-	res := []svrproto.Resource{}
+func (p *Provider) ResourceListAll(ctx context.Context, args *svrproto.ResourceListAllArgs) (*svrproto.ResourceListAllReply, error) {
+	res := []*svrproto.Resource{}
 	for _, item := range p.inputs.resources {
-		res = append(res, svrproto.Resource{
+		res = append(res, &svrproto.Resource{
 			Path:       item.Path,
 			Unique:     item.Unique,
 			Seek:       item.Seek,
@@ -118,7 +118,7 @@ func (p *Provider) ResourceAllList(ctx context.Context, args *svrproto.ResourceA
 
 	}
 
-	reply := &svrproto.ResourceAllListReply{}
+	reply := &svrproto.ResourceListAllReply{}
 	reply.Resources = res
 	return reply, nil
 }
@@ -148,7 +148,7 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 
 	reply := &svrproto.ResourceListReply{}
 	for _, item := range resourceListMsg.Resources {
-		reply.Resources = append(reply.Resources, svrproto.Resource{
+		reply.Resources = append(reply.Resources, &svrproto.Resource{
 			Path:   item.Path,
 			Unique: item.Unique,
 		})
@@ -186,7 +186,7 @@ func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceC
 	}
 
 	reply := &svrproto.ResourceCurrentReply{
-		Resource: svrproto.Resource{
+		Resource: &svrproto.Resource{
 			Path:       resourceCurrentMsg.Resource.Path,
 			Seek:       resourceCurrentMsg.Resource.Seek,
 			End:        resourceCurrentMsg.Resource.End,

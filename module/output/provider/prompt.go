@@ -50,7 +50,7 @@ func (p *Provider) OutputAdd(ctx context.Context, args *svrproto.OutputAddArgs) 
 	}
 
 	return &svrproto.OutputAddReply{
-		Output: svrproto.Output{
+		Output: &svrproto.Output{
 			Path:   outputAddMsg.Output.Path,
 			Unique: outputAddMsg.Output.Unique,
 		},
