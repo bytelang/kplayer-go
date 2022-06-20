@@ -17,11 +17,13 @@ service PlayGreeter {
   rpc PlayStop(PlayStopArgs) returns (PlayStopReply){
     option (google.api.http) = {
       post: "/play/stop"
+      body:"*"
     };
   }
   rpc PlaySkip(PlaySkipArgs) returns (PlaySkipReply){
     option (google.api.http) = {
       post: "/play/skip"
+      body:"*"
     };
   }
   rpc PlayDuration(PlayDurationArgs) returns (PlayDurationReply){
@@ -32,11 +34,13 @@ service PlayGreeter {
   rpc PlayPause(PlayPauseArgs) returns (PlayPauseReply){
     option (google.api.http) = {
       post: "/play/pause"
+      body:"*"
     };
   }
   rpc PlayContinue(PlayContinueArgs) returns (PlayContinueReply){
     option (google.api.http) = {
       post: "/play/continue"
+      body:"*"
     };
   }
   rpc PlayInformation(PlayInformationArgs) returns (PlayInformationReply){
@@ -51,6 +55,7 @@ service OutputGreeter {
   rpc OutputAdd(OutputAddArgs) returns (OutputAddReply){
     option (google.api.http) = {
       post: "/output/add"
+      body:"*"
     };
   }
   rpc OutputRemove(OutputRemoveArgs) returns (OutputRemoveReply){
@@ -75,6 +80,7 @@ service PluginGreeter {
   rpc PluginAdd(PluginAddArgs) returns (PluginAddReplay){
     option (google.api.http) = {
       post: "/plugin/add"
+      body:"*"
     };
   }
   rpc PluginRemove(PluginRemoveArgs) returns (PluginRemoveReply){
@@ -85,6 +91,7 @@ service PluginGreeter {
   rpc PluginUpdate(PluginUpdateArgs) returns (PluginUpdateReply){
     option (google.api.http) = {
       patch: "/plugin/update"
+      body:"*"
     };
   }
 }
@@ -94,6 +101,7 @@ service ResourceGreeter {
   rpc ResourceAdd(ResourceAddArgs) returns (ResourceAddReply){
     option (google.api.http) = {
       post: "/resource/add"
+      body:"*"
     };
   }
   rpc ResourceRemove(ResourceRemoveArgs) returns (ResourceRemoveReply){
@@ -119,6 +127,7 @@ service ResourceGreeter {
   rpc ResourceSeek(ResourceSeekArgs) returns (ResourceSeekReply){
     option (google.api.http) = {
       post: "/resource/seek"
+      body:"*"
     };
   }
 }

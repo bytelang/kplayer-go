@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/forgoer/openssl"
 	"github.com/ghodss/yaml"
+	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
@@ -237,6 +238,14 @@ func ShortNameGenerate(longURL string) [4]string {
 		result[i] = string(tempUri)
 	}
 	return result
+}
+
+func ValidateStructor(in interface{}) error {
+	validate := validator.New()
+	if err := validate.Struct(in); err != nil {
+		return err
+	}
+	return nil
 }
 
 func getMd5Str(str string) string {

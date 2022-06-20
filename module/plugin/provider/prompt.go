@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
-	"github.com/bytelang/kplayer/types"
+	kptypes "github.com/bytelang/kplayer/types"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
 	kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
@@ -15,6 +15,10 @@ import (
 )
 
 func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	if err := p.addPlugin(moduletypes.Plugin{
 		Path:       GetPluginPath(args.Plugin.Path),
 		Unique:     args.Plugin.Unique,
@@ -26,8 +30,8 @@ func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) 
 
 	// wait for message
 	pluginAddMsg := &msg.EventMessagePluginAdd{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, pluginAddMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, pluginAddMsg)
 		return pluginAddMsg.Plugin.Unique == args.Plugin.Unique
 	})
 	defer keeperCtx.Close()
@@ -60,6 +64,10 @@ func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) 
 }
 
 func (p *Provider) PluginRemove(ctx context.Context, args *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	// validate
 	if !p.list.Exist(args.Unique) {
 		return nil, PluginUniqueNotFound
@@ -74,8 +82,8 @@ func (p *Provider) PluginRemove(ctx context.Context, args *svrproto.PluginRemove
 	}
 
 	pluginRemoveMsg := &msg.EventMessagePluginRemove{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_REMOVE, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, pluginRemoveMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_REMOVE, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, pluginRemoveMsg)
 		return pluginRemoveMsg.Plugin.Unique == args.Unique
 	})
 	defer keeperCtx.Close()
@@ -101,7 +109,11 @@ func (p *Provider) PluginRemove(ctx context.Context, args *svrproto.PluginRemove
 	return reply, nil
 }
 
-func (p *Provider) PluginList(ctx context.Context, plugin *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
+func (p *Provider) PluginList(ctx context.Context, args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	reply := &svrproto.PluginListReply{}
 	for _, item := range p.list.plugins {
 		reply.Plugins = append(reply.Plugins, &svrproto.Plugin{
@@ -117,14 +129,18 @@ func (p *Provider) PluginList(ctx context.Context, plugin *svrproto.PluginListAr
 }
 
 func (p *Provider) PluginListFromCore(ctx context.Context, args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_LIST, &kpprompt.EventPromptPluginList{}); err != nil {
 		return nil, err
 	}
 
 	pluginListMsg := &msg.EventMessagePluginList{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_LIST, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, pluginListMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_LIST, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, pluginListMsg)
 		return true
 	})
 	defer keeperCtx.Close()
@@ -157,6 +173,10 @@ func (p *Provider) PluginListFromCore(ctx context.Context, args *svrproto.Plugin
 }
 
 func (p *Provider) PluginUpdate(ctx context.Context, args *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	// validate
 	if !p.list.Exist(args.Unique) {
 		return nil, PluginUniqueNotFound
@@ -177,8 +197,8 @@ func (p *Provider) PluginUpdate(ctx context.Context, args *svrproto.PluginUpdate
 	}
 
 	pluginUpdateMsg := &msg.EventMessagePluginUpdate{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_UPDATE, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, pluginUpdateMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_UPDATE, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, pluginUpdateMsg)
 		return true
 	})
 	defer keeperCtx.Close()

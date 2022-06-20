@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
-	"github.com/bytelang/kplayer/types"
+	kptypes "github.com/bytelang/kplayer/types"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
 	kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
@@ -16,47 +16,55 @@ import (
 	"time"
 )
 
-func (p *Provider) ResourceAdd(ctx context.Context, resource *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error) {
+func (p *Provider) ResourceAdd(ctx context.Context, args *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
 	// uri scheme parse
-	parseUrl, err := url.Parse(resource.Path)
+	parseUrl, err := url.Parse(args.Path)
 	if err != nil {
-		return nil, fmt.Errorf("uri scheme invalid. path: %s", resource.Path)
+		return nil, fmt.Errorf("uri scheme invalid. path: %s", args.Path)
 	}
 	if parseUrl.Scheme == "" {
 		// determine whether the file exists
-		_, err := os.Stat(resource.Path)
+		_, err := os.Stat(args.Path)
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("file not exists. path: %s", resource.Path)
+			return nil, fmt.Errorf("file not exists. path: %s", args.Path)
 		}
 	}
-	if resource.End < resource.Seek {
+	if args.End < args.Seek {
 		return nil, fmt.Errorf("end timestamp can not be less than start timestamp")
 	}
 
 	// append to playlist
 	if err := p.inputs.AppendResource(moduletypes.Resource{
-		Path:       resource.Path,
-		Unique:     resource.Unique,
-		Seek:       resource.Seek,
-		End:        resource.End,
+		Path:       args.Path,
+		Unique:     args.Unique,
+		Seek:       args.Seek,
+		End:        args.End,
 		CreateTime: uint64(time.Now().Unix()),
 	}); err != nil {
 		return nil, err
 	}
 
 	reply := &svrproto.ResourceAddReply{}
-	reply.Resource.Unique = resource.Unique
-	reply.Resource.Path = resource.Path
-	reply.Resource.Seek = resource.Seek
-	reply.Resource.End = resource.End
+	reply.Resource.Unique = args.Unique
+	reply.Resource.Path = args.Path
+	reply.Resource.Seek = args.Seek
+	reply.Resource.End = args.End
 
 	return reply, nil
 }
 
-func (p *Provider) ResourceRemove(ctx context.Context, resource *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error) {
+func (p *Provider) ResourceRemove(ctx context.Context, args *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
@@ -65,12 +73,12 @@ func (p *Provider) ResourceRemove(ctx context.Context, resource *svrproto.Resour
 		return nil, err
 	}
 
-	if resource.Unique == currentResource.Unique {
+	if args.Unique == currentResource.Unique {
 		return nil, CannotRemoveCurrentResource
 	}
 
 	// remove resource
-	res, err := p.inputs.RemoveResourceByUnique(resource.Unique)
+	res, err := p.inputs.RemoveResourceByUnique(args.Unique)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +92,11 @@ func (p *Provider) ResourceRemove(ctx context.Context, resource *svrproto.Resour
 }
 
 func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {
-	res := []*svrproto.Resource{}
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
+	var res []*svrproto.Resource
 	for _, item := range p.inputs.resources[p.currentIndex+1:] {
 		res = append(res, &svrproto.Resource{
 			Path:       item.Path,
@@ -104,6 +116,10 @@ func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceList
 }
 
 func (p *Provider) ResourceListAll(ctx context.Context, args *svrproto.ResourceListAllArgs) (*svrproto.ResourceListAllReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	res := []*svrproto.Resource{}
 	for _, item := range p.inputs.resources {
 		res = append(res, &svrproto.Resource{
@@ -130,8 +146,8 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 	}
 
 	resourceListMsg := &msg.EventMessageResourceList{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_LIST, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, resourceListMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_LIST, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, resourceListMsg)
 		return true
 	})
 	defer keeperCtx.Close()
@@ -158,14 +174,18 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 }
 
 func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_CURRENT, &kpprompt.EventPromptResourceCurrent{}); err != nil {
 		return nil, err
 	}
 
 	resourceCurrentMsg := &msg.EventMessageResourceCurrent{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_CURRENT, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, resourceCurrentMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_CURRENT, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, resourceCurrentMsg)
 		return true
 	})
 	defer keeperCtx.Close()
@@ -185,6 +205,9 @@ func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceC
 		return nil, err
 	}
 
+	resourceDuration := time.Duration(time.Second * time.Duration(resourceCurrentMsg.Duration))
+	resourceSeek := time.Duration(time.Second * time.Duration(resourceCurrentMsg.Seek))
+
 	reply := &svrproto.ResourceCurrentReply{
 		Resource: &svrproto.Resource{
 			Path:       resourceCurrentMsg.Resource.Path,
@@ -195,14 +218,20 @@ func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceC
 			StartTime:  currentRes.StartTime,
 			EndTime:    currentRes.EndTime,
 		},
-		Duration: resourceCurrentMsg.Duration,
-		Seek:     resourceCurrentMsg.Seek,
-		HitCache: resourceCurrentMsg.HitCache,
+		Duration:       resourceCurrentMsg.Duration,
+		DurationFormat: fmt.Sprintf("%d:%d:%d", uint64(resourceDuration.Hours()), uint64(resourceDuration.Minutes())%60, uint64(resourceDuration.Seconds())%60),
+		Seek:           resourceCurrentMsg.Seek,
+		SeekFormat:     fmt.Sprintf("%d:%d:%d", uint64(resourceSeek.Hours()), uint64(resourceSeek.Minutes())%60, uint64(resourceSeek.Seconds())%60),
+		HitCache:       resourceCurrentMsg.HitCache,
 	}
 	return reply, nil
 }
 
 func (p *Provider) ResourceSeek(ctx context.Context, args *svrproto.ResourceSeekArgs) (*svrproto.ResourceSeekReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
