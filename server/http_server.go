@@ -69,7 +69,9 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 		}
 
 		// Register gRPC server endpoint
-		mux := runtime.NewServeMux()
+		mux := runtime.NewServeMux(
+			runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}),
+		)
 		opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 		err = server.RegisterPlayGreeterHandlerFromEndpoint(ctx, mux, grpcEndpoint, opts)
 		if err != nil {

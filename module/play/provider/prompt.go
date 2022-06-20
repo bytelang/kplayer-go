@@ -125,7 +125,6 @@ func (p *Provider) PlayContinue(ctx context.Context, args *svrproto.PlayContinue
 
 func (p *Provider) PlayDuration(ctx context.Context, args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error) {
 	reply := &svrproto.PlayDurationReply{
-		Time:              p.startTime.String(),
 		StartTimestamp:    uint64(p.startTime.Unix()),
 		DurationTimestamp: uint64(time.Now().Unix() - p.startTime.Unix()),
 	}

@@ -17,9 +17,8 @@ message PlayStopReply {
 message PlayDurationArgs {
 }
 message PlayDurationReply {
-  string time = 1;
-  uint64 start_timestamp = 2;
-  uint64 duration_timestamp = 3;
+  uint64 start_timestamp = 1;
+  uint64 duration_timestamp = 2;
 }
 
 message PlayPauseArgs {
