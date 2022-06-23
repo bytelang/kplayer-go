@@ -60,7 +60,7 @@ service OutputGreeter {
   }
   rpc OutputRemove(OutputRemoveArgs) returns (OutputRemoveReply){
     option (google.api.http) = {
-      delete: "/output/remove"
+      delete: "/output/remove/{unique}"
     };
   }
   rpc OutputList(OutputListArgs) returns (OutputListReply){
@@ -85,7 +85,7 @@ service PluginGreeter {
   }
   rpc PluginRemove(PluginRemoveArgs) returns (PluginRemoveReply){
     option (google.api.http) = {
-      delete: "/plugin/remove"
+      delete: "/plugin/remove/{unique}"
     };
   }
   rpc PluginUpdate(PluginUpdateArgs) returns (PluginUpdateReply){
@@ -106,7 +106,7 @@ service ResourceGreeter {
   }
   rpc ResourceRemove(ResourceRemoveArgs) returns (ResourceRemoveReply){
     option (google.api.http) = {
-      delete: "/resource/remove"
+      delete: "/resource/remove/{unique}"
     };
   }
   rpc ResourceList(ResourceListArgs) returns (ResourceListReply){

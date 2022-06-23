@@ -51,7 +51,7 @@ func (p *Provider) ResourceAdd(ctx context.Context, args *svrproto.ResourceAddAr
 		return nil, err
 	}
 
-	reply := &svrproto.ResourceAddReply{}
+	reply := &svrproto.ResourceAddReply{Resource: &svrproto.Resource{}}
 	reply.Resource.Unique = args.Unique
 	reply.Resource.Path = args.Path
 	reply.Resource.Seek = args.Seek
@@ -78,13 +78,15 @@ func (p *Provider) ResourceRemove(ctx context.Context, args *svrproto.ResourceRe
 	}
 
 	// remove resource
-	res, err := p.inputs.RemoveResourceByUnique(args.Unique)
+	res, index, err := p.inputs.RemoveResourceByUnique(args.Unique)
 	if err != nil {
 		return nil, err
 	}
-	p.currentIndex = p.currentIndex - 1
+	if index < p.currentIndex {
+		p.currentIndex = p.currentIndex - 1
+	}
 
-	reply := &svrproto.ResourceRemoveReply{}
+	reply := &svrproto.ResourceRemoveReply{Resource: &svrproto.ResourceRemoveReply_Resource{}}
 	reply.Resource.Path = res.Path
 	reply.Resource.Unique = res.Unique
 	reply.Resource.CreateTime = res.CreateTime
@@ -235,24 +237,43 @@ func (p *Provider) ResourceSeek(ctx context.Context, args *svrproto.ResourceSeek
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
-	seekRes, searchIndex, err := p.inputs.GetResourceByUnique(args.Unique)
+	seekRes, _, err := p.inputs.GetResourceByUnique(args.Unique)
 	if err != nil {
 		return nil, err
 	}
 
-	p.resetInputs[seekRes.Unique] = seekRes.Seek
-	p.currentIndex = searchIndex - 1
-
-	if _, err := p.playProvider.PlaySkip(ctx, &svrproto.PlaySkipArgs{}); err != nil {
+	// send prompt
+	coreKplayer := core.GetLibKplayerInstance()
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_SEEK, &kpprompt.EventPromptResourceSeek{
+		Unique: args.Unique,
+		Seek:   args.Seek,
+	}); err != nil {
 		return nil, err
+	}
+
+	resourceSeek := &msg.EventMessageResourceSeek{}
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_SEEK, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, resourceSeek)
+		return true
+	})
+	defer keeperCtx.Close()
+
+	if err := p.RegisterKeeperChannel(keeperCtx); err != nil {
+		return nil, err
+	}
+
+	// wait context
+	keeperCtx.Wait()
+	if len(resourceSeek.Error) != 0 {
+		return nil, fmt.Errorf("%s", resourceSeek.Error)
 	}
 
 	reply := &svrproto.ResourceSeekReply{
 		Resource: &svrproto.Resource{
-			Path:       seekRes.Path,
-			Unique:     seekRes.Unique,
-			Seek:       seekRes.Seek,
-			End:        seekRes.End,
+			Path:       resourceSeek.Resource.Path,
+			Unique:     resourceSeek.Resource.Unique,
+			Seek:       resourceSeek.Resource.Seek,
+			End:        resourceSeek.Resource.End,
 			CreateTime: seekRes.CreateTime,
 			StartTime:  seekRes.StartTime,
 			EndTime:    seekRes.EndTime,

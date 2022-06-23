@@ -19,8 +19,8 @@ func (p *Provider) OutputAdd(ctx context.Context, args *svrproto.OutputAddArgs) 
 		return nil, err
 	}
 
-	outputUnique := args.Output.Unique
-	outputPath := args.Output.Path
+	outputUnique := args.Unique
+	outputPath := args.Path
 	if outputUnique == "" {
 		outputUnique = kptypes.GetUniqueString(outputPath)
 	}

@@ -26,7 +26,9 @@ message PluginListReply {
 
 // add
 message PluginAddArgs {
-  Plugin plugin = 1;
+  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+  string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+  map<string, string> params = 5;
 }
 message PluginAddReplay {
   Plugin plugin = 1;

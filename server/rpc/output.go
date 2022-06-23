@@ -22,7 +22,7 @@ func NewOutput(pi provider.ProviderI) *Output {
 // Add add output to core player
 func (o *Output) Add(r *http.Request, args *svrproto.OutputAddArgs, reply *svrproto.OutputAddReply) error {
 	// validate
-	urlParse, err := url.Parse(args.Output.Path)
+	urlParse, err := url.Parse(args.Path)
 	if err != nil {
 		return err
 	}
@@ -36,12 +36,12 @@ func (o *Output) Add(r *http.Request, args *svrproto.OutputAddArgs, reply *svrpr
 		return fmt.Errorf("unsupport output resource protocol")
 	}
 	if urlParse.Scheme == "file" {
-		fileInfo, err := os.Stat(args.Output.Path)
+		fileInfo, err := os.Stat(args.Path)
 		if err != nil {
-			return fmt.Errorf("file not exist. path: %s", args.Output.Path)
+			return fmt.Errorf("file not exist. path: %s", args.Path)
 		}
 		if fileInfo.Mode()&(1<<2) != 0 {
-			return fmt.Errorf("file don`t have read permission. path: %s", args.Output.Path)
+			return fmt.Errorf("file don`t have read permission. path: %s", args.Path)
 		}
 	}
 

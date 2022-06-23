@@ -80,7 +80,7 @@
         ]
       }
     },
-    "/output/remove": {
+    "/output/remove/{unique}": {
       "delete": {
         "operationId": "OutputGreeter_OutputRemove",
         "responses": {
@@ -100,8 +100,8 @@
         "parameters": [
           {
             "name": "unique",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -338,7 +338,7 @@
         ]
       }
     },
-    "/plugin/remove": {
+    "/plugin/remove/{unique}": {
       "delete": {
         "operationId": "PluginGreeter_PluginRemove",
         "responses": {
@@ -358,8 +358,8 @@
         "parameters": [
           {
             "name": "unique",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -499,7 +499,7 @@
         ]
       }
     },
-    "/resource/remove": {
+    "/resource/remove/{unique}": {
       "delete": {
         "operationId": "ResourceGreeter_ResourceRemove",
         "responses": {
@@ -519,8 +519,8 @@
         "parameters": [
           {
             "name": "unique",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -577,8 +577,11 @@
     "RPCProtoOutputAddArgs": {
       "type": "object",
       "properties": {
-        "output": {
-          "$ref": "#/definitions/RPCProtoOutput"
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
         }
       },
       "title": "add"
@@ -727,8 +730,17 @@
     "RPCProtoPluginAddArgs": {
       "type": "object",
       "properties": {
-        "plugin": {
-          "$ref": "#/definitions/RPCProtoPlugin"
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       },
       "title": "add"

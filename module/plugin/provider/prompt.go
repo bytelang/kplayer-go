@@ -20,10 +20,10 @@ func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) 
 	}
 
 	if err := p.addPlugin(moduletypes.Plugin{
-		Path:       GetPluginPath(args.Plugin.Path),
-		Unique:     args.Plugin.Unique,
+		Path:       GetPluginPath(args.Path),
+		Unique:     args.Unique,
 		CreateTime: uint64(time.Now().Unix()),
-		Params:     args.Plugin.Params,
+		Params:     args.Params,
 	}); err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) 
 	pluginAddMsg := &msg.EventMessagePluginAdd{}
 	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
 		kptypes.UnmarshalProtoMessage(msg, pluginAddMsg)
-		return pluginAddMsg.Plugin.Unique == args.Plugin.Unique
+		return pluginAddMsg.Plugin.Unique == args.Unique
 	})
 	defer keeperCtx.Close()
 
@@ -53,7 +53,7 @@ func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) 
 		return nil, err
 	}
 
-	reply := &svrproto.PluginAddReplay{}
+	reply := &svrproto.PluginAddReplay{Plugin: &svrproto.Plugin{}}
 	reply.Plugin.Path = plugin.Path
 	reply.Plugin.Unique = plugin.Unique
 	reply.Plugin.Params = plugin.Params
@@ -98,7 +98,7 @@ func (p *Provider) PluginRemove(ctx context.Context, args *svrproto.PluginRemove
 		return nil, fmt.Errorf("%s", pluginRemoveMsg.Error)
 	}
 
-	reply := &svrproto.PluginRemoveReply{}
+	reply := &svrproto.PluginRemoveReply{Plugin: &svrproto.Plugin{}}
 	reply.Plugin.Path = pluginRemoveMsg.Plugin.Path
 	reply.Plugin.Unique = pluginRemoveMsg.Plugin.Unique
 	reply.Plugin.Params = make(map[string]string)

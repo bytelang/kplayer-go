@@ -239,19 +239,26 @@ func local_request_OutputGreeter_OutputAdd_0(ctx context.Context, marshaler runt
 
 }
 
-var (
-	filter_OutputGreeter_OutputRemove_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
 func request_OutputGreeter_OutputRemove_0(ctx context.Context, marshaler runtime.Marshaler, client OutputGreeterClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq OutputRemoveArgs
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["unique"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "unique")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_OutputGreeter_OutputRemove_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.Unique, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "unique", err)
 	}
 
 	msg, err := client.OutputRemove(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -263,11 +270,22 @@ func local_request_OutputGreeter_OutputRemove_0(ctx context.Context, marshaler r
 	var protoReq OutputRemoveArgs
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["unique"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "unique")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_OutputGreeter_OutputRemove_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.Unique, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "unique", err)
 	}
 
 	msg, err := server.OutputRemove(ctx, &protoReq)
@@ -345,19 +363,26 @@ func local_request_PluginGreeter_PluginAdd_0(ctx context.Context, marshaler runt
 
 }
 
-var (
-	filter_PluginGreeter_PluginRemove_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
 func request_PluginGreeter_PluginRemove_0(ctx context.Context, marshaler runtime.Marshaler, client PluginGreeterClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq PluginRemoveArgs
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["unique"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "unique")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_PluginGreeter_PluginRemove_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.Unique, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "unique", err)
 	}
 
 	msg, err := client.PluginRemove(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -369,11 +394,22 @@ func local_request_PluginGreeter_PluginRemove_0(ctx context.Context, marshaler r
 	var protoReq PluginRemoveArgs
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["unique"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "unique")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_PluginGreeter_PluginRemove_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.Unique, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "unique", err)
 	}
 
 	msg, err := server.PluginRemove(ctx, &protoReq)
@@ -449,19 +485,26 @@ func local_request_ResourceGreeter_ResourceAdd_0(ctx context.Context, marshaler 
 
 }
 
-var (
-	filter_ResourceGreeter_ResourceRemove_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
 func request_ResourceGreeter_ResourceRemove_0(ctx context.Context, marshaler runtime.Marshaler, client ResourceGreeterClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ResourceRemoveArgs
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["unique"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "unique")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ResourceGreeter_ResourceRemove_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.Unique, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "unique", err)
 	}
 
 	msg, err := client.ResourceRemove(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -473,11 +516,22 @@ func local_request_ResourceGreeter_ResourceRemove_0(ctx context.Context, marshal
 	var protoReq ResourceRemoveArgs
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["unique"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "unique")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ResourceGreeter_ResourceRemove_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.Unique, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "unique", err)
 	}
 
 	msg, err := server.ResourceRemove(ctx, &protoReq)
@@ -1339,7 +1393,7 @@ func RegisterOutputGreeterHandlerClient(ctx context.Context, mux *runtime.ServeM
 var (
 	pattern_OutputGreeter_OutputAdd_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"output", "add"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_OutputGreeter_OutputRemove_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"output", "remove"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_OutputGreeter_OutputRemove_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"output", "remove", "unique"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_OutputGreeter_OutputList_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"output", "list"}, "", runtime.AssumeColonVerbOpt(true)))
 )
@@ -1478,7 +1532,7 @@ var (
 
 	pattern_PluginGreeter_PluginAdd_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"plugin", "add"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_PluginGreeter_PluginRemove_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"plugin", "remove"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_PluginGreeter_PluginRemove_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"plugin", "remove", "unique"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_PluginGreeter_PluginUpdate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"plugin", "update"}, "", runtime.AssumeColonVerbOpt(true)))
 )
@@ -1657,7 +1711,7 @@ func RegisterResourceGreeterHandlerClient(ctx context.Context, mux *runtime.Serv
 var (
 	pattern_ResourceGreeter_ResourceAdd_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"resource", "add"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_ResourceGreeter_ResourceRemove_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"resource", "remove"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_ResourceGreeter_ResourceRemove_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"resource", "remove", "unique"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_ResourceGreeter_ResourceList_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"resource", "list"}, "", runtime.AssumeColonVerbOpt(true)))
 

@@ -14,7 +14,8 @@ message Output {
 
 // add
 message OutputAddArgs {
-  Output output = 1 [(gogoproto.moretags) = "validate:\"required\""];
+  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+  string unique = 2;
 }
 message OutputAddReply {
   Output output = 1;
