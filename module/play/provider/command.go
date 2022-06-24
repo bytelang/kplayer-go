@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	pidFilePath = "log/kplayer.pid"
-	logFilePath = "log/kplayer.log"
+	pidFilePath     = "log/kplayer.pid"
+	logFilePath     = "log/kplayer.log"
+	coreLogFilePath = "log/core.log"
 )
 
 func GetCommand() *cobra.Command {
@@ -386,7 +387,11 @@ func startCommand() *cobra.Command {
 
 			// start core
 			{
-				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
+				if logLevel == log.TraceLevel {
+					coreKplayer.SetLogLevel("", coreLogLevel)
+				} else {
+					coreKplayer.SetLogLevel(coreLogFilePath, coreLogLevel)
+				}
 
 				// initialize
 				coreKplayer.Initialization()

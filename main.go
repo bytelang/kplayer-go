@@ -203,10 +203,10 @@ func setDefaultConfig(v *viper.Viper) {
 
 	v.SetDefault("play.encode.video_width", 854)
 	v.SetDefault("play.encode.video_height", 480)
-	v.SetDefault("play.encode.video_fps", 30)
+	v.SetDefault("play.encode.video_fps", 25)
 	v.SetDefault("play.encode.audio_channel_layout", 3)
 	v.SetDefault("play.encode.audio_channels", 2)
-	v.SetDefault("play.encode.audio_sample_rate", 48000)
+	v.SetDefault("play.encode.audio_sample_rate", 44100)
 	v.SetDefault("play.encode.bit_rate", 0)
 	v.SetDefault("play.encode.avg_quality", 0)
 }
