@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	kptypes "github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/client"
@@ -45,11 +46,18 @@ unique_name:
 				unique = kptypes.GetUniqueString(path)
 			}
 
-			reply := &kpserver.OutputAddReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Output.Add", &kpserver.OutputAddArgs{
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			outputClient := kpserver.NewOutputGreeterClient(conn)
+			reply, err := outputClient.OutputAdd(context.Background(), &kpserver.OutputAddArgs{
 				Path:   path,
 				Unique: unique,
-			}, reply); err != nil {
+			})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -79,10 +87,17 @@ func removeCommand() *cobra.Command {
 			// args
 			uniqueName := args[0]
 
-			reply := &kpserver.OutputRemoveReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Output.Remove", &kpserver.OutputRemoveArgs{
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			outputClient := kpserver.NewOutputGreeterClient(conn)
+			reply, err := outputClient.OutputRemove(context.Background(), &kpserver.OutputRemoveArgs{
 				Unique: uniqueName,
-			}, reply); err != nil {
+			})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -108,8 +123,15 @@ func listCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.OutputListReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Output.List", &kpserver.OutputListArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			outputClient := kpserver.NewOutputGreeterClient(conn)
+			reply, err := outputClient.OutputList(context.Background(), &kpserver.OutputListArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}

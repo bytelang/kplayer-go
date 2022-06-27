@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/types/client"
 	"github.com/bytelang/kplayer/types/config"
@@ -74,8 +75,15 @@ func durationCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlayDurationReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Duration", &kpserver.PlayDurationArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlayDuration(context.Background(), &kpserver.PlayDurationArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -101,8 +109,15 @@ func pauseCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlayPauseReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlayPause(context.Background(), &kpserver.PlayPauseArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -128,8 +143,15 @@ func continueCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlayPauseReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlayContinue(context.Background(), &kpserver.PlayContinueArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -155,8 +177,15 @@ func skipCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlaySkipReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Skip", &kpserver.PlaySkipArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlaySkip(context.Background(), &kpserver.PlaySkipArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -182,8 +211,15 @@ func versionCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlayInformationReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Information", &kpserver.PlayInformationArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlayInformation(context.Background(), &kpserver.PlayInformationArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}

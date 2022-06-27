@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	kptypes "github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/client"
@@ -55,14 +56,18 @@ unique:
 			}
 
 			// request
-			reply := &kpserver.PluginAddReplay{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Plugin.Add", &kpserver.PluginAddReplay{
-				Plugin: &kpserver.Plugin{
-					Path:   name,
-					Unique: unique,
-					Params: params,
-				},
-			}, reply); err != nil {
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			pluginClient := kpserver.NewPluginGreeterClient(conn)
+			reply, err := pluginClient.PluginAdd(context.Background(), &kpserver.PluginAddArgs{
+				Path:   name,
+				Unique: unique,
+				Params: params,
+			})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -94,10 +99,16 @@ func RemoveCommand() *cobra.Command {
 			// args
 			uniqueName := args[0]
 
-			reply := &kpserver.PluginRemoveReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Plugin.Remove", &kpserver.PluginRemoveArgs{
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			pluginClient := kpserver.NewPluginGreeterClient(conn)
+			reply, err := pluginClient.PluginRemove(context.Background(), &kpserver.PluginRemoveArgs{
 				Unique: uniqueName,
-			}, reply); err != nil {
+			})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -123,8 +134,15 @@ func ListCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PluginListReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Plugin.List", &kpserver.PluginListReply{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			pluginClient := kpserver.NewPluginGreeterClient(conn)
+			reply, err := pluginClient.PluginList(context.Background(), &kpserver.PluginListArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -163,11 +181,17 @@ func UpdateCommand() *cobra.Command {
 			}
 
 			// request
-			reply := &kpserver.PluginUpdateReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Plugin.Update", &kpserver.PluginUpdateArgs{
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			pluginClient := kpserver.NewPluginGreeterClient(conn)
+			reply, err := pluginClient.PluginUpdate(context.Background(), &kpserver.PluginUpdateArgs{
 				Unique: uniqueName,
 				Params: params,
-			}, reply); err != nil {
+			})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
