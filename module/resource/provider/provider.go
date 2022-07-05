@@ -154,7 +154,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		msg := &kpmsg.EventMessageResourceStart{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		log.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique}).
-			Info("start play resource")
+			Debug("start play resource")
 
 		res, _, err := p.inputs.GetResourceByUnique(msg.Resource.Unique)
 		if err != nil {
@@ -169,6 +169,10 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		if seek, ok := p.resetInputs[msg.Resource.Unique]; ok {
 			res.Seek = seek
 		}
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_CHECKED:
+		msg := &kpmsg.EventMessageResourceChecked{}
+		kptypes.UnmarshalProtoMessage(message.Body, msg)
+		log.WithFields(log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique, "duration": msg.InputAttribute.Duration, "hit_cache": msg.HitCache}).Info("checked play resource")
 	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
 		msg := &kpmsg.EventMessageResourceFinish{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)

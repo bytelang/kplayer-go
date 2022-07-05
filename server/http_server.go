@@ -41,7 +41,7 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 		// grpc server
 		listen, err := net.Listen("tcp", grpcEndpoint)
 		if err != nil {
-			log.WithField("error", err).Panic("start grpc gateway server failed")
+			log.WithField("error", err).Fatal("start grpc gateway server failed")
 		}
 
 		server.RegisterOutputGreeterServer(grpcSvc, outputModule)
@@ -51,7 +51,7 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 
 		err = grpcSvc.Serve(listen)
 		if err != nil {
-			log.WithField("error", err).Panic("start grpc gateway server failed")
+			log.WithField("error", err).Fatal("start grpc gateway server failed")
 		}
 		log.Info("rpc server shutdown success")
 	}()
@@ -65,7 +65,7 @@ func (h httpServer) StartServer(stopChan chan bool, mm module.ModuleManager) {
 		// http server
 		listen, err := net.Listen("tcp", httpEndpoint)
 		if err != nil {
-			log.WithField("error", err).Panic("start grpc gateway server failed")
+			log.WithField("error", err).Fatal("start grpc gateway server failed")
 		}
 
 		// Register gRPC server endpoint

@@ -227,6 +227,10 @@ func (p *Provider) StartReconnect() {
 }
 
 func (p *Provider) BeginRunning() {
+	if p.EmptyOutputListFlag {
+		return
+	}
+
 	for _, item := range p.configList.outputs {
 		if err := core.GetLibKplayerInstance().AddOutput(&kpprompt.EventPromptOutputAdd{
 			Output: &kpprompt.PromptOutput{

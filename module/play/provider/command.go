@@ -343,16 +343,6 @@ func startCommand() *cobra.Command {
 
 			cfg := clientCtx.Config
 
-			// override only generate cache config
-			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
-				cfg.Play.PlayModel = config.PLAY_FILL_STRATEGY_name[int32(config.PLAY_MODEL_LIST)]
-				cfg.Play.EncodeModel = config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)]
-				cfg.Play.CacheOn = true
-				cfg.Play.SkipInvalidResource = false
-				cfg.Output.Lists = []*config.OutputInstance{}
-				log.Info("running on generate cache model")
-			}
-
 			coreKplayer := core.GetLibKplayerInstance()
 			if err := coreKplayer.SetOptions(map[core.CoreKplayerOption]interface{}{
 				core.ProtocolOption:     cfg.Play.EncodeModel,
@@ -409,6 +399,7 @@ func startCommand() *cobra.Command {
 					<-timeTicker.C
 					if err := kptypes.Knock(); err != nil {
 						currentRetriesCount = currentRetriesCount + 1
+						log.Warn("knock failed. please check the network communication")
 						continue
 					}
 
