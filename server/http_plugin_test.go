@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
 )
 
 // output
@@ -35,9 +36,7 @@ func TestPluginAdd(t *testing.T) {
 	}{
 		"show-time",
 		"plugin-1",
-		map[string]string{
-			"fontfile": "/tmp/font.ttf",
-		},
+		map[string]string{},
 	}
 	postDataBytes, _ := json.Marshal(postData)
 	req, err := http.NewRequest("POST", Host+"plugin/add", bytes.NewBuffer(postDataBytes))
@@ -57,6 +56,7 @@ func TestPluginAdd(t *testing.T) {
 }
 
 func TestPluginUpdate(t *testing.T) {
+	time.Sleep(time.Second * 1)
 	postData := struct {
 		Unique string            `json:"unique"`
 		Params map[string]string `json:"params"`

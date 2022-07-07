@@ -133,6 +133,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		plugin, _, err := p.list.GetPluginByUnique(msg.Plugin.Unique)
 		if err != nil {
 			logFields.Warn(err)
+			return
 		}
 		plugin.LoadedTime = uint64(time.Now().Unix())
 
@@ -227,9 +228,6 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 	if p.list.Exist(plugin.Unique) {
 		return PluginUniqueHasExist
 	}
-	if !kptypes.FileExists(plugin.Path) {
-		return PluginFileNotFound
-	}
 
 	// send prompt
 	params := map[string]string{}
@@ -260,6 +258,27 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 	// append list
 	if err := p.list.AppendPlugin(plugin); err != nil {
 		return err
+	}
+
+	// wait for message
+	pluginAddMsg := &kpmsg.EventMessagePluginAdd{}
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, pluginAddMsg)
+		return pluginAddMsg.Plugin.Unique == plugin.Unique
+	})
+	defer keeperCtx.Close()
+
+	if err := p.RegisterKeeperChannel(keeperCtx); err != nil {
+		_, _ = p.list.RemovePluginByUnique(plugin.Unique)
+		return err
+	}
+
+	// wait context
+	keeperCtx.Wait()
+
+	if len(pluginAddMsg.Error) != 0 {
+		_, _ = p.list.RemovePluginByUnique(plugin.Unique)
+		return fmt.Errorf("%s", pluginAddMsg.Error)
 	}
 
 	return nil

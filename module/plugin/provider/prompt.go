@@ -11,6 +11,9 @@ import (
 	kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
 	moduletypes "github.com/bytelang/kplayer/types/module"
 	svrproto "github.com/bytelang/kplayer/types/server"
+	log "github.com/sirupsen/logrus"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -19,6 +22,27 @@ func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) 
 		return nil, err
 	}
 
+	// download plugin file
+	pluginName := strings.TrimSuffix(filepath.Base(args.Path), filepath.Ext(args.Path))
+	if pluginName == "" {
+		return nil, fmt.Errorf("plugin path cannot be empty")
+	}
+	logField := log.WithFields(log.Fields{"name": pluginName, "path": args.Path})
+	if err := InitPluginFile(pluginName, GetPluginPath(args.Path)); err != nil {
+		if _, ok := err.(kptypes.ApiError); ok {
+			logField.Error("plugin request information failed")
+			return nil, err
+		}
+
+		if !kptypes.FileExists(args.Path) {
+			logField.Error("plugin initialization failed")
+			return nil, err
+		}
+
+		logField.Warn(fmt.Sprintf("plugin file exist, but plugin is no registration. %s", err))
+	}
+
+	// add plugin prompt
 	if err := p.addPlugin(moduletypes.Plugin{
 		Path:       GetPluginPath(args.Path),
 		Unique:     args.Unique,
@@ -28,27 +52,8 @@ func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) 
 		return nil, err
 	}
 
-	// wait for message
-	pluginAddMsg := &msg.EventMessagePluginAdd{}
-	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
-		kptypes.UnmarshalProtoMessage(msg, pluginAddMsg)
-		return pluginAddMsg.Plugin.Unique == args.Unique
-	})
-	defer keeperCtx.Close()
-
-	if err := p.RegisterKeeperChannel(keeperCtx); err != nil {
-		return nil, err
-	}
-
-	// wait context
-	keeperCtx.Wait()
-
-	if len(pluginAddMsg.Error) != 0 {
-		return nil, fmt.Errorf("%s", pluginAddMsg.Error)
-	}
-
 	// get plugin
-	plugin, _, err := p.list.GetPluginByUnique(pluginAddMsg.Plugin.Unique)
+	plugin, _, err := p.list.GetPluginByUnique(args.Unique)
 	if err != nil {
 		return nil, err
 	}
