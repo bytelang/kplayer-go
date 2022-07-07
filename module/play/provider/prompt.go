@@ -175,3 +175,7 @@ func (p *Provider) PlayInformation(ctx context.Context, args *svrproto.PlayInfor
 func (p *Provider) GetRPCParams() config.Server {
 	return p.rpc
 }
+
+func (p *Provider) GetCacheOn() bool {
+	return p.cacheOn
+}

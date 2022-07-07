@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/bytelang/kplayer/app"
 	"github.com/bytelang/kplayer/cmd"
 	"github.com/bytelang/kplayer/module"
+	"github.com/bytelang/kplayer/module/play/provider"
 	"github.com/bytelang/kplayer/server"
 	kptypes "github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/config"
@@ -18,6 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 	"runtime"
+	"strings"
 )
 
 func init() {
@@ -119,6 +122,27 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 
 	clientCtx.Viper = v
 	if err := v.Unmarshal(clientCtx.Config); err != nil {
+		log.Fatal(err)
+	}
+
+	// custom config
+	{
+		// add generate cache config
+		if cmd.Flag(provider.FlagGenerateCache) != nil {
+			if cmd.Flag(provider.FlagGenerateCache).Value.String() == provider.FlagYesValue {
+				clientCtx.Config.Play.PlayModel = strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LIST)])
+				clientCtx.Config.Play.EncodeModel = strings.ToLower(config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)])
+				clientCtx.Config.Output.Lists = nil
+				clientCtx.Config.Play.CacheOn = true
+			}
+		}
+	}
+
+	reInitConfig, err := json.Marshal(clientCtx.Config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := v.ReadConfig(bytes.NewBuffer(reInitConfig)); err != nil {
 		log.Fatal(err)
 	}
 

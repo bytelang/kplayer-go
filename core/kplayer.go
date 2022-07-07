@@ -205,7 +205,8 @@ func (lb *libKplayer) Initialization() {
 	C.ReceiveMessage(C.MessageCallBack(C.goCallBackMessage))
 	C.ProgressCallback(C.ProgressCallBack(C.goCallBackProgress))
 
-	C.Initialization(C.CString(lb.protocol),
+	C.Initialization(
+		C.CString(lb.protocol),
 		C.int(lb.video_width),
 		C.int(lb.video_height),
 		C.int(lb.video_bitrate),

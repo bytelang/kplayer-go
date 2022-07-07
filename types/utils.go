@@ -54,14 +54,18 @@ func GetRandString(size ...uint) string {
 }
 
 func GetUniqueString(str string) string {
+	uniqueStr := ShortNameGenerate(str)[0]
+	if ok := issueRandStr[uniqueStr]; !ok {
+		issueRandStr[uniqueStr] = true
+		return uniqueStr
+	}
+
 	for i := 1; i <= 100; i++ {
-		uniqueStr := ShortNameGenerate(str)[0]
+		uniqueStr = fmt.Sprintf("%s-%d", uniqueStr, i)
 		if ok := issueRandStr[uniqueStr]; !ok {
 			issueRandStr[uniqueStr] = true
 			return uniqueStr
 		}
-
-		str = fmt.Sprintf("%s-%d", str, i)
 	}
 
 	log.Fatal("generate unique string failed")

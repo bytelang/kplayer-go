@@ -34,9 +34,6 @@ type Provider struct {
 	// reconnect
 	reconnectChan chan interface{}
 	reconnectWait sync.WaitGroup
-
-	// empty output flag for generate cache
-	EmptyOutputListFlag bool
 }
 
 var _ ProviderI = &Provider{}
@@ -166,11 +163,6 @@ func (p *Provider) ValidateConfig() error {
 }
 
 func (p *Provider) addOutput(output moduletypes.Output) error {
-	if p.EmptyOutputListFlag {
-		// empty output list
-		return nil
-	}
-
 	// validate
 	if p.configList.Exist(output.Unique) {
 		return OutputUniqueHasExisted
@@ -227,10 +219,6 @@ func (p *Provider) StartReconnect() {
 }
 
 func (p *Provider) BeginRunning() {
-	if p.EmptyOutputListFlag {
-		return
-	}
-
 	for _, item := range p.configList.outputs {
 		if err := core.GetLibKplayerInstance().AddOutput(&kpprompt.EventPromptOutputAdd{
 			Output: &kpprompt.PromptOutput{
