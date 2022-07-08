@@ -15,7 +15,7 @@ func TestFilePlay(t *testing.T) {
 		case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_EMPTY:
 			//add output
 			coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{Output: &kpprompt.PromptOutput{
-				Path:   "/tmp/test.flv",
+				Path:   "test.flv",
 				Unique: "test",
 			}})
 
@@ -74,7 +74,7 @@ func TestMultiFilePlay(t *testing.T) {
 		case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_EMPTY:
 			//add output
 			coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{Output: &kpprompt.PromptOutput{
-				Path:   "/tmp/test.flv",
+				Path:   "test.flv",
 				Unique: "test",
 			}})
 

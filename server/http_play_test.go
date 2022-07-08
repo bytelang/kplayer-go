@@ -108,7 +108,7 @@ func TestPlaySkip(t *testing.T) {
 			Path   string `json:"path"`
 			Unique string `json:"unique"`
 		}{
-			"/tmp/short.flv",
+			"short.flv",
 			"resource-1",
 		}
 		postDataBytes, _ := json.Marshal(postData)

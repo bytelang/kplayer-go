@@ -16,7 +16,7 @@ func TestResourceAdd(t *testing.T) {
 		Path   string `json:"path"`
 		Unique string `json:"unique"`
 	}{
-		"/tmp/short.flv",
+		"short.flv",
 		"resource-1",
 	}
 	postDataBytes, _ := json.Marshal(postData)
@@ -53,7 +53,7 @@ func TestResourceAdd(t *testing.T) {
 		t.Log(string(body))
 
 		resourcePath := gjson.Parse(string(body)).Get("resources.0.path").String()
-		if resourcePath != "/tmp/short.flv" {
+		if resourcePath != "short.flv" {
 			t.Fatal("add resource failed")
 		}
 	}
@@ -94,7 +94,7 @@ func TestResourceAdd(t *testing.T) {
 		t.Log(string(body))
 
 		resourcePath := gjson.Parse(string(body)).Get("resources.0.path").String()
-		if resourcePath == "/tmp/short.flv" {
+		if resourcePath == "short.flv" {
 			t.Fatal("add resource failed")
 		}
 	}

@@ -32,7 +32,7 @@ func TestOutputAddInvalid(t *testing.T) {
 		Path   string `json:"path"`
 		Unique string `json:"unique"`
 	}{
-		"/uuu/output-1",
+		"/tmp/output-1",
 		"invalid-1",
 	}
 	postDataBytes, _ := json.Marshal(postData)
