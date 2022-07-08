@@ -23,7 +23,8 @@ const (
 
 const (
 	DefaultRPCAddress string = "127.0.0.1"
-	DefaultRPCPort    uint32 = 4156
+	DefaultHttpPort   uint32 = 4156
+	DefaultRPCPort    uint32 = 4155
 )
 
 // ErrorCode contains the exit code for server exit.

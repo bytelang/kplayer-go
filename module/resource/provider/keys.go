@@ -35,8 +35,8 @@ func (rs *Resources) GetResourceByUnique(unique string) (*moduletypes.Resource, 
 	return nil, 0, ResourceNotFound
 }
 
-func (rs *Resources) GetResourceByIndex(index uint32) (*moduletypes.Resource, error) {
-	if index > uint32(len(rs.resources)) {
+func (rs *Resources) GetResourceByIndex(index int) (*moduletypes.Resource, error) {
+	if index > len(rs.resources) {
 		return nil, ResourceNotFound
 	}
 
@@ -53,13 +53,13 @@ func (rs *Resources) Exist(unique string) bool {
 	return false
 }
 
-func (rs *Resources) RemoveResourceByUnique(unique string) (*moduletypes.Resource, error) {
+func (rs *Resources) RemoveResourceByUnique(unique string) (*moduletypes.Resource, int, error) {
 	rs.lock.Lock()
 	defer rs.lock.Unlock()
 
 	res, index, err := rs.GetResourceByUnique(unique)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var newResource []moduletypes.Resource
@@ -67,7 +67,7 @@ func (rs *Resources) RemoveResourceByUnique(unique string) (*moduletypes.Resourc
 	newResource = append(newResource, (rs.resources)[index+1:]...)
 
 	rs.resources = newResource
-	return res, nil
+	return res, index, nil
 }
 
 func (rs *Resources) AppendResource(resource moduletypes.Resource) error {

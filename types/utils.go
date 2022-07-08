@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/forgoer/openssl"
 	"github.com/ghodss/yaml"
+	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
@@ -53,7 +54,22 @@ func GetRandString(size ...uint) string {
 }
 
 func GetUniqueString(str string) string {
-	return ShortNameGenerate(str)[0]
+	uniqueStr := ShortNameGenerate(str)[0]
+	if ok := issueRandStr[uniqueStr]; !ok {
+		issueRandStr[uniqueStr] = true
+		return uniqueStr
+	}
+
+	for i := 1; i <= 100; i++ {
+		uniqueStr = fmt.Sprintf("%s-%d", uniqueStr, i)
+		if ok := issueRandStr[uniqueStr]; !ok {
+			issueRandStr[uniqueStr] = true
+			return uniqueStr
+		}
+	}
+
+	log.Fatal("generate unique string failed")
+	return ""
 }
 
 func UnmarshalProtoMessage(data string, obj protoiface.MessageV1) {
@@ -237,6 +253,14 @@ func ShortNameGenerate(longURL string) [4]string {
 		result[i] = string(tempUri)
 	}
 	return result
+}
+
+func ValidateStructor(in interface{}) error {
+	validate := validator.New()
+	if err := validate.Struct(in); err != nil {
+		return err
+	}
+	return nil
 }
 
 func getMd5Str(str string) string {

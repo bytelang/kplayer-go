@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -17,25 +18,22 @@ import (
 )
 
 type ProviderI interface {
-	OutputAdd(output *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error)
-	OutputRemove(output *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error)
-	OutputList(output *svrproto.OutputListArgs) (*svrproto.OutputListReply, error)
+	OutputAdd(ctx context.Context, output *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error)
+	OutputRemove(ctx context.Context, output *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error)
+	OutputList(ctx context.Context, output *svrproto.OutputListArgs) (*svrproto.OutputListReply, error)
 }
 
 type Provider struct {
 	module.ModuleKeeper
+	svrproto.UnimplementedOutputGreeterServer
 
 	// module outputs
 	configList        Outputs
-	list              Outputs
 	reconnectInternal int32
 
 	// reconnect
 	reconnectChan chan interface{}
 	reconnectWait sync.WaitGroup
-
-	// empty output flag for generate cache
-	EmptyOutputListFlag bool
 }
 
 var _ ProviderI = &Provider{}
@@ -71,7 +69,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, config *config.Output)
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
-	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_OUTPUT_ADD:
 		msg := &kpmsg.EventMessageOutputAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 
@@ -106,7 +104,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		output.StartTime = uint64(time.Now().Unix())
 		output.EndTime = 0
 		output.Connected = true
-	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_REMOVE:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_OUTPUT_REMOVE:
 		msg := &kpmsg.EventMessageOutputRemove{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{
@@ -114,12 +112,12 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 			"path":   msg.Output.Path,
 		})
 
-		if _, err := p.list.RemoveOutputByUnique(msg.Output.Unique); err != nil {
+		if _, err := p.configList.RemoveOutputByUnique(msg.Output.Unique); err != nil {
 			logFields.Fatal("remove output failed")
 		}
 
 		logFields.Info("remove output success")
-	case kpproto.EVENT_MESSAGE_ACTION_OUTPUT_DISCONNECT:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_OUTPUT_DISCONNECT:
 		msg := &kpmsg.EventMessageOutputDisconnect{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 
@@ -138,7 +136,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 
 		// update output status
-		output, _, err := p.list.GetOutputByUnique(msg.Output.Unique)
+		output, _, err := p.configList.GetOutputByUnique(msg.Output.Unique)
 		if err != nil {
 			logFields.WithField("error", err).Fatal("update output status failed")
 		}
@@ -165,20 +163,15 @@ func (p *Provider) ValidateConfig() error {
 }
 
 func (p *Provider) addOutput(output moduletypes.Output) error {
-	if p.EmptyOutputListFlag {
-		// empty output list
-		return nil
-	}
-
 	// validate
-	if p.list.Exist(output.Unique) {
+	if p.configList.Exist(output.Unique) {
 		return OutputUniqueHasExisted
 	}
 
 	// send prompt
 	corePlayer := core.GetLibKplayerInstance()
 
-	if err := corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
+	if err := corePlayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
 		Output: &kpprompt.PromptOutput{
 			Path:   output.Path,
 			Unique: output.Unique,
@@ -187,7 +180,7 @@ func (p *Provider) addOutput(output moduletypes.Output) error {
 		log.Warn(err)
 	}
 
-	if err := p.list.AppendOutput(output); err != nil {
+	if err := p.configList.AppendOutput(output); err != nil {
 		return err
 	}
 
@@ -210,7 +203,7 @@ func (p *Provider) StartReconnect() {
 			time.Sleep(time.Second * time.Duration(p.reconnectInternal))
 
 			corePlayer := core.GetLibKplayerInstance()
-			_ = corePlayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
+			_ = corePlayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_OUTPUT_ADD, &kpprompt.EventPromptOutputAdd{
 				Output: &kpprompt.PromptOutput{
 					Path:   ins.Path,
 					Unique: ins.Unique,

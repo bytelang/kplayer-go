@@ -49,14 +49,6 @@ func (m AppModule) TriggerMessage(message *kpproto.KPMessage) {
 
 func (m AppModule) BeginRunning(option ...module.ModuleOption) {
 	go m.Provider.StartReconnect()
-
-	// only generate cache options
-	for _, item := range option {
-		if item == module.ModuleOptionGenerateCache {
-			m.Provider.EmptyOutputListFlag = true
-		}
-	}
-
 	m.Provider.BeginRunning()
 }
 

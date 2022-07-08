@@ -1,0 +1,977 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "greeter.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "PlayGreeter"
+    },
+    {
+      "name": "OutputGreeter"
+    },
+    {
+      "name": "PluginGreeter"
+    },
+    {
+      "name": "ResourceGreeter"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/output/add": {
+      "post": {
+        "summary": "Output",
+        "operationId": "OutputGreeter_OutputAdd",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoOutputAddReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoOutputAddArgs"
+            }
+          }
+        ],
+        "tags": [
+          "OutputGreeter"
+        ]
+      }
+    },
+    "/output/list": {
+      "get": {
+        "operationId": "OutputGreeter_OutputList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoOutputListReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "OutputGreeter"
+        ]
+      }
+    },
+    "/output/remove/{unique}": {
+      "delete": {
+        "operationId": "OutputGreeter_OutputRemove",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoOutputRemoveReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "unique",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "OutputGreeter"
+        ]
+      }
+    },
+    "/play/continue": {
+      "post": {
+        "operationId": "PlayGreeter_PlayContinue",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlayContinueReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlayContinueArgs"
+            }
+          }
+        ],
+        "tags": [
+          "PlayGreeter"
+        ]
+      }
+    },
+    "/play/duration": {
+      "get": {
+        "operationId": "PlayGreeter_PlayDuration",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlayDurationReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "PlayGreeter"
+        ]
+      }
+    },
+    "/play/information": {
+      "get": {
+        "operationId": "PlayGreeter_PlayInformation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlayInformationReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "PlayGreeter"
+        ]
+      }
+    },
+    "/play/pause": {
+      "post": {
+        "operationId": "PlayGreeter_PlayPause",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlayPauseReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlayPauseArgs"
+            }
+          }
+        ],
+        "tags": [
+          "PlayGreeter"
+        ]
+      }
+    },
+    "/play/skip": {
+      "post": {
+        "operationId": "PlayGreeter_PlaySkip",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlaySkipReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlaySkipArgs"
+            }
+          }
+        ],
+        "tags": [
+          "PlayGreeter"
+        ]
+      }
+    },
+    "/play/stop": {
+      "post": {
+        "summary": "Player",
+        "operationId": "PlayGreeter_PlayStop",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlayStopReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPlayStopArgs"
+            }
+          }
+        ],
+        "tags": [
+          "PlayGreeter"
+        ]
+      }
+    },
+    "/plugin/add": {
+      "post": {
+        "operationId": "PluginGreeter_PluginAdd",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPluginAddReplay"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPluginAddArgs"
+            }
+          }
+        ],
+        "tags": [
+          "PluginGreeter"
+        ]
+      }
+    },
+    "/plugin/list": {
+      "get": {
+        "summary": "Plugin",
+        "operationId": "PluginGreeter_PluginList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPluginListReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "PluginGreeter"
+        ]
+      }
+    },
+    "/plugin/remove/{unique}": {
+      "delete": {
+        "operationId": "PluginGreeter_PluginRemove",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPluginRemoveReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "unique",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "PluginGreeter"
+        ]
+      }
+    },
+    "/plugin/update": {
+      "patch": {
+        "operationId": "PluginGreeter_PluginUpdate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPluginUpdateReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoPluginUpdateArgs"
+            }
+          }
+        ],
+        "tags": [
+          "PluginGreeter"
+        ]
+      }
+    },
+    "/resource/add": {
+      "post": {
+        "summary": "Resource",
+        "operationId": "ResourceGreeter_ResourceAdd",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoResourceAddReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoResourceAddArgs"
+            }
+          }
+        ],
+        "tags": [
+          "ResourceGreeter"
+        ]
+      }
+    },
+    "/resource/current": {
+      "get": {
+        "operationId": "ResourceGreeter_ResourceCurrent",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoResourceCurrentReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ResourceGreeter"
+        ]
+      }
+    },
+    "/resource/list": {
+      "get": {
+        "operationId": "ResourceGreeter_ResourceList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoResourceListReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ResourceGreeter"
+        ]
+      }
+    },
+    "/resource/list-all": {
+      "get": {
+        "operationId": "ResourceGreeter_ResourceListAll",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoResourceListAllReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ResourceGreeter"
+        ]
+      }
+    },
+    "/resource/remove/{unique}": {
+      "delete": {
+        "operationId": "ResourceGreeter_ResourceRemove",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoResourceRemoveReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "unique",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ResourceGreeter"
+        ]
+      }
+    },
+    "/resource/seek": {
+      "post": {
+        "operationId": "ResourceGreeter_ResourceSeek",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RPCProtoResourceSeekReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RPCProtoResourceSeekArgs"
+            }
+          }
+        ],
+        "tags": [
+          "ResourceGreeter"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "RPCProtoOutput": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        }
+      }
+    },
+    "RPCProtoOutputAddArgs": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        }
+      },
+      "title": "add"
+    },
+    "RPCProtoOutputAddReply": {
+      "type": "object",
+      "properties": {
+        "output": {
+          "$ref": "#/definitions/RPCProtoOutput"
+        }
+      }
+    },
+    "RPCProtoOutputListReply": {
+      "type": "object",
+      "properties": {
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RPCProtoOutputModule"
+          }
+        }
+      }
+    },
+    "RPCProtoOutputModule": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "connected": {
+          "type": "boolean"
+        }
+      },
+      "title": "list"
+    },
+    "RPCProtoOutputRemoveReply": {
+      "type": "object",
+      "properties": {
+        "output": {
+          "$ref": "#/definitions/RPCProtoOutput"
+        }
+      }
+    },
+    "RPCProtoPlayContinueArgs": {
+      "type": "object"
+    },
+    "RPCProtoPlayContinueReply": {
+      "type": "object"
+    },
+    "RPCProtoPlayDurationReply": {
+      "type": "object",
+      "properties": {
+        "startTimestamp": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "durationTimestamp": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "RPCProtoPlayInformationReply": {
+      "type": "object",
+      "properties": {
+        "majorVersion": {
+          "type": "string"
+        },
+        "libkplayerVersion": {
+          "type": "string"
+        },
+        "pluginVersion": {
+          "type": "string"
+        },
+        "licenseVersion": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "startTimeTimestamp": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "RPCProtoPlayPauseArgs": {
+      "type": "object"
+    },
+    "RPCProtoPlayPauseReply": {
+      "type": "object"
+    },
+    "RPCProtoPlaySkipArgs": {
+      "type": "object"
+    },
+    "RPCProtoPlaySkipReply": {
+      "type": "object"
+    },
+    "RPCProtoPlayStopArgs": {
+      "type": "object"
+    },
+    "RPCProtoPlayStopReply": {
+      "type": "object"
+    },
+    "RPCProtoPlugin": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "loadedTime": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "plugin"
+    },
+    "RPCProtoPluginAddArgs": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "add"
+    },
+    "RPCProtoPluginAddReplay": {
+      "type": "object",
+      "properties": {
+        "plugin": {
+          "$ref": "#/definitions/RPCProtoPlugin"
+        }
+      }
+    },
+    "RPCProtoPluginListReply": {
+      "type": "object",
+      "properties": {
+        "plugins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RPCProtoPlugin"
+          }
+        }
+      }
+    },
+    "RPCProtoPluginRemoveReply": {
+      "type": "object",
+      "properties": {
+        "plugin": {
+          "$ref": "#/definitions/RPCProtoPlugin"
+        }
+      }
+    },
+    "RPCProtoPluginUpdateArgs": {
+      "type": "object",
+      "properties": {
+        "unique": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Update"
+    },
+    "RPCProtoPluginUpdateReply": {
+      "type": "object",
+      "properties": {
+        "plugin": {
+          "$ref": "#/definitions/RPCProtoPlugin"
+        }
+      }
+    },
+    "RPCProtoResource": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        },
+        "seek": {
+          "type": "string",
+          "format": "int64"
+        },
+        "end": {
+          "type": "string",
+          "format": "int64"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "res"
+    },
+    "RPCProtoResourceAddArgs": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        },
+        "seek": {
+          "type": "string",
+          "format": "int64"
+        },
+        "end": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "add"
+    },
+    "RPCProtoResourceAddReply": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "#/definitions/RPCProtoResource"
+        }
+      }
+    },
+    "RPCProtoResourceCurrentReply": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "#/definitions/RPCProtoResource"
+        },
+        "duration": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "durationFormat": {
+          "type": "string"
+        },
+        "seek": {
+          "type": "string",
+          "format": "int64"
+        },
+        "seekFormat": {
+          "type": "string"
+        },
+        "hitCache": {
+          "type": "boolean"
+        }
+      }
+    },
+    "RPCProtoResourceListAllReply": {
+      "type": "object",
+      "properties": {
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RPCProtoResource"
+          }
+        }
+      }
+    },
+    "RPCProtoResourceListReply": {
+      "type": "object",
+      "properties": {
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RPCProtoResource"
+          }
+        }
+      }
+    },
+    "RPCProtoResourceRemoveReply": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "#/definitions/RPCProtoResourceRemoveReplyResource"
+        }
+      }
+    },
+    "RPCProtoResourceRemoveReplyResource": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "string"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "RPCProtoResourceSeekArgs": {
+      "type": "object",
+      "properties": {
+        "unique": {
+          "type": "string"
+        },
+        "seek": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "seek to timestamp"
+    },
+    "RPCProtoResourceSeekReply": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "#/definitions/RPCProtoResource"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

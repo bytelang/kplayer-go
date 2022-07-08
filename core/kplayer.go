@@ -3,6 +3,7 @@ package core
 // #cgo LDFLAGS: -lkplayer -lkpcodec -lkputil -lkpadapter -lkpplugin
 // #include "extra.h"
 // void goCallBackMessage(int, char*);
+// void goCallBackProgress(double, int);
 import "C"
 
 import (
@@ -23,11 +24,45 @@ import (
 func goCallBackMessage(action C.int, msgRaw *C.char) {
 	msg := C.GoString(msgRaw)
 	ac := int(action)
-	libKplayerInstance.callbackFn(ac, msg)
+	libKplayerInstance.callbackMessageFn(ac, msg)
 }
 
+//export goCallBackProgress
+// goCallBackProgress define libkplayer callback function
+func goCallBackProgress(percent C.double, bitRate C.int) {
+	libKplayerInstance.callbackProgressFn(float64(percent), int(bitRate))
+}
+
+type CoreKplayerOption string
+
+var (
+	ProtocolOption     CoreKplayerOption = "protocol"
+	VideoWidthOption   CoreKplayerOption = "video_width"
+	VideoHeightOption  CoreKplayerOption = "video_height"
+	VideoBitrateOption CoreKplayerOption = "video_bitrate"
+	VideoQualityOption CoreKplayerOption = "video_quality"
+	VideoFpsOption     CoreKplayerOption = "video_fps"
+	AudioSampleRate    CoreKplayerOption = "audio_sample_rate"
+	AudioChannelLayout CoreKplayerOption = "audio_channel_layout"
+	AudioChannels      CoreKplayerOption = "audio_channels"
+	VideoFillStrategy  CoreKplayerOption = "video_fill_strategy"
+)
+
 var libKplayerInstance *libKplayer = &libKplayer{
-	callbackFn: func(action int, message string) {},
+	protocol:              "file",
+	video_width:           848,
+	video_height:          480,
+	video_bitrate:         0,
+	video_quality:         0,
+	video_fps:             25,
+	audio_sample_rate:     44100,
+	audio_channel_layout:  3,
+	audio_channels:        2,
+	cache_on:              false,
+	skip_invalid_resource: false,
+	video_fill_strategy:   0,
+	callbackMessageFn:     func(action int, message string) {},
+	callbackProgressFn:    func(percent float64, bitRate int) {},
 }
 
 // libKplayer
@@ -37,24 +72,20 @@ type libKplayer struct {
 	video_width          uint32
 	video_height         uint32
 	video_bitrate        uint32
-	video_qulity         uint32
+	video_quality        uint32
 	video_fps            uint32
 	audio_sample_rate    uint32
 	audio_channel_layout uint32
 	audio_channels       uint32
+	video_fill_strategy  int32
 
 	// options
 	cache_on              bool
 	skip_invalid_resource bool
 
 	// event message receiver
-	callbackFn func(action int, message string)
-
-	// delay queue size
-	delay_queue_size uint16
-
-	// fill strategy
-	fill_strategy int32
+	callbackMessageFn  func(action int, message string)
+	callbackProgressFn func(percent float64, bitRate int)
 }
 
 // GetLibKplayer return singleton LibKplayer instance
@@ -63,34 +94,40 @@ func GetLibKplayerInstance() *libKplayer {
 }
 
 // SetOptions set basic options
-func (lb *libKplayer) SetOptions(protocol string,
-	video_width uint32,
-	video_height uint32,
-	video_bitrate uint32,
-	video_qulity uint32,
-	video_fps uint32,
-	audio_sample_rate uint32,
-	audio_channel_layout uint32,
-	audio_channels uint32, delay_queue_size uint32, fill_strategy int32) error {
-	libKplayerInstance.protocol = strings.ToLower(protocol)
-	libKplayerInstance.video_width = video_width
-	libKplayerInstance.video_height = video_height
-	libKplayerInstance.video_bitrate = video_bitrate
-	libKplayerInstance.video_qulity = video_qulity
-	libKplayerInstance.video_fps = video_fps
-	libKplayerInstance.audio_sample_rate = audio_sample_rate
-	libKplayerInstance.audio_channel_layout = audio_channel_layout
-	libKplayerInstance.audio_channels = audio_channels
-
-	// other params
-	libKplayerInstance.delay_queue_size = uint16(delay_queue_size)
-	libKplayerInstance.fill_strategy = fill_strategy
-
+func (lb *libKplayer) SetOptions(options map[CoreKplayerOption]interface{}) error {
+	for option, value := range options {
+		switch option {
+		case ProtocolOption:
+			libKplayerInstance.protocol = strings.ToLower(value.(string))
+		case VideoWidthOption:
+			libKplayerInstance.video_width = value.(uint32)
+		case VideoHeightOption:
+			libKplayerInstance.video_height = value.(uint32)
+		case VideoBitrateOption:
+			libKplayerInstance.video_bitrate = value.(uint32)
+		case VideoQualityOption:
+			libKplayerInstance.video_quality = value.(uint32)
+		case VideoFpsOption:
+			libKplayerInstance.video_fps = value.(uint32)
+		case VideoFillStrategy:
+			libKplayerInstance.video_fill_strategy = value.(int32)
+		case AudioSampleRate:
+			libKplayerInstance.audio_sample_rate = value.(uint32)
+		case AudioChannelLayout:
+			libKplayerInstance.audio_channel_layout = value.(uint32)
+		case AudioChannels:
+			libKplayerInstance.audio_channels = value.(uint32)
+		}
+	}
 	return nil
 }
 
 func (lb *libKplayer) SetCallBackMessage(fn func(action int, message string)) {
-	lb.callbackFn = fn
+	lb.callbackMessageFn = fn
+}
+
+func (lb *libKplayer) SetCallBackProgress(fn func(percent float64, bitRate int)) {
+	lb.callbackProgressFn = fn
 }
 
 func (lb *libKplayer) GetInformation() *kpproto.Information {
@@ -166,18 +203,19 @@ func (lb *libKplayer) Initialization() {
 	}
 
 	C.ReceiveMessage(C.MessageCallBack(C.goCallBackMessage))
+	C.ProgressCallback(C.ProgressCallBack(C.goCallBackProgress))
 
-	C.Initialization(C.CString(lb.protocol),
+	C.Initialization(
+		C.CString(lb.protocol),
 		C.int(lb.video_width),
 		C.int(lb.video_height),
 		C.int(lb.video_bitrate),
-		C.int(lb.video_qulity),
+		C.int(lb.video_quality),
 		C.int(lb.video_fps),
 		C.int(lb.audio_sample_rate),
 		C.int(lb.audio_channel_layout),
 		C.int(lb.audio_channels),
-		C.short(lb.delay_queue_size),
-		C.int(lb.fill_strategy))
+		C.int(lb.video_fill_strategy))
 }
 
 func (lb *libKplayer) AddOutput(body *kpprompt.EventPromptOutputAdd) error {

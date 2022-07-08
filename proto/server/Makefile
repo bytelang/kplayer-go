@@ -1,5 +1,5 @@
 build-go:
-	protoc -I=. -I=${PROTO_PATH} --gogo_out=. *.proto
+	protoc -I=.:${PROTO_PATH} --gogo_out=plugins=grpc:. --grpc-gateway_out=logtostderr=true:. --openapiv2_out=./gen *.proto
 	cp -rf github.com/bytelang/kplayer/types/* ../../types/
 	rm -rf github.com
 

@@ -1,24 +1,27 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/bytelang/kplayer/types/config"
-	errortypes "github.com/bytelang/kplayer/types/error"
-	"github.com/go-playground/validator/v10"
-	"io/ioutil"
-	"os"
-	"runtime"
-
 	"github.com/bytelang/kplayer/app"
 	"github.com/bytelang/kplayer/cmd"
 	"github.com/bytelang/kplayer/module"
+	"github.com/bytelang/kplayer/module/play/provider"
 	"github.com/bytelang/kplayer/server"
 	kptypes "github.com/bytelang/kplayer/types"
+	"github.com/bytelang/kplayer/types/config"
+	errortypes "github.com/bytelang/kplayer/types/error"
+	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
+	"io/ioutil"
+	"os"
+	"runtime"
+	"strings"
 )
 
 func init() {
@@ -75,7 +78,7 @@ func Execute(rootCmd *cobra.Command, defaultHome string, defaultFile string) err
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, kptypes.ClientContextKey, kptypes.DefaultClientContext())
 	ctx = context.WithValue(ctx, kptypes.ModuleManagerContextKey, app.ModuleManager)
-	ctx = context.WithValue(ctx, kptypes.ServerCreatorContextKey, server.NewJsonRPCServer())
+	ctx = context.WithValue(ctx, kptypes.ServerCreatorContextKey, server.NewHttpServer())
 
 	return kptypes.SetCommandContextAndExecute(rootCmd, ctx)
 }
@@ -103,6 +106,9 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 	v := viper.New()
 	v.AddConfigPath(".")
 	v.SetConfigType("json")
+	if !kptypes.FileExists(configFileName) && !kptypes.FileExists(configFileName+".json") {
+		v.SetConfigType("yaml")
+	}
 	v.SetConfigName(configFileName)
 
 	// skip on init stage
@@ -123,6 +129,27 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		log.Fatal(err)
 	}
 
+	// custom config
+	{
+		// add generate cache config
+		if cmd.Flag(provider.FlagGenerateCache) != nil {
+			if cmd.Flag(provider.FlagGenerateCache).Value.String() == provider.FlagYesValue {
+				clientCtx.Config.Play.PlayModel = strings.ToLower(config.PLAY_MODEL_name[int32(config.PLAY_MODEL_LIST)])
+				clientCtx.Config.Play.EncodeModel = strings.ToLower(config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)])
+				clientCtx.Config.Output.Lists = nil
+				clientCtx.Config.Play.CacheOn = true
+			}
+		}
+	}
+
+	reInitConfig, err := json.Marshal(clientCtx.Config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := v.ReadConfig(bytes.NewBuffer(reInitConfig)); err != nil {
+		log.Fatal(err)
+	}
+
 	// validate global config
 	if err := ValidateConfig(clientCtx.Config); err != nil {
 		log.Fatal(err)
@@ -133,11 +160,11 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		m := mm.GetModule(item)
 
 		// init config and set default value
-		d, err := json.Marshal(v.AllSettings()[m.GetModuleName()])
+		d, err := json.Marshal(clientCtx.Config)
 		if err != nil {
 			log.Fatal(err)
 		}
-		modifyData, err := m.InitConfig(clientCtx, d)
+		modifyData, err := m.InitConfig(clientCtx, []byte(gjson.Parse(string(d)).Get(m.GetModuleName()).String()))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -198,15 +225,16 @@ func setDefaultConfig(v *viper.Viper) {
 	v.SetDefault("play.fill_strategy", "tile")
 
 	v.SetDefault("play.rpc.on", true)
-	v.SetDefault("play.rpc.port", kptypes.DefaultRPCPort)
+	v.SetDefault("play.rpc.http_port", kptypes.DefaultHttpPort)
+	v.SetDefault("play.rpc.grpc_port", kptypes.DefaultRPCPort)
 	v.SetDefault("play.rpc.address", kptypes.DefaultRPCAddress)
 
-	v.SetDefault("play.encode.video_width", 780)
+	v.SetDefault("play.encode.video_width", 854)
 	v.SetDefault("play.encode.video_height", 480)
-	v.SetDefault("play.encode.video_fps", 30)
+	v.SetDefault("play.encode.video_fps", 25)
 	v.SetDefault("play.encode.audio_channel_layout", 3)
 	v.SetDefault("play.encode.audio_channels", 2)
-	v.SetDefault("play.encode.audio_sample_rate", 48000)
+	v.SetDefault("play.encode.audio_sample_rate", 44100)
 	v.SetDefault("play.encode.bit_rate", 0)
 	v.SetDefault("play.encode.avg_quality", 0)
 }

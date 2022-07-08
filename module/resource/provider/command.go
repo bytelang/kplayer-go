@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	kptypes "github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/client"
@@ -70,13 +71,19 @@ end:
 			}
 
 			// send request
-			reply := &kpserver.ResourceAddReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Resource.Add", &kpserver.ResourceAddArgs{
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			resourceClient := kpserver.NewResourceGreeterClient(conn)
+			reply, err := resourceClient.ResourceAdd(context.Background(), &kpserver.ResourceAddArgs{
 				Path:   path,
 				Unique: unique,
 				Seek:   seek,
 				End:    end,
-			}, reply); err != nil {
+			})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -105,10 +112,17 @@ func RemoveCommand() *cobra.Command {
 			// args
 			uniqueName := args[0]
 
-			reply := &kpserver.ResourceRemoveReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Resource.Remove", &kpserver.ResourceRemoveArgs{
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			resourceClient := kpserver.NewResourceGreeterClient(conn)
+			reply, err := resourceClient.ResourceRemove(context.Background(), &kpserver.ResourceRemoveArgs{
 				Unique: uniqueName,
-			}, reply); err != nil {
+			})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -134,8 +148,15 @@ func ListCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.ResourceListReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Resource.List", &kpserver.ResourceListArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			resourceClient := kpserver.NewResourceGreeterClient(conn)
+			reply, err := resourceClient.ResourceList(context.Background(), &kpserver.ResourceListArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -161,8 +182,15 @@ func AllCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.ResourceAllListReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Resource.AllList", &kpserver.ResourceAllListArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			resourceClient := kpserver.NewResourceGreeterClient(conn)
+			reply, err := resourceClient.ResourceListAll(context.Background(), &kpserver.ResourceListAllArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -188,8 +216,15 @@ func CurrentCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.ResourceCurrentReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Resource.Current", &kpserver.ResourceCurrentArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			resourceClient := kpserver.NewResourceGreeterClient(conn)
+			reply, err := resourceClient.ResourceCurrent(context.Background(), &kpserver.ResourceCurrentArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -227,11 +262,18 @@ seek:
 				return err
 			}
 
-			reply := &kpserver.ResourceSeekReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Resource.Seek", &kpserver.ResourceSeekArgs{
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			resourceClient := kpserver.NewResourceGreeterClient(conn)
+			reply, err := resourceClient.ResourceSeek(context.Background(), &kpserver.ResourceSeekArgs{
 				Unique: uniqueName,
 				Seek:   seekPosition,
-			}, reply); err != nil {
+			})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}

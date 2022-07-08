@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
@@ -18,14 +19,15 @@ import (
 )
 
 type ProviderI interface {
-	PluginAdd(plugin *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error)
-	PluginRemove(plugin *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error)
-	PluginList(plugin *svrproto.PluginListArgs) (*svrproto.PluginListReply, error)
-	PluginUpdate(plugin *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error)
+	PluginAdd(ctx context.Context, plugin *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error)
+	PluginRemove(ctx context.Context, plugin *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error)
+	PluginList(ctx context.Context, plugin *svrproto.PluginListArgs) (*svrproto.PluginListReply, error)
+	PluginUpdate(ctx context.Context, plugin *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error)
 }
 
 type Provider struct {
 	module.ModuleKeeper
+	svrproto.UnimplementedPluginGreeterServer
 
 	// config
 	list Plugins
@@ -118,7 +120,7 @@ func (p *Provider) ValidateConfig() error {
 
 func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	switch message.Action {
-	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_ADD:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD:
 		msg := &kpmsg.EventMessagePluginAdd{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path, "author": msg.Plugin.Author})
@@ -131,11 +133,12 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		plugin, _, err := p.list.GetPluginByUnique(msg.Plugin.Unique)
 		if err != nil {
 			logFields.Warn(err)
+			return
 		}
 		plugin.LoadedTime = uint64(time.Now().Unix())
 
 		logFields.Info("add plugin success")
-	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_REMOVE:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_REMOVE:
 		msg := &kpmsg.EventMessagePluginRemove{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path})
@@ -150,7 +153,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		}
 
 		logFields.Info("remove plugin success")
-	case kpproto.EVENT_MESSAGE_ACTION_PLUGIN_UPDATE:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_UPDATE:
 		msg := &kpmsg.EventMessagePluginUpdate{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
 		logFields := log.WithFields(log.Fields{"unique": msg.Plugin.Unique, "path": msg.Plugin.Path})
@@ -171,7 +174,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 		plugin.Params = params
 
 		logFields.Info("update plugin success")
-	case kpproto.EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
+	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_FINISH:
 		// reload failed plugin
 		p.list.lock.Lock()
 		defer p.list.lock.Unlock()
@@ -185,7 +188,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 				}
 
 				coreKplayer := core.GetLibKplayerInstance()
-				if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
+				if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
 					Plugin: &kpprompt.PromptPlugin{
 						Path:   item.Path,
 						Unique: item.Unique,
@@ -225,9 +228,6 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 	if p.list.Exist(plugin.Unique) {
 		return PluginUniqueHasExist
 	}
-	if !kptypes.FileExists(plugin.Path) {
-		return PluginFileNotFound
-	}
 
 	// send prompt
 	params := map[string]string{}
@@ -244,7 +244,7 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 		return err
 	}
 
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_ADD, &kpprompt.EventPromptPluginAdd{
 		Plugin: &kpprompt.PromptPlugin{
 			Path:    plugin.Path,
 			Content: fileContent,
@@ -258,6 +258,27 @@ func (p *Provider) addPlugin(plugin moduletypes.Plugin) error {
 	// append list
 	if err := p.list.AppendPlugin(plugin); err != nil {
 		return err
+	}
+
+	// wait for message
+	pluginAddMsg := &kpmsg.EventMessagePluginAdd{}
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLUGIN_ADD, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, pluginAddMsg)
+		return pluginAddMsg.Plugin.Unique == plugin.Unique
+	})
+	defer keeperCtx.Close()
+
+	if err := p.RegisterKeeperChannel(keeperCtx); err != nil {
+		_, _ = p.list.RemovePluginByUnique(plugin.Unique)
+		return err
+	}
+
+	// wait context
+	keeperCtx.Wait()
+
+	if len(pluginAddMsg.Error) != 0 {
+		_, _ = p.list.RemovePluginByUnique(plugin.Unique)
+		return fmt.Errorf("%s", pluginAddMsg.Error)
 	}
 
 	return nil

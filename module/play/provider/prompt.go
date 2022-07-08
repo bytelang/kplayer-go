@@ -1,10 +1,11 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
-	"github.com/bytelang/kplayer/types"
+	kptypes "github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/config"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
@@ -13,16 +14,20 @@ import (
 	"time"
 )
 
-func (p *Provider) PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error) {
+func (p *Provider) PlayStop(ctx context.Context, args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLAYER_STOP, &prompt.EventPromptPlayerStop{}); err != nil {
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_STOP, &prompt.EventPromptPlayerStop{}); err != nil {
 		return nil, err
 	}
 
 	// register prompt
 	endedMsg := &msg.EventMessagePlayerEnded{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_ENDED, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, endedMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_STOP, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, endedMsg)
 		return true
 	})
 	defer keeperCtx.Close()
@@ -40,16 +45,20 @@ func (p *Provider) PlayStop(args *svrproto.PlayStopArgs) (*svrproto.PlayStopRepl
 	return &svrproto.PlayStopReply{}, nil
 }
 
-func (p *Provider) PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error) {
+func (p *Provider) PlayPause(ctx context.Context, args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLAYER_PAUSE, &prompt.EventPromptPlayerPause{}); err != nil {
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_PAUSE, &prompt.EventPromptPlayerPause{}); err != nil {
 		return nil, err
 	}
 
 	// register prompt
 	pauseMsg := &msg.EventMessagePlayerPause{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_PAUSE, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, pauseMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_PAUSE, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, pauseMsg)
 		return true
 	})
 	defer keeperCtx.Close()
@@ -67,17 +76,21 @@ func (p *Provider) PlayPause(args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseR
 	return &svrproto.PlayPauseReply{}, nil
 }
 
-func (p *Provider) PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error) {
+func (p *Provider) PlaySkip(ctx context.Context, args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	// send skip prompt
 	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLAYER_SKIP, &prompt.EventPromptPlayerSkip{}); err != nil {
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_SKIP, &prompt.EventPromptPlayerSkip{}); err != nil {
 		return nil, err
 	}
 
 	// register prompt
 	skipMsg := &msg.EventMessagePlayerSkip{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_SKIP, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, skipMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_SKIP, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, skipMsg)
 		return true
 	})
 	defer keeperCtx.Close()
@@ -95,16 +108,20 @@ func (p *Provider) PlaySkip(args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipRepl
 	return &svrproto.PlaySkipReply{}, nil
 }
 
-func (p *Provider) PlayContinue(args *svrproto.PlayContinueArgs) (*svrproto.PlayContinueReply, error) {
+func (p *Provider) PlayContinue(ctx context.Context, args *svrproto.PlayContinueArgs) (*svrproto.PlayContinueReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	coreKplayer := core.GetLibKplayerInstance()
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_PLAYER_CONTINUE, &prompt.EventPromptPlayerContinue{}); err != nil {
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_CONTINUE, &prompt.EventPromptPlayerContinue{}); err != nil {
 		return nil, err
 	}
 
 	// register prompt
 	continueMsg := &msg.EventMessagePlayerContinue{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_PLAYER_CONTINUE, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, continueMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_CONTINUE, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, continueMsg)
 		return true
 	})
 	defer keeperCtx.Close()
@@ -122,22 +139,29 @@ func (p *Provider) PlayContinue(args *svrproto.PlayContinueArgs) (*svrproto.Play
 	return &svrproto.PlayContinueReply{}, nil
 }
 
-func (p *Provider) PlayDuration(args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error) {
+func (p *Provider) PlayDuration(ctx context.Context, args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	reply := &svrproto.PlayDurationReply{
-		Time:              p.startTime.String(),
 		StartTimestamp:    uint64(p.startTime.Unix()),
 		DurationTimestamp: uint64(time.Now().Unix() - p.startTime.Unix()),
 	}
 	return reply, nil
 }
 
-func (p *Provider) PlayInformation(args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error) {
+func (p *Provider) PlayInformation(ctx context.Context, args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	coreKplayer := core.GetLibKplayerInstance()
 	// get core information
 	info := coreKplayer.GetInformation()
 
 	reply := &svrproto.PlayInformationReply{
-		MajorVersion:       types.MAJOR_TAG,
+		MajorVersion:       kptypes.MAJOR_TAG,
 		LibkplayerVersion:  info.MajorVersion,
 		PluginVersion:      info.PluginVersion,
 		LicenseVersion:     info.LicenseVersion,
@@ -148,6 +172,10 @@ func (p *Provider) PlayInformation(args *svrproto.PlayInformationArgs) (*svrprot
 	return reply, nil
 }
 
-func (p *Provider) GetRPCParams() config.Rpc {
+func (p *Provider) GetRPCParams() config.Server {
 	return p.rpc
+}
+
+func (p *Provider) GetCacheOn() bool {
+	return p.cacheOn
 }

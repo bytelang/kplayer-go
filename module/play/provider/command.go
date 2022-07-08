@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/types/client"
 	"github.com/bytelang/kplayer/types/config"
@@ -24,8 +25,9 @@ import (
 )
 
 const (
-	pidFilePath = "log/kplayer.pid"
-	logFilePath = "log/kplayer.log"
+	pidFilePath     = "log/kplayer.pid"
+	logFilePath     = "log/kplayer.log"
+	coreLogFilePath = "log/core.log"
 )
 
 func GetCommand() *cobra.Command {
@@ -73,8 +75,15 @@ func durationCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlayDurationReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Duration", &kpserver.PlayDurationArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlayDuration(context.Background(), &kpserver.PlayDurationArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -100,8 +109,15 @@ func pauseCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlayPauseReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlayPause(context.Background(), &kpserver.PlayPauseArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -127,8 +143,15 @@ func continueCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlayPauseReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Pause", &kpserver.PlayPauseArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlayContinue(context.Background(), &kpserver.PlayContinueArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -154,8 +177,15 @@ func skipCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlaySkipReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Skip", &kpserver.PlaySkipArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlaySkip(context.Background(), &kpserver.PlaySkipArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -181,8 +211,15 @@ func versionCommand() *cobra.Command {
 			// get client ctx
 			clientCtx := kptypes.GetClientContextFromCommand(cmd)
 
-			reply := &kpserver.PlayInformationReply{}
-			if err := client.ClientRequest(clientCtx.Config.Play.Rpc, "Play.Information", &kpserver.PlayInformationArgs{}, reply); err != nil {
+			// request
+			conn, err := client.GrpcClientRequest(clientCtx.Config.Play.Rpc)
+			if err != nil {
+				return err
+			}
+
+			playClient := kpserver.NewPlayGreeterClient(conn)
+			reply, err := playClient.PlayInformation(context.Background(), &kpserver.PlayInformationArgs{})
+			if err != nil {
 				log.Error(err)
 				return nil
 			}
@@ -306,28 +343,18 @@ func startCommand() *cobra.Command {
 
 			cfg := clientCtx.Config
 
-			// override only generate cache config
-			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
-				cfg.Play.PlayModel = config.PLAY_FILL_STRATEGY_name[int32(config.PLAY_MODEL_LIST)]
-				cfg.Play.EncodeModel = config.ENCODE_MODEL_name[int32(config.ENCODE_MODEL_FILE)]
-				cfg.Play.CacheOn = true
-				cfg.Play.DelayQueueSize = 500
-				cfg.Play.SkipInvalidResource = false
-				log.Info("running on generate cache model")
-			}
-
 			coreKplayer := core.GetLibKplayerInstance()
-			if err := coreKplayer.SetOptions(cfg.Play.EncodeModel,
-				cfg.Play.Encode.VideoWidth,
-				cfg.Play.Encode.VideoHeight,
-				cfg.Play.Encode.BitRate,
-				cfg.Play.Encode.AvgQuality,
-				cfg.Play.Encode.VideoFps,
-				cfg.Play.Encode.AudioSampleRate,
-				cfg.Play.Encode.AudioChannelLayout,
-				cfg.Play.Encode.AudioChannels,
-				cfg.Play.DelayQueueSize,
-				config.PLAY_FILL_STRATEGY_value[strings.ToUpper(cfg.Play.FillStrategy)]); err != nil {
+			if err := coreKplayer.SetOptions(map[core.CoreKplayerOption]interface{}{
+				core.ProtocolOption:     cfg.Play.EncodeModel,
+				core.VideoWidthOption:   cfg.Play.Encode.VideoWidth,
+				core.VideoHeightOption:  cfg.Play.Encode.VideoHeight,
+				core.VideoBitrateOption: cfg.Play.Encode.BitRate,
+				core.VideoQualityOption: cfg.Play.Encode.AvgQuality,
+				core.VideoFillStrategy:  cfg.Play.Encode.VideoFps,
+				core.AudioSampleRate:    cfg.Play.Encode.AudioSampleRate,
+				core.AudioChannelLayout: cfg.Play.Encode.AudioChannelLayout,
+				core.AudioChannels:      cfg.Play.Encode.AudioChannels,
+				core.VideoFillStrategy:  config.PLAY_FILL_STRATEGY_value[strings.ToUpper(cfg.Play.FillStrategy)]}); err != nil {
 				log.Fatal(err)
 			}
 			coreKplayer.SetCacheOn(cfg.Play.CacheOn)
@@ -335,7 +362,7 @@ func startCommand() *cobra.Command {
 
 			serverStopChan := make(chan bool)
 
-			var coreLogLevel int = 0
+			var coreLogLevel int
 			level, err := cmd.Flags().GetString(kptypes.FlagLogLevel)
 			if err != nil {
 				log.Fatal(err)
@@ -343,11 +370,13 @@ func startCommand() *cobra.Command {
 			logLevel, err := log.ParseLevel(level)
 			switch logLevel {
 			case log.TraceLevel:
-				coreLogLevel = 2
+				coreLogLevel = 0
 			case log.DebugLevel:
 				coreLogLevel = 1
+			case log.ErrorLevel:
+				coreLogLevel = 3
 			default:
-				coreLogLevel = 0
+				coreLogLevel = 2
 			}
 
 			// module option
@@ -370,6 +399,7 @@ func startCommand() *cobra.Command {
 					<-timeTicker.C
 					if err := kptypes.Knock(); err != nil {
 						currentRetriesCount = currentRetriesCount + 1
+						log.Warn("knock failed. please check the network communication")
 						continue
 					}
 
@@ -384,7 +414,11 @@ func startCommand() *cobra.Command {
 
 			// start core
 			{
-				coreKplayer.SetLogLevel("log/core.log", coreLogLevel)
+				if logLevel == log.TraceLevel {
+					coreKplayer.SetLogLevel("", coreLogLevel)
+				} else {
+					coreKplayer.SetLogLevel(coreLogFilePath, coreLogLevel)
+				}
 
 				// initialize
 				coreKplayer.Initialization()

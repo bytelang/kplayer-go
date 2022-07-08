@@ -1,10 +1,11 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"github.com/bytelang/kplayer/core"
 	"github.com/bytelang/kplayer/module"
-	"github.com/bytelang/kplayer/types"
+	kptypes "github.com/bytelang/kplayer/types"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
 	kpprompt "github.com/bytelang/kplayer/types/core/proto/prompt"
@@ -13,10 +14,20 @@ import (
 	"time"
 )
 
-func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error) {
+func (p *Provider) OutputAdd(ctx context.Context, args *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
+	outputUnique := args.Unique
+	outputPath := args.Path
+	if outputUnique == "" {
+		outputUnique = kptypes.GetUniqueString(outputPath)
+	}
+
 	if err := p.addOutput(kpmodule.Output{
-		Path:       args.Output.Path,
-		Unique:     args.Output.Unique,
+		Path:       outputPath,
+		Unique:     outputUnique,
 		CreateTime: uint64(time.Now().Unix()),
 		Connected:  false,
 	}); err != nil {
@@ -25,9 +36,10 @@ func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddR
 
 	// register prompt
 	outputAddMsg := &msg.EventMessageOutputAdd{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, outputAddMsg)
-		return outputAddMsg.Output.Unique == args.Output.Unique && outputAddMsg.Output.Path == args.Output.Path
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_OUTPUT_ADD, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, outputAddMsg)
+		re := outputAddMsg.Output.Unique == outputUnique && outputAddMsg.Output.Path == outputPath
+		return re
 	})
 	defer keeperCtx.Close()
 
@@ -42,17 +54,41 @@ func (p *Provider) OutputAdd(args *svrproto.OutputAddArgs) (*svrproto.OutputAddR
 	}
 
 	return &svrproto.OutputAddReply{
-		Output: svrproto.Output{
+		Output: &svrproto.Output{
 			Path:   outputAddMsg.Output.Path,
 			Unique: outputAddMsg.Output.Unique,
 		},
 	}, nil
 }
 
-func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error) {
+func (p *Provider) OutputRemove(ctx context.Context, args *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
+	if !p.configList.Exist(args.Unique) {
+		return nil, OutputUniqueNotFound
+	}
+	output, _, err := p.configList.GetOutputByUnique(args.Unique)
+	if err != nil {
+		return nil, err
+	}
+	if output.Connected == false {
+		removeOutput, err := p.configList.RemoveOutputByUnique(output.Unique)
+		if err != nil {
+			return nil, err
+		}
+		return &svrproto.OutputRemoveReply{
+			Output: &svrproto.Output{
+				Path:   removeOutput.Path,
+				Unique: removeOutput.Unique,
+			},
+		}, nil
+	}
+
 	coreKplayer := core.GetLibKplayerInstance()
 
-	if err := coreKplayer.SendPrompt(kpproto.EVENT_PROMPT_ACTION_OUTPUT_REMOVE, &kpprompt.EventPromptOutputRemove{
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_OUTPUT_REMOVE, &kpprompt.EventPromptOutputRemove{
 		Unique: args.Unique,
 	}); err != nil {
 		return nil, err
@@ -60,8 +96,8 @@ func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.Outp
 
 	// register prompt
 	outputRemoveMsg := &msg.EventMessageOutputRemove{}
-	keeperCtx := module.NewKeeperContext(types.GetRandString(), kpproto.EVENT_MESSAGE_ACTION_OUTPUT_REMOVE, func(msg string) bool {
-		types.UnmarshalProtoMessage(msg, outputRemoveMsg)
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_OUTPUT_REMOVE, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, outputRemoveMsg)
 		return outputRemoveMsg.Output.Unique == args.Unique
 	})
 	defer keeperCtx.Close()
@@ -84,9 +120,13 @@ func (p *Provider) OutputRemove(args *svrproto.OutputRemoveArgs) (*svrproto.Outp
 	}, nil
 }
 
-func (p *Provider) OutputList(args *svrproto.OutputListArgs) (*svrproto.OutputListReply, error) {
+func (p *Provider) OutputList(ctx context.Context, args *svrproto.OutputListArgs) (*svrproto.OutputListReply, error) {
+	if err := kptypes.ValidateStructor(args); err != nil {
+		return nil, err
+	}
+
 	outputs := []*svrproto.OutputModule{}
-	for _, item := range p.list.outputs {
+	for _, item := range p.configList.outputs {
 		outputs = append(outputs, &svrproto.OutputModule{
 			Path:       item.Path,
 			Unique:     item.Unique,

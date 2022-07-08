@@ -80,10 +80,11 @@ func getDefaultConfig() *config.KPConfig {
 			CacheOn:             false,
 			CacheUncheck:        false,
 			SkipInvalidResource: false,
-			Rpc: &config.Rpc{
-				On:      true,
-				Address: types.DefaultRPCAddress,
-				Port:    types.DefaultRPCPort,
+			Rpc: &config.Server{
+				On:       true,
+				Address:  types.DefaultRPCAddress,
+				GrpcPort: types.DefaultRPCPort,
+				HttpPort: types.DefaultHttpPort,
 			},
 			Encode: &config.Encode{
 				VideoWidth:         780,

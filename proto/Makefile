@@ -10,9 +10,9 @@ $(SUB_DIR):
 build-go:
 	make subdirs
 	cd core && \
-	protoc -I=. -I=${PROTO_PATH} -I=./proto/prompt -I=./proto/msg --gogo_out=. proto/*.proto && \
-	protoc -I=. -I=${PROTO_PATH} -I=./proto/prompt -I=./proto/msg --gogo_out=. proto/prompt/*.proto && \
-	protoc -I=. -I=${PROTO_PATH} -I=./proto/prompt -I=./proto/msg --gogo_out=. proto/msg/*.proto && \
+	protoc -I=.:${PROTO_PATH} -I=./proto/prompt -I=./proto/msg --go_out=. proto/*.proto && \
+	protoc -I=.:${PROTO_PATH} -I=./proto/prompt -I=./proto/msg --go_out=. proto/prompt/*.proto && \
+	protoc -I=.:${PROTO_PATH} -I=./proto/prompt -I=./proto/msg --go_out=. proto/msg/*.proto && \
 	cp -rf github.com/bytelang/kplayer/types/* ../../types/ && \
 	rm -rf github.com
 
