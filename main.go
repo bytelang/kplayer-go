@@ -17,6 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"os"
 	"runtime"
@@ -105,6 +106,9 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 	v := viper.New()
 	v.AddConfigPath(".")
 	v.SetConfigType("json")
+	if !kptypes.FileExists(configFileName) && !kptypes.FileExists(configFileName+".json") {
+		v.SetConfigType("yaml")
+	}
 	v.SetConfigName(configFileName)
 
 	// skip on init stage
@@ -156,11 +160,11 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 		m := mm.GetModule(item)
 
 		// init config and set default value
-		d, err := json.Marshal(v.AllSettings()[m.GetModuleName()])
+		d, err := json.Marshal(clientCtx.Config)
 		if err != nil {
 			log.Fatal(err)
 		}
-		modifyData, err := m.InitConfig(clientCtx, d)
+		modifyData, err := m.InitConfig(clientCtx, []byte(gjson.Parse(string(d)).Get(m.GetModuleName()).String()))
 		if err != nil {
 			log.Fatal(err)
 		}

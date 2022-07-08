@@ -11,7 +11,7 @@ import (
 
 const (
 	AppName               = "kplayer"
-	DefaultConfigFileName = "config.json"
+	DefaultConfigFileName = "config"
 	DefaultConfigFilePath = "./"
 	ConfigVersion         = "2.0.0"
 )
