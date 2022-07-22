@@ -60,8 +60,9 @@ func GetUniqueString(str string) string {
 		return uniqueStr
 	}
 
+	basicUniqueStr := uniqueStr
 	for i := 1; i <= 100; i++ {
-		uniqueStr = fmt.Sprintf("%s-%d", uniqueStr, i)
+		uniqueStr = fmt.Sprintf("%s-%d", basicUniqueStr, i)
 		if ok := issueRandStr[uniqueStr]; !ok {
 			issueRandStr[uniqueStr] = true
 			return uniqueStr
