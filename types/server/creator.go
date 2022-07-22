@@ -5,5 +5,5 @@ import (
 )
 
 type ServerCreator interface {
-	StartServer(stopChan chan bool, mm module.ModuleManager)
+	StartServer(stopChan chan bool, mm module.ModuleManager, authOn bool, authToken string)
 }

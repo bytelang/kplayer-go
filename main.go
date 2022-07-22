@@ -237,4 +237,7 @@ func setDefaultConfig(v *viper.Viper) {
 	v.SetDefault("play.encode.audio_sample_rate", 44100)
 	v.SetDefault("play.encode.bit_rate", 0)
 	v.SetDefault("play.encode.avg_quality", 0)
+
+	// auth
+	v.SetDefault("auth.auth_on", false)
 }

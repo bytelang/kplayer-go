@@ -15,10 +15,6 @@ import (
 )
 
 func (p *Provider) PlayStop(ctx context.Context, args *svrproto.PlayStopArgs) (*svrproto.PlayStopReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_STOP, &prompt.EventPromptPlayerStop{}); err != nil {
 		return nil, err
@@ -46,10 +42,6 @@ func (p *Provider) PlayStop(ctx context.Context, args *svrproto.PlayStopArgs) (*
 }
 
 func (p *Provider) PlayPause(ctx context.Context, args *svrproto.PlayPauseArgs) (*svrproto.PlayPauseReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_PAUSE, &prompt.EventPromptPlayerPause{}); err != nil {
 		return nil, err
@@ -77,10 +69,6 @@ func (p *Provider) PlayPause(ctx context.Context, args *svrproto.PlayPauseArgs) 
 }
 
 func (p *Provider) PlaySkip(ctx context.Context, args *svrproto.PlaySkipArgs) (*svrproto.PlaySkipReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	// send skip prompt
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_SKIP, &prompt.EventPromptPlayerSkip{}); err != nil {
@@ -109,10 +97,6 @@ func (p *Provider) PlaySkip(ctx context.Context, args *svrproto.PlaySkipArgs) (*
 }
 
 func (p *Provider) PlayContinue(ctx context.Context, args *svrproto.PlayContinueArgs) (*svrproto.PlayContinueReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_CONTINUE, &prompt.EventPromptPlayerContinue{}); err != nil {
 		return nil, err
@@ -140,10 +124,6 @@ func (p *Provider) PlayContinue(ctx context.Context, args *svrproto.PlayContinue
 }
 
 func (p *Provider) PlayDuration(ctx context.Context, args *svrproto.PlayDurationArgs) (*svrproto.PlayDurationReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	reply := &svrproto.PlayDurationReply{
 		StartTimestamp:    uint64(p.startTime.Unix()),
 		DurationTimestamp: uint64(time.Now().Unix() - p.startTime.Unix()),
@@ -152,10 +132,6 @@ func (p *Provider) PlayDuration(ctx context.Context, args *svrproto.PlayDuration
 }
 
 func (p *Provider) PlayInformation(ctx context.Context, args *svrproto.PlayInformationArgs) (*svrproto.PlayInformationReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	coreKplayer := core.GetLibKplayerInstance()
 	// get core information
 	info := coreKplayer.GetInformation()

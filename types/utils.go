@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	reqerror "github.com/bytelang/kplayer/types/error"
 	"github.com/forgoer/openssl"
 	"github.com/ghodss/yaml"
 	"github.com/go-playground/validator/v10"
@@ -259,7 +260,8 @@ func ShortNameGenerate(longURL string) [4]string {
 func ValidateStructor(in interface{}) error {
 	validate := validator.New()
 	if err := validate.Struct(in); err != nil {
-		return err
+		validationErrors := err.(validator.ValidationErrors)
+		return reqerror.NewRequestError(validationErrors[0])
 	}
 	return nil
 }

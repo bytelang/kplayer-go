@@ -67,7 +67,7 @@ message ResourceCurrentReply {
 
 // seek to timestamp
 message ResourceSeekArgs {
-  string unique = 1;
+  string unique = 1 [(gogoproto.moretags) = "validate:\"required\""];
   int64 seek = 2;
 }
 message ResourceSeekReply {

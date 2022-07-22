@@ -17,10 +17,6 @@ import (
 )
 
 func (p *Provider) ResourceAdd(ctx context.Context, args *svrproto.ResourceAddArgs) (*svrproto.ResourceAddReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
@@ -61,10 +57,6 @@ func (p *Provider) ResourceAdd(ctx context.Context, args *svrproto.ResourceAddAr
 }
 
 func (p *Provider) ResourceRemove(ctx context.Context, args *svrproto.ResourceRemoveArgs) (*svrproto.ResourceRemoveReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
@@ -94,10 +86,6 @@ func (p *Provider) ResourceRemove(ctx context.Context, args *svrproto.ResourceRe
 }
 
 func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	var res []*svrproto.Resource
 	for _, item := range p.inputs.resources[p.currentIndex+1:] {
 		res = append(res, &svrproto.Resource{
@@ -118,10 +106,6 @@ func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceList
 }
 
 func (p *Provider) ResourceListAll(ctx context.Context, args *svrproto.ResourceListAllArgs) (*svrproto.ResourceListAllReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	res := []*svrproto.Resource{}
 	for _, item := range p.inputs.resources {
 		res = append(res, &svrproto.Resource{
@@ -176,10 +160,6 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 }
 
 func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceCurrentArgs) (*svrproto.ResourceCurrentReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_CURRENT, &kpprompt.EventPromptResourceCurrent{}); err != nil {
 		return nil, err
@@ -230,10 +210,6 @@ func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceC
 }
 
 func (p *Provider) ResourceSeek(ctx context.Context, args *svrproto.ResourceSeekArgs) (*svrproto.ResourceSeekReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 

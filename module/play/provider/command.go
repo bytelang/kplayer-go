@@ -409,7 +409,10 @@ func startCommand() *cobra.Command {
 			}()
 
 			go func() {
-				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm)
+				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm,
+					cfg.Auth.AuthOn,
+					cfg.Auth.Token,
+				)
 			}()
 
 			// start core
