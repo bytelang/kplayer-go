@@ -213,16 +213,30 @@ func (p *Provider) ResourceSeek(ctx context.Context, args *svrproto.ResourceSeek
 	p.input_mutex.Lock()
 	defer p.input_mutex.Unlock()
 
-	seekRes, _, err := p.inputs.GetResourceByUnique(args.Unique)
-	if err != nil {
-		return nil, err
+	var seekRes *moduletypes.Resource
+	var seekIndex int
+	var err error
+	if len(args.Unique) != 0 {
+		seekRes, seekIndex, err = p.inputs.GetResourceByUnique(args.Unique)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		seekRes, err = p.inputs.GetResourceByIndex(p.currentIndex)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// send prompt
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_SEEK, &kpprompt.EventPromptResourceSeek{
-		Unique: args.Unique,
-		Seek:   args.Seek,
+		Resource: &kpproto.PromptResource{
+			Path:   seekRes.Path,
+			Unique: seekRes.Unique,
+			Seek:   args.Seek,
+			End:    -1,
+		},
 	}); err != nil {
 		return nil, err
 	}
@@ -255,5 +269,8 @@ func (p *Provider) ResourceSeek(ctx context.Context, args *svrproto.ResourceSeek
 			EndTime:    seekRes.EndTime,
 		},
 	}
+
+	// update current resource index
+	p.currentIndex = seekIndex
 	return reply, nil
 }
