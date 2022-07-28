@@ -133,16 +133,25 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 				Path:   msg.Output.Path,
 				Unique: msg.Output.Unique,
 			}
+
+			// update output status
+			output, _, err := p.configList.GetOutputByUnique(msg.Output.Unique)
+			if err != nil {
+				logFields.WithField("error", err).Fatal("update output status failed")
+			}
+
+			output.EndTime = uint64(time.Now().Unix())
+			output.Connected = false
+			break
 		}
 
-		// update output status
-		output, _, err := p.configList.GetOutputByUnique(msg.Output.Unique)
+		// remove output
+		removeOutput, err := p.configList.RemoveOutputByUnique(msg.Output.Unique)
+		logResultFields := log.WithFields(log.Fields{"path": removeOutput.Path, "unique": removeOutput.Unique})
 		if err != nil {
-			logFields.WithField("error", err).Fatal("update output status failed")
+			logResultFields.Fatal("remove disconnected output failed")
 		}
-
-		output.EndTime = uint64(time.Now().Unix())
-		output.Connected = false
+		logResultFields.Info("remove disconnected output success")
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	reqerror "github.com/bytelang/kplayer/types/error"
 	"github.com/forgoer/openssl"
 	"github.com/ghodss/yaml"
 	"github.com/go-playground/validator/v10"
@@ -60,8 +61,9 @@ func GetUniqueString(str string) string {
 		return uniqueStr
 	}
 
+	basicUniqueStr := uniqueStr
 	for i := 1; i <= 100; i++ {
-		uniqueStr = fmt.Sprintf("%s-%d", uniqueStr, i)
+		uniqueStr = fmt.Sprintf("%s-%d", basicUniqueStr, i)
 		if ok := issueRandStr[uniqueStr]; !ok {
 			issueRandStr[uniqueStr] = true
 			return uniqueStr
@@ -258,7 +260,8 @@ func ShortNameGenerate(longURL string) [4]string {
 func ValidateStructor(in interface{}) error {
 	validate := validator.New()
 	if err := validate.Struct(in); err != nil {
-		return err
+		validationErrors := err.(validator.ValidationErrors)
+		return reqerror.NewRequestError(validationErrors[0])
 	}
 	return nil
 }

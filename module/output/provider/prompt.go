@@ -15,10 +15,6 @@ import (
 )
 
 func (p *Provider) OutputAdd(ctx context.Context, args *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	outputUnique := args.Unique
 	outputPath := args.Path
 	if outputUnique == "" {
@@ -62,10 +58,6 @@ func (p *Provider) OutputAdd(ctx context.Context, args *svrproto.OutputAddArgs) 
 }
 
 func (p *Provider) OutputRemove(ctx context.Context, args *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	if !p.configList.Exist(args.Unique) {
 		return nil, OutputUniqueNotFound
 	}
@@ -121,10 +113,6 @@ func (p *Provider) OutputRemove(ctx context.Context, args *svrproto.OutputRemove
 }
 
 func (p *Provider) OutputList(ctx context.Context, args *svrproto.OutputListArgs) (*svrproto.OutputListReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	outputs := []*svrproto.OutputModule{}
 	for _, item := range p.configList.outputs {
 		outputs = append(outputs, &svrproto.OutputModule{

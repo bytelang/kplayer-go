@@ -18,10 +18,6 @@ import (
 )
 
 func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) (*svrproto.PluginAddReplay, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	// download plugin file
 	pluginName := strings.TrimSuffix(filepath.Base(args.Path), filepath.Ext(args.Path))
 	if pluginName == "" {
@@ -69,10 +65,6 @@ func (p *Provider) PluginAdd(ctx context.Context, args *svrproto.PluginAddArgs) 
 }
 
 func (p *Provider) PluginRemove(ctx context.Context, args *svrproto.PluginRemoveArgs) (*svrproto.PluginRemoveReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	// validate
 	if !p.list.Exist(args.Unique) {
 		return nil, PluginUniqueNotFound
@@ -115,10 +107,6 @@ func (p *Provider) PluginRemove(ctx context.Context, args *svrproto.PluginRemove
 }
 
 func (p *Provider) PluginList(ctx context.Context, args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	reply := &svrproto.PluginListReply{}
 	for _, item := range p.list.plugins {
 		reply.Plugins = append(reply.Plugins, &svrproto.Plugin{
@@ -134,10 +122,6 @@ func (p *Provider) PluginList(ctx context.Context, args *svrproto.PluginListArgs
 }
 
 func (p *Provider) PluginListFromCore(ctx context.Context, args *svrproto.PluginListArgs) (*svrproto.PluginListReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	coreKplayer := core.GetLibKplayerInstance()
 	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLUGIN_LIST, &kpprompt.EventPromptPluginList{}); err != nil {
 		return nil, err
@@ -178,10 +162,6 @@ func (p *Provider) PluginListFromCore(ctx context.Context, args *svrproto.Plugin
 }
 
 func (p *Provider) PluginUpdate(ctx context.Context, args *svrproto.PluginUpdateArgs) (*svrproto.PluginUpdateReply, error) {
-	if err := kptypes.ValidateStructor(args); err != nil {
-		return nil, err
-	}
-
 	// validate
 	if !p.list.Exist(args.Unique) {
 		return nil, PluginUniqueNotFound

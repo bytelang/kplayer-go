@@ -389,6 +389,10 @@ func startCommand() *cobra.Command {
 			timeTicker := time.NewTicker(time.Second * (KnockIntervalMinutes * 60))
 			defer timeTicker.Stop()
 			go func() {
+				if err := kptypes.Knock(); err != nil {
+					log.Fatal("knock failed. please check the network communication")
+				}
+
 				maxRetriesCount := KnockMaxRetries
 				currentRetriesCount := 0
 				for {
@@ -409,7 +413,10 @@ func startCommand() *cobra.Command {
 			}()
 
 			go func() {
-				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm)
+				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm,
+					cfg.Auth.AuthOn,
+					cfg.Auth.Token,
+				)
 			}()
 
 			// start core
