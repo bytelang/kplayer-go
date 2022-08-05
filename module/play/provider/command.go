@@ -413,10 +413,12 @@ func startCommand() *cobra.Command {
 			}()
 
 			go func() {
-				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm,
-					cfg.Auth.AuthOn,
-					cfg.Auth.Token,
-				)
+				if cfg.Play.Rpc.On {
+					(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm,
+						cfg.Auth.AuthOn,
+						cfg.Auth.Token,
+					)
+				}
 			}()
 
 			// start core
