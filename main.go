@@ -14,10 +14,12 @@ import (
 	"github.com/bytelang/kplayer/types/config"
 	errortypes "github.com/bytelang/kplayer/types/error"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang/protobuf/ptypes"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
+	"google.golang.org/protobuf/types/known/anypb"
 	"io/ioutil"
 	"os"
 	"runtime"
@@ -124,10 +126,69 @@ func InitGlobalContextConfig(cmd *cobra.Command) {
 	// set default value
 	setDefaultConfig(v)
 
+	// refill resource list proto.any
+	// viper decode not support protobuf any unpack
+	// prepare constructing a resource list
+	var resourceLists []*anypb.Any
+	for _, item := range v.Get("resource.lists").([]interface{}) {
+		switch itemResource := item.(type) {
+		case string:
+			singleResource := &config.SingleResource{
+				Path: itemResource,
+			}
+			any, err := ptypes.MarshalAny(singleResource)
+			if err != nil {
+				log.WithField("error", err).Fatal("unmarshal any failed")
+			}
+			resourceLists = append(resourceLists, any)
+		case map[string]interface{}:
+			var found bool = false
+
+			bytes, err := json.Marshal(item)
+			if err != nil {
+				log.WithField("error", err).Fatal("unmarshal resource item failed")
+			}
+			// single resource
+			{
+				singleResource := &config.SingleResource{}
+				if err := kptypes.UnmarshalProtoMessageContinue(string(bytes), singleResource); err == nil {
+					any, err := ptypes.MarshalAny(singleResource)
+					if err != nil {
+						log.WithField("error", err).Fatal("unmarshal any failed")
+					}
+					resourceLists = append(resourceLists, any)
+					found = true
+				}
+			}
+
+			// mix resource
+			{
+				mixResource := &config.MixResource{}
+				if err := kptypes.UnmarshalProtoMessageContinue(string(bytes), mixResource); err == nil {
+					any, err := ptypes.MarshalAny(mixResource)
+					if err != nil {
+						log.WithField("error", err).Fatal("unmarshal any failed")
+					}
+					resourceLists = append(resourceLists, any)
+					found = true
+				}
+			}
+
+			if !found {
+				log.WithField("content", item).Warn("unrecognized resource structure")
+			}
+		}
+	}
+	v.Set("resource.lists", map[string]interface{}{})
+
+	// unmarshal config
 	clientCtx.Viper = v
 	if err := v.Unmarshal(clientCtx.Config); err != nil {
 		log.Fatal(err)
 	}
+
+	// set resource list
+	clientCtx.Config.Resource.Lists = resourceLists
 
 	// custom config
 	{

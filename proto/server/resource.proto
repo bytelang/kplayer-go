@@ -7,6 +7,18 @@ option go_package = "github.com/bytelang/kplayer/types/server";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 
+enum ResourceMediaType{
+  none = 0;
+  video = 1;
+  audio = 2;
+}
+
+message MixResourceGroup {
+  string path = 1;
+  ResourceMediaType media_type = 2;
+  bool persistent_loop = 3;
+}
+
 // res
 message Resource {
   string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
@@ -16,6 +28,8 @@ message Resource {
   uint64 create_time = 5 [(gogoproto.jsontag) = "create_time"];
   uint64 start_time = 6 [(gogoproto.jsontag) = "start_time"];
   uint64 end_time = 7 [(gogoproto.jsontag) = "end_time"];
+  bool mix_resource_type = 8 [(gogoproto.jsontag) = "mix_resource_type"];
+  repeated MixResourceGroup groups = 9 [(gogoproto.jsontag) = "groups"];
 }
 
 // add
@@ -24,6 +38,8 @@ message ResourceAddArgs {
   string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
   int64 seek = 3 [(gogoproto.moretags) = "validate:\"number\""];
   int64 end = 4 [(gogoproto.moretags) = "validate:\"number\""];
+  bool mix_resource_type = 8 [(gogoproto.jsontag) = "mix_resource_type"];
+  repeated MixResourceGroup groups = 9 [(gogoproto.jsontag) = "groups"];
 }
 message ResourceAddReply {
   Resource resource = 1;

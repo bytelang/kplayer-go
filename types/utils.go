@@ -5,19 +5,23 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/bytelang/kplayer/types/config"
 	reqerror "github.com/bytelang/kplayer/types/error"
 	"github.com/forgoer/openssl"
 	"github.com/ghodss/yaml"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/runtime/protoiface"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -54,8 +58,8 @@ func GetRandString(size ...uint) string {
 	return str
 }
 
-func GetUniqueString(str string) string {
-	uniqueStr := ShortNameGenerate(str)[0]
+func GetUniqueString(str string, append ...string) string {
+	uniqueStr := ShortNameGenerate(str + strings.Join(append, "#"))[0]
 	if ok := issueRandStr[uniqueStr]; !ok {
 		issueRandStr[uniqueStr] = true
 		return uniqueStr
@@ -78,6 +82,13 @@ func UnmarshalProtoMessage(data string, obj protoiface.MessageV1) {
 	if err := jsonpb.UnmarshalString(data, obj); err != nil {
 		log.WithFields(log.Fields{"error": err, "data": data}).Fatal("error unmarshal message")
 	}
+}
+
+func UnmarshalProtoMessageContinue(data string, obj protoiface.MessageV1) error {
+	if err := jsonpb.UnmarshalString(data, obj); err != nil {
+		return err
+	}
+	return nil
 }
 
 func MarshalProtoMessage(obj proto.Message) (string, error) {
@@ -271,4 +282,37 @@ func getMd5Str(str string) string {
 	m.Write([]byte(str))
 	c := m.Sum(nil)
 	return hex.EncodeToString(c)
+}
+
+func GetResourceItemByAny(item *anypb.Any) (interface{}, error) {
+	var err error
+	// single resource
+	{
+		singleResource := &config.SingleResource{}
+		if err = ptypes.UnmarshalAny(item, singleResource); err == nil {
+			return singleResource, nil
+		}
+	}
+
+	// mix resource
+	{
+		mixResource := &config.MixResource{}
+		if err = ptypes.UnmarshalAny(item, mixResource); err == nil {
+			return mixResource, nil
+		}
+	}
+
+	return nil, fmt.Errorf("any type unmarshal failed. %s", err)
+}
+
+func PathUrlEncode(path string) string {
+	pathUrl, err := url.Parse(path)
+	if err == nil {
+		if pathUrl.Scheme == "http" || pathUrl.Scheme == "https" {
+			pathUrl.Query().Encode()
+			return pathUrl.String()
+		}
+	}
+
+	return path
 }

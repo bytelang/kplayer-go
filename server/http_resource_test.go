@@ -176,6 +176,7 @@ func TestResourceSeekDuration(t *testing.T) {
 	t.Log(string(body))
 
 	// validate
+	time.Sleep(time.Second * 3)
 	{
 		queryUniqueName, seek := getCurrentResourceSeek(t)
 		if queryUniqueName != uniqueName {
@@ -183,7 +184,7 @@ func TestResourceSeekDuration(t *testing.T) {
 		}
 
 		if seek > 5 {
-			t.Fatal("seek failed")
+			t.Fatalf("seek failed. seek: %d", seek)
 		}
 	}
 }

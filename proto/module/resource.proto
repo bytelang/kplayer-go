@@ -6,13 +6,27 @@ option go_package = "github.com/bytelang/kplayer/types/module";
 
 import "gogoproto/gogo.proto";
 
+enum ResourceMediaType{
+  none = 0;
+  video = 1;
+  audio = 2;
+}
+
+message MixResourceGroup {
+  string path = 1;
+  ResourceMediaType media_type = 2;
+  bool persistent_loop = 3;
+}
+
 // res
 message Resource {
-	string path = 1;
-	string unique = 2;
-	int64 seek = 3;
-	int64 end = 4;
-	uint64 create_time = 5;
-	uint64 start_time = 6;
-	uint64 end_time = 7;
+  string path = 1;
+  string unique = 2;
+  int64 seek = 3;
+  int64 end = 4;
+  uint64 create_time = 5;
+  uint64 start_time = 6;
+  uint64 end_time = 7;
+  bool mix_resource_type = 8;
+  repeated MixResourceGroup groups = 9;
 }

@@ -380,7 +380,7 @@ func startCommand() *cobra.Command {
 			}
 
 			// module option
-			moduleOptions := []module.ModuleOption{}
+			var moduleOptions []module.ModuleOption
 			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
 				moduleOptions = append(moduleOptions, module.ModuleOptionGenerateCache)
 			}
