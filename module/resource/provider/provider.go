@@ -99,7 +99,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) 
 
 					if err := p.inputs.AppendResource(moduletypes.Resource{
 						Path:       f,
-						Unique:     kptypes.GetUniqueString(f),
+						Unique:     GetResourceUniqueName("", f),
 						Seek:       0,
 						End:        -1,
 						CreateTime: uint64(time.Now().Unix()),
@@ -111,14 +111,9 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) 
 			}
 
 			// add resource file
-			uniqueName := assertRes.Unique
-			if len(uniqueName) == 0 {
-				uniqueName = kptypes.GetUniqueString(assertRes.Path)
-			}
-
 			if err := p.inputs.AppendResource(moduletypes.Resource{
 				Path:       assertRes.Path,
-				Unique:     uniqueName,
+				Unique:     GetResourceUniqueName(assertRes.Unique, assertRes.Path),
 				Seek:       assertRes.Seek,
 				End:        assertRes.End,
 				CreateTime: uint64(time.Now().Unix()),
@@ -126,58 +121,26 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) 
 				log.WithFields(log.Fields{"path": assertRes.Path, "error": err, "type": "single"}).Error("add resource to playlist failed")
 			}
 		case *config.MixResource:
-			// add resource mix file
-			var firstVideoResource *config.MixResourceGroup = nil
-			var firstAudioResource *config.MixResourceGroup = nil
-
-			var groups []*moduletypes.MixResourceGroup
-			for _, groupItem := range assertRes.Groups {
-				if groupItem.MediaType == config.ResourceMediaType_video && firstVideoResource == nil {
-					firstVideoResource = groupItem
-				}
-				if groupItem.MediaType == config.ResourceMediaType_audio && firstAudioResource == nil {
-					firstAudioResource = groupItem
-				}
-
-				// add groups
-				mediaType := moduletypes.ResourceMediaType_video
-				if groupItem.MediaType == config.ResourceMediaType_audio {
-					mediaType = moduletypes.ResourceMediaType_audio
-				}
-				groups = append(groups, &moduletypes.MixResourceGroup{
-					Path:           groupItem.Path,
-					MediaType:      mediaType,
-					PersistentLoop: groupItem.PersistentLoop,
-				})
-			}
-
-			// calc primary resource
-			var primaryResource *config.MixResourceGroup = firstVideoResource
-			if primaryResource.PersistentLoop && !firstAudioResource.PersistentLoop {
-				primaryResource = firstAudioResource
-			}
+			groups := TransferConfigToModuleResourceGroup(assertRes.Groups)
+			firstVideoResourceGroup, firstAudioResourceGroup, primaryResourceGroup := CalcMixResourceGroupPrimaryPath(groups)
 
 			// eliminating all resources requires a loop
-			if firstVideoResource.PersistentLoop && firstAudioResource.PersistentLoop {
+			if firstVideoResourceGroup.PersistentLoop && firstAudioResourceGroup.PersistentLoop {
 				for key, _ := range groups {
 					groups[key].PersistentLoop = false
 				}
 			}
 
-			uniqueName := assertRes.Unique
-			if len(uniqueName) == 0 {
-				uniqueName = kptypes.GetUniqueString(primaryResource.Path, "MIX")
-			}
 			if err := p.inputs.AppendResource(moduletypes.Resource{
-				Path:            primaryResource.Path,
-				Unique:          uniqueName,
+				Path:            primaryResourceGroup.Path,
+				Unique:          GetResourceUniqueName(assertRes.Unique, primaryResourceGroup.Path, "MIX"),
 				Seek:            assertRes.Seek,
 				End:             assertRes.End,
 				CreateTime:      uint64(time.Now().Unix()),
 				MixResourceType: true,
 				Groups:          groups,
 			}); err != nil {
-				log.WithFields(log.Fields{"path": primaryResource, "groups": assertRes.Groups, "error": err, "type": "mix"}).Error("add resource to playlist failed")
+				log.WithFields(log.Fields{"path": primaryResourceGroup, "groups": assertRes.Groups, "error": err, "type": "mix"}).Error("add resource to playlist failed")
 			}
 		default:
 			log.WithField("error", "invalid resource type").Fatal(item)

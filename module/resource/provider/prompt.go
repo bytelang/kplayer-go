@@ -21,38 +21,65 @@ func (p *Provider) ResourceAdd(ctx context.Context, args *svrproto.ResourceAddAr
 	defer p.input_mutex.Unlock()
 
 	// uri scheme parse
-	parseUrl, err := url.Parse(args.Path)
-	if err != nil {
-		return nil, fmt.Errorf("uri scheme invalid. path: %s", args.Path)
-	}
-	if parseUrl.Scheme == "" {
-		// determine whether the file exists
-		_, err := os.Stat(args.Path)
-		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("file not exists. path: %s", args.Path)
+	if !args.MixResourceType {
+		parseUrl, err := url.Parse(args.Path)
+		if err != nil {
+			return nil, fmt.Errorf("uri scheme invalid. path: %s", args.Path)
+		}
+		if parseUrl.Scheme == "" {
+			// determine whether the file exists
+			_, err := os.Stat(args.Path)
+			if os.IsNotExist(err) {
+				return nil, fmt.Errorf("file not exists. path: %s", args.Path)
+			}
+		}
+	} else {
+		for _, item := range args.Groups {
+			parseUrl, err := url.Parse(item.Path)
+			if err != nil {
+				return nil, fmt.Errorf("media_type %s. uri scheme invalid. path: %s", item.MediaType, item.Path)
+			}
+			if parseUrl.Scheme == "" {
+				// determine whether the file exists
+				_, err := os.Stat(item.Path)
+				if os.IsNotExist(err) {
+					return nil, fmt.Errorf("media_type: %s. file not exists. path: %s", item.MediaType, item.Path)
+				}
+			}
 		}
 	}
+
 	if args.End < args.Seek {
 		return nil, fmt.Errorf("end timestamp can not be less than start timestamp")
 	}
 
 	// append to playlist
-	if err := p.inputs.AppendResource(moduletypes.Resource{
-		Path:       args.Path,
-		Unique:     args.Unique,
-		Seek:       args.Seek,
-		End:        args.End,
-		CreateTime: uint64(time.Now().Unix()),
-	}); err != nil {
+	primaryPath := args.Path
+	moduleGroups := TransferServerToModuleResourceGroup(args.Groups)
+	if args.MixResourceType {
+		_, _, primaryResourceGroup := CalcMixResourceGroupPrimaryPath(moduleGroups)
+		primaryPath = primaryResourceGroup.Path
+	}
+	moduleResource := moduletypes.Resource{
+		Path:            primaryPath,
+		Unique:          args.Unique,
+		Seek:            args.Seek,
+		End:             args.End,
+		MixResourceType: args.MixResourceType,
+		CreateTime:      uint64(time.Now().Unix()),
+		Groups:          moduleGroups,
+	}
+
+	if err := p.inputs.AppendResource(moduleResource); err != nil {
 		return nil, err
 	}
 
 	reply := &svrproto.ResourceAddReply{Resource: &svrproto.Resource{}}
-	reply.Resource.Unique = args.Unique
-	reply.Resource.Path = args.Path
-	reply.Resource.Seek = args.Seek
-	reply.Resource.End = args.End
-	reply.Resource.MixResourceType = args.MixResourceType
+	reply.Resource.Unique = moduleResource.Unique
+	reply.Resource.Path = moduleResource.Path
+	reply.Resource.Seek = moduleResource.Seek
+	reply.Resource.End = moduleResource.End
+	reply.Resource.MixResourceType = moduleResource.MixResourceType
 	reply.Resource.Groups = args.Groups
 
 	return reply, nil
@@ -244,8 +271,8 @@ func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceC
 		return nil, err
 	}
 
-	resourceDuration := time.Duration(time.Second * time.Duration(resourceCurrentMsg.Duration))
-	resourceSeek := time.Duration(time.Second * time.Duration(resourceCurrentMsg.Seek))
+	resourceDuration := time.Second * time.Duration(resourceCurrentMsg.Duration)
+	resourceSeek := time.Second * time.Duration(resourceCurrentMsg.Seek)
 
 	// groups
 	var groups []*svrproto.MixResourceGroup

@@ -34,7 +34,7 @@ message Resource {
 
 // add
 message ResourceAddArgs {
-  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+  string path = 1 [(gogoproto.moretags) = "validate:\"required_if=mix_resource_type false\""];
   string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
   int64 seek = 3 [(gogoproto.moretags) = "validate:\"number\""];
   int64 end = 4 [(gogoproto.moretags) = "validate:\"number\""];
