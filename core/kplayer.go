@@ -81,6 +81,7 @@ type libKplayer struct {
 
 	// options
 	cache_on              bool
+	cache_uncheck_source  bool
 	skip_invalid_resource bool
 
 	// event message receiver
@@ -160,7 +161,8 @@ func (lb *libKplayer) SendPrompt(action kpproto.EventPromptAction, body proto.Me
 	return nil
 }
 
-func (lb *libKplayer) Run() {
+func (lb *libKplayer) Run() int {
+	resultCode := 0
 	// start
 	stopChan := make(chan bool)
 	go func() {
@@ -172,16 +174,23 @@ func (lb *libKplayer) Run() {
 		result := C.Run()
 
 		if int(result) < 0 {
+			resultCode = int(result)
 			log.WithFields(log.Fields{"code": int(result), "error": C.GoString(C.GetError())}).Error("core return error")
 		}
 	}()
 
 	<-stopChan
 	log.Info("core shut down success")
+
+	return resultCode
 }
 
 func (lb *libKplayer) SetCacheOn(c bool) {
 	lb.cache_on = c
+}
+
+func (lb *libKplayer) SetCacheUncheckSource() {
+	lb.cache_uncheck_source = true
 }
 
 func (lb *libKplayer) SetSkipInvalidResource(s bool) {
@@ -197,6 +206,9 @@ func (lb *libKplayer) SetLogLevel(path string, level int) {
 func (lb *libKplayer) Initialization() {
 	if lb.cache_on {
 		C.SetCacheOn(C.int(1))
+	}
+	if lb.cache_uncheck_source {
+		C.SetCacheUncheckSource()
 	}
 	if lb.skip_invalid_resource {
 		C.SetSkipInvalidResource(C.int(1))
