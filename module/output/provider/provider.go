@@ -21,6 +21,12 @@ type ProviderI interface {
 	OutputAdd(ctx context.Context, output *svrproto.OutputAddArgs) (*svrproto.OutputAddReply, error)
 	OutputRemove(ctx context.Context, output *svrproto.OutputRemoveArgs) (*svrproto.OutputRemoveReply, error)
 	OutputList(ctx context.Context, output *svrproto.OutputListArgs) (*svrproto.OutputListReply, error)
+	mustEmbedUnimplementedOutputGreeterServer()
+}
+
+func (p Provider) mustEmbedUnimplementedOutputGreeterServer() {
+	//TODO implement me
+	panic("implement me")
 }
 
 type Provider struct {

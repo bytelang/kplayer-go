@@ -207,6 +207,8 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 
 		// log field single and mix
 		logFields := log.Fields{"path": msg.Resource.Path,
+			"seek":     msg.Resource.Seek,
+			"end":      msg.Resource.End,
 			"unique":   msg.Resource.Unique,
 			"type":     strings.ToLower(msg.Resource.InputType.String()),
 			"duration": msg.InputAttribute.Duration}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bytelang/kplayer/types/api"
 	"github.com/golang/protobuf/proto"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -42,6 +43,7 @@ func GetApiRequestUrl(path string) string {
 }
 
 func RequestHttpGet(host string, params proto.Message, message proto.Message) error {
+	log.WithFields(log.Fields{"host": host, "params": params}).Debug("request http api")
 	d, err := json.Marshal(params)
 	if err != nil {
 		return err

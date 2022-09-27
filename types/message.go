@@ -1,7 +1,6 @@
 package types
 
 import (
-	"encoding/json"
 	kpproto "github.com/bytelang/kplayer/types/core/proto"
 	"github.com/bytelang/kplayer/types/core/proto/msg"
 	"github.com/gogo/protobuf/proto"
@@ -40,6 +39,6 @@ type messageJson struct {
 	Body   proto.Message `json:"body"`
 }
 
-func ParseMessageToJson(message kpproto.KPMessage) ([]byte, error) {
-	return json.Marshal(message)
+func ParseMessageToJson(message proto.Message) (string, error) {
+	return MarshalProtoMessage(message)
 }
