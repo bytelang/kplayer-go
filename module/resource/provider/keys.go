@@ -16,6 +16,7 @@ const (
 	CannotRemoveCurrentResource ResourceError = "can not remove playing resource"
 	ResourceNotFound            ResourceError = "resource not found"
 	ResourceUniqueHasExisted    ResourceError = "resource unique name has existed"
+	ResourcePathCanNotBeEmpty   ResourceError = "resource path can not be empty"
 )
 
 type ResourceError string
@@ -80,6 +81,10 @@ func (rs *Resources) AppendResource(resource moduletypes.Resource) error {
 	res, _, _ := rs.GetResourceByUnique(resource.Unique)
 	if res != nil {
 		return ResourceUniqueHasExisted
+	}
+
+	if len(resource.Path) == 0 {
+		return ResourcePathCanNotBeEmpty
 	}
 
 	rs.resources = append(rs.resources, resource)

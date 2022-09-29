@@ -104,7 +104,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) 
 						End:        -1,
 						CreateTime: uint64(time.Now().Unix()),
 					}); err != nil {
-						log.WithFields(log.Fields{"path": assertRes.Path, "error": err}).Error("add resource to playlist failed")
+						log.WithFields(log.Fields{"path": assertRes.Path, "unique": assertRes.Unique, "error": err}).Fatal("add resource to playlist failed")
 					}
 				}
 				continue
@@ -118,7 +118,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) 
 				End:        assertRes.End,
 				CreateTime: uint64(time.Now().Unix()),
 			}); err != nil {
-				log.WithFields(log.Fields{"path": assertRes.Path, "error": err, "type": "single"}).Error("add resource to playlist failed")
+				log.WithFields(log.Fields{"path": assertRes.Path, "unique": assertRes.Unique, "error": err, "type": "single"}).Fatal("add resource to playlist failed")
 			}
 		case *config.MixResource:
 			groups := TransferConfigToModuleResourceGroup(assertRes.Groups)
@@ -140,7 +140,7 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) 
 				MixResourceType: true,
 				Groups:          groups,
 			}); err != nil {
-				log.WithFields(log.Fields{"path": primaryResourceGroup, "groups": assertRes.Groups, "error": err, "type": "mix"}).Error("add resource to playlist failed")
+				log.WithFields(log.Fields{"path": primaryResourceGroup, "unique": assertRes.Unique, "groups": assertRes.Groups, "error": err, "type": "mix"}).Fatal("add resource to playlist failed")
 			}
 		default:
 			log.WithField("error", "invalid resource type").Fatal(item)

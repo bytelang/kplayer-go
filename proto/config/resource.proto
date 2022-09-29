@@ -19,7 +19,7 @@ enum ResourceMediaType{
 }
 
 message MixResourceGroup {
-  string path = 1;
+  string path = 1 [(gogoproto.moretags) = "validate:\"required\" mapstructure:\"unique\""];
   ResourceMediaType media_type = 2;
   bool persistent_loop = 3;
 }
@@ -33,7 +33,7 @@ message MixResource {
 
 message SingleResource{
   string unique = 1;
-  string path = 2;
+  string path = 2 [(gogoproto.moretags) = "validate:\"required\" mapstructure:\"unique\""];
   int64 seek = 3;
   int64 end = 4;
 }
