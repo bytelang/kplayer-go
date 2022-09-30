@@ -158,6 +158,14 @@ func (h *httpServer) StartServer(stopChan chan bool, mm module.ModuleManager, au
 
 			log.WithField("address", r.RemoteAddr).Debug("success connected websocket client")
 
+			// validate auth token
+			if h.authOn {
+				if r.Header.Get(AUTHORIZATION_METADATA_KEY) != h.authToken {
+					conn.WriteMessage(websocket.TextMessage, []byte("Connection forbidden. auth token invalid"))
+					return
+				}
+			}
+
 			// subscribe message
 			websocketName := "websocket-" + conn.RemoteAddr().String()
 			sub, err := cmd.SubscribeMessage(websocketName)
