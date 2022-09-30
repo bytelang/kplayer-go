@@ -15,7 +15,6 @@ import (
 	svrproto "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
-	"net/url"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -76,42 +75,75 @@ func (p *Provider) InitModule(ctx *kptypes.ClientContext, cfg *config.Resource) 
 	p.allowExtensions = cfg.Extensions
 
 	for _, item := range cfg.Lists {
-		// add resource directory
-		if files, err := kptypes.GetDirectorFiles(item); err == nil {
-			// sort file
-			sort.Strings(files)
-
-			for _, f := range files {
-				ext := filepath.Ext(f)
-				if len(ext) > 1 {
-					ext = ext[1:]
-				}
-				if p.allowExtensions != nil && !kptypes.ArrayInString(p.allowExtensions, ext) {
-					continue
-				}
-
-				if err := p.inputs.AppendResource(moduletypes.Resource{
-					Path:       f,
-					Unique:     kptypes.GetUniqueString(f),
-					Seek:       0,
-					End:        -1,
-					CreateTime: uint64(time.Now().Unix()),
-				}); err != nil {
-					log.WithFields(log.Fields{"path": item, "error": err}).Error("add resource to playlist failed")
-				}
-			}
-			continue
+		// parse resource item
+		res, err := kptypes.GetResourceItemByAny(item)
+		if err != nil {
+			log.WithField("content", item.String()).Fatal("not in the expected format")
 		}
 
-		// add resource file
-		if err := p.inputs.AppendResource(moduletypes.Resource{
-			Path:       item,
-			Unique:     kptypes.GetUniqueString(item),
-			Seek:       0,
-			End:        -1,
-			CreateTime: uint64(time.Now().Unix()),
-		}); err != nil {
-			log.WithFields(log.Fields{"path": item, "error": err}).Error("add resource to playlist failed")
+		switch assertRes := res.(type) {
+		case *config.SingleResource:
+			// add resource directory
+			if files, err := kptypes.GetDirectorFiles(assertRes.Path); err == nil {
+				// sort file
+				sort.Strings(files)
+
+				for _, f := range files {
+					ext := filepath.Ext(f)
+					if len(ext) > 1 {
+						ext = ext[1:]
+					}
+					if p.allowExtensions != nil && !kptypes.ArrayInString(p.allowExtensions, ext) {
+						continue
+					}
+
+					if err := p.inputs.AppendResource(moduletypes.Resource{
+						Path:       f,
+						Unique:     GetResourceUniqueName("", f),
+						Seek:       0,
+						End:        -1,
+						CreateTime: uint64(time.Now().Unix()),
+					}); err != nil {
+						log.WithFields(log.Fields{"path": assertRes.Path, "unique": assertRes.Unique, "error": err}).Fatal("add resource to playlist failed")
+					}
+				}
+				continue
+			}
+
+			// add resource file
+			if err := p.inputs.AppendResource(moduletypes.Resource{
+				Path:       assertRes.Path,
+				Unique:     GetResourceUniqueName(assertRes.Unique, assertRes.Path),
+				Seek:       assertRes.Seek,
+				End:        assertRes.End,
+				CreateTime: uint64(time.Now().Unix()),
+			}); err != nil {
+				log.WithFields(log.Fields{"path": assertRes.Path, "unique": assertRes.Unique, "error": err, "type": "single"}).Fatal("add resource to playlist failed")
+			}
+		case *config.MixResource:
+			groups := TransferConfigToModuleResourceGroup(assertRes.Groups)
+			firstVideoResourceGroup, firstAudioResourceGroup, primaryResourceGroup := CalcMixResourceGroupPrimaryPath(groups)
+
+			// eliminating all resources requires a loop
+			if firstVideoResourceGroup.PersistentLoop && firstAudioResourceGroup.PersistentLoop {
+				for key, _ := range groups {
+					groups[key].PersistentLoop = false
+				}
+			}
+
+			if err := p.inputs.AppendResource(moduletypes.Resource{
+				Path:            primaryResourceGroup.Path,
+				Unique:          GetResourceUniqueName(assertRes.Unique, primaryResourceGroup.Path, "MIX"),
+				Seek:            assertRes.Seek,
+				End:             assertRes.End,
+				CreateTime:      uint64(time.Now().Unix()),
+				MixResourceType: true,
+				Groups:          groups,
+			}); err != nil {
+				log.WithFields(log.Fields{"path": primaryResourceGroup, "unique": assertRes.Unique, "groups": assertRes.Groups, "error": err, "type": "mix"}).Fatal("add resource to playlist failed")
+			}
+		default:
+			log.WithField("error", "invalid resource type").Fatal(item)
 		}
 	}
 
@@ -127,7 +159,7 @@ func (p *Provider) ValidateConfig() error {
 		return fmt.Errorf("start point invalid. cannot great than total resource")
 	}
 
-	existName := []string{}
+	var existName []string
 	for _, item := range p.inputs.resources {
 		if kptypes.ArrayInString(existName, item.Unique) {
 			return ResourceUniqueHasExisted
@@ -172,7 +204,15 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 	case kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_RESOURCE_CHECKED:
 		msg := &kpmsg.EventMessageResourceChecked{}
 		kptypes.UnmarshalProtoMessage(message.Body, msg)
-		logFields := log.Fields{"path": msg.Resource.Path, "unique": msg.Resource.Unique, "duration": msg.InputAttribute.Duration}
+
+		// log field single and mix
+		logFields := log.Fields{"path": msg.Resource.Path,
+			"seek":     msg.Resource.Seek,
+			"end":      msg.Resource.End,
+			"unique":   msg.Resource.Unique,
+			"type":     strings.ToLower(msg.Resource.InputType.String()),
+			"duration": msg.InputAttribute.Duration}
+
 		if p.playProvider.GetCacheOn() {
 			logFields["hit_cache"] = msg.HitCache
 		}
@@ -214,12 +254,12 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 			p.currentIndex = p.currentIndex + 1
 			if p.currentIndex >= len(p.inputs.resources) {
 				p.currentIndex = 0
-				log.Infof("Running mode on [%s]. will a new loop will take place...", strings.ToLower(p.playProvider.GetPlayModel().String()))
+				log.Infof("running mode on [%s]. will a new loop will take place...", strings.ToLower(p.playProvider.GetPlayModel().String()))
 			}
 		case config.PLAY_MODEL_QUEUE:
 			p.currentIndex = p.currentIndex + 1
 			if p.currentIndex >= len(p.inputs.resources) {
-				log.Infof("Running mode on [%s]. wait for the resource file to be added...", strings.ToLower(p.playProvider.GetPlayModel().String()))
+				log.Infof("running mode on [%s]. wait for the resource file to be added...", strings.ToLower(p.playProvider.GetPlayModel().String()))
 				return // wait for new resource
 			}
 		case config.PLAY_MODEL_RANDOM:
@@ -255,20 +295,36 @@ func (p *Provider) addNextResourceToCore() {
 	encodePath := currentResource.Path
 
 	// protocol url encode
-	pathUrl, err := url.Parse(currentResource.Path)
-	if err == nil {
-		if pathUrl.Scheme == "http" || pathUrl.Scheme == "https" {
-			pathUrl.Query().Encode()
-			encodePath = pathUrl.String()
+	encodePath = kptypes.PathUrlEncode(currentResource.Path)
+
+	// input type
+	inputType := kpproto.ResourceInputType_RESOURCE_INPUT_TYPE_SINGLE
+	if currentResource.MixResourceType {
+		inputType = kpproto.ResourceInputType_RESOURCE_INPUT_TYPE_MIX
+	}
+
+	// groups
+	var groups []*kpproto.ResourceGroup
+	for _, item := range currentResource.Groups {
+		mediaType := kpproto.ResourceMediaType_RESOURCE_MEDIA_TYPE_VIDEO
+		if item.MediaType == moduletypes.ResourceMediaType_audio {
+			mediaType = kpproto.ResourceMediaType_RESOURCE_MEDIA_TYPE_AUDIO
 		}
+		groups = append(groups, &kpproto.ResourceGroup{
+			Path:           kptypes.PathUrlEncode(item.Path),
+			MediaType:      mediaType,
+			PersistentLoop: item.PersistentLoop,
+		})
 	}
 
 	if err := core.GetLibKplayerInstance().SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_RESOURCE_ADD, &prompt.EventPromptResourceAdd{
 		Resource: &kpproto.PromptResource{
-			Path:   encodePath,
-			Unique: currentResource.Unique,
-			Seek:   currentResource.Seek,
-			End:    currentResource.End,
+			Path:      encodePath,
+			Unique:    currentResource.Unique,
+			Seek:      currentResource.Seek,
+			End:       currentResource.End,
+			InputType: inputType,
+			Groups:    groups,
 		},
 	}); err != nil {
 		log.Warn(err)

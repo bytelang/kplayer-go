@@ -5,8 +5,35 @@ package ConfigProto;
 option go_package = "github.com/bytelang/kplayer/types/config";
 
 import "gogoproto/gogo.proto";
+import "google/protobuf/any.proto";
 
 message Resource {
-  repeated string lists = 1 [(gogoproto.nullable) = false];
+  repeated google.protobuf.Any lists = 1;
   repeated string extensions = 2 [(gogoproto.nullable) = false];
+}
+
+enum ResourceMediaType{
+  none = 0;
+  video = 1;
+  audio = 2;
+}
+
+message MixResourceGroup {
+  string path = 1 [(gogoproto.moretags) = "validate:\"required\" mapstructure:\"unique\""];
+  ResourceMediaType media_type = 2;
+  bool persistent_loop = 3;
+}
+
+message MixResource {
+  string unique = 1;
+  int64 seek = 4;
+  int64 end = 5;
+  repeated MixResourceGroup groups = 6;
+}
+
+message SingleResource{
+  string unique = 1;
+  string path = 2 [(gogoproto.moretags) = "validate:\"required\" mapstructure:\"unique\""];
+  int64 seek = 3;
+  int64 end = 4;
 }

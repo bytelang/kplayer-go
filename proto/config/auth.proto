@@ -7,6 +7,6 @@ option go_package = "github.com/bytelang/kplayer/types/config";
 import "gogoproto/gogo.proto";
 
 message Auth {
-  bool auth_on = 1 [(gogoproto.moretags) = "mapstructure:\"auth_on\""];;
-  string token = 2 [(gogoproto.moretags) = "validate:\"required,min=1\" mapstructure:\"token\""];;
+  bool auth_on = 1 [(gogoproto.moretags) = "mapstructure:\"auth_on\""];
+  string token = 2 [(gogoproto.moretags) = "validate:\"required,min=1\" mapstructure:\"token\""];
 }

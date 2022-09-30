@@ -21,37 +21,66 @@ func (p *Provider) ResourceAdd(ctx context.Context, args *svrproto.ResourceAddAr
 	defer p.input_mutex.Unlock()
 
 	// uri scheme parse
-	parseUrl, err := url.Parse(args.Path)
-	if err != nil {
-		return nil, fmt.Errorf("uri scheme invalid. path: %s", args.Path)
-	}
-	if parseUrl.Scheme == "" {
-		// determine whether the file exists
-		_, err := os.Stat(args.Path)
-		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("file not exists. path: %s", args.Path)
+	if !args.MixResourceType {
+		parseUrl, err := url.Parse(args.Path)
+		if err != nil {
+			return nil, fmt.Errorf("uri scheme invalid. path: %s", args.Path)
+		}
+		if parseUrl.Scheme == "" {
+			// determine whether the file exists
+			_, err := os.Stat(args.Path)
+			if os.IsNotExist(err) {
+				return nil, fmt.Errorf("file not exists. path: %s", args.Path)
+			}
+		}
+	} else {
+		for _, item := range args.Groups {
+			parseUrl, err := url.Parse(item.Path)
+			if err != nil {
+				return nil, fmt.Errorf("media_type %s. uri scheme invalid. path: %s", item.MediaType, item.Path)
+			}
+			if parseUrl.Scheme == "" {
+				// determine whether the file exists
+				_, err := os.Stat(item.Path)
+				if os.IsNotExist(err) {
+					return nil, fmt.Errorf("media_type: %s. file not exists. path: %s", item.MediaType, item.Path)
+				}
+			}
 		}
 	}
+
 	if args.End < args.Seek {
 		return nil, fmt.Errorf("end timestamp can not be less than start timestamp")
 	}
 
 	// append to playlist
-	if err := p.inputs.AppendResource(moduletypes.Resource{
-		Path:       args.Path,
-		Unique:     args.Unique,
-		Seek:       args.Seek,
-		End:        args.End,
-		CreateTime: uint64(time.Now().Unix()),
-	}); err != nil {
+	primaryPath := args.Path
+	moduleGroups := TransferServerToModuleResourceGroup(args.Groups)
+	if args.MixResourceType {
+		_, _, primaryResourceGroup := CalcMixResourceGroupPrimaryPath(moduleGroups)
+		primaryPath = primaryResourceGroup.Path
+	}
+	moduleResource := moduletypes.Resource{
+		Path:            primaryPath,
+		Unique:          args.Unique,
+		Seek:            args.Seek,
+		End:             args.End,
+		MixResourceType: args.MixResourceType,
+		CreateTime:      uint64(time.Now().Unix()),
+		Groups:          moduleGroups,
+	}
+
+	if err := p.inputs.AppendResource(moduleResource); err != nil {
 		return nil, err
 	}
 
 	reply := &svrproto.ResourceAddReply{Resource: &svrproto.Resource{}}
-	reply.Resource.Unique = args.Unique
-	reply.Resource.Path = args.Path
-	reply.Resource.Seek = args.Seek
-	reply.Resource.End = args.End
+	reply.Resource.Unique = moduleResource.Unique
+	reply.Resource.Path = moduleResource.Path
+	reply.Resource.Seek = moduleResource.Seek
+	reply.Resource.End = moduleResource.End
+	reply.Resource.MixResourceType = moduleResource.MixResourceType
+	reply.Resource.Groups = args.Groups
 
 	return reply, nil
 }
@@ -88,14 +117,30 @@ func (p *Provider) ResourceRemove(ctx context.Context, args *svrproto.ResourceRe
 func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceListArgs) (*svrproto.ResourceListReply, error) {
 	var res []*svrproto.Resource
 	for _, item := range p.inputs.resources[p.currentIndex+1:] {
+		var groups []*svrproto.MixResourceGroup
+		for _, groupItem := range item.Groups {
+			groups = append(groups, &svrproto.MixResourceGroup{
+				Path: groupItem.Path,
+				MediaType: func() svrproto.ResourceMediaType {
+					if groupItem.MediaType == moduletypes.ResourceMediaType_audio {
+						return svrproto.ResourceMediaType_audio
+					}
+					return svrproto.ResourceMediaType_video
+				}(),
+				PersistentLoop: groupItem.PersistentLoop,
+			})
+		}
+
 		res = append(res, &svrproto.Resource{
-			Path:       item.Path,
-			Unique:     item.Unique,
-			Seek:       item.Seek,
-			End:        item.End,
-			CreateTime: item.CreateTime,
-			StartTime:  item.StartTime,
-			EndTime:    item.EndTime,
+			Path:            item.Path,
+			Unique:          item.Unique,
+			Seek:            item.Seek,
+			End:             item.End,
+			CreateTime:      item.CreateTime,
+			StartTime:       item.StartTime,
+			EndTime:         item.EndTime,
+			MixResourceType: item.MixResourceType,
+			Groups:          groups,
 		})
 
 	}
@@ -106,16 +151,32 @@ func (p *Provider) ResourceList(ctx context.Context, args *svrproto.ResourceList
 }
 
 func (p *Provider) ResourceListAll(ctx context.Context, args *svrproto.ResourceListAllArgs) (*svrproto.ResourceListAllReply, error) {
-	res := []*svrproto.Resource{}
+	var res []*svrproto.Resource
 	for _, item := range p.inputs.resources {
+		var groups []*svrproto.MixResourceGroup
+		for _, groupItem := range item.Groups {
+			groups = append(groups, &svrproto.MixResourceGroup{
+				Path: groupItem.Path,
+				MediaType: func() svrproto.ResourceMediaType {
+					if groupItem.MediaType == moduletypes.ResourceMediaType_audio {
+						return svrproto.ResourceMediaType_audio
+					}
+					return svrproto.ResourceMediaType_video
+				}(),
+				PersistentLoop: groupItem.PersistentLoop,
+			})
+		}
+
 		res = append(res, &svrproto.Resource{
-			Path:       item.Path,
-			Unique:     item.Unique,
-			Seek:       item.Seek,
-			End:        item.End,
-			CreateTime: item.CreateTime,
-			StartTime:  item.StartTime,
-			EndTime:    item.EndTime,
+			Path:            item.Path,
+			Unique:          item.Unique,
+			Seek:            item.Seek,
+			End:             item.End,
+			CreateTime:      item.CreateTime,
+			StartTime:       item.StartTime,
+			EndTime:         item.EndTime,
+			MixResourceType: item.MixResourceType,
+			Groups:          groups,
 		})
 
 	}
@@ -150,9 +211,32 @@ func (p *Provider) CoreResourceList() (*svrproto.ResourceListReply, error) {
 
 	reply := &svrproto.ResourceListReply{}
 	for _, item := range resourceListMsg.Resources {
+		var groups []*svrproto.MixResourceGroup
+		for _, groupItem := range item.Groups {
+			groups = append(groups, &svrproto.MixResourceGroup{
+				Path: groupItem.Path,
+				MediaType: func() svrproto.ResourceMediaType {
+					if groupItem.MediaType == kpproto.ResourceMediaType_RESOURCE_MEDIA_TYPE_AUDIO {
+						return svrproto.ResourceMediaType_audio
+					}
+					return svrproto.ResourceMediaType_video
+				}(),
+				PersistentLoop: groupItem.PersistentLoop,
+			})
+		}
+
+		mixResourceType := false
+		if item.InputType == kpproto.ResourceInputType_RESOURCE_INPUT_TYPE_MIX {
+			mixResourceType = true
+		}
+
 		reply.Resources = append(reply.Resources, &svrproto.Resource{
-			Path:   item.Path,
-			Unique: item.Unique,
+			Path:            item.Path,
+			Unique:          item.Unique,
+			Seek:            item.Seek,
+			End:             item.End,
+			MixResourceType: mixResourceType,
+			Groups:          groups,
 		})
 	}
 
@@ -187,18 +271,35 @@ func (p *Provider) ResourceCurrent(ctx context.Context, args *svrproto.ResourceC
 		return nil, err
 	}
 
-	resourceDuration := time.Duration(time.Second * time.Duration(resourceCurrentMsg.Duration))
-	resourceSeek := time.Duration(time.Second * time.Duration(resourceCurrentMsg.Seek))
+	resourceDuration := time.Second * time.Duration(resourceCurrentMsg.Duration)
+	resourceSeek := time.Second * time.Duration(resourceCurrentMsg.Seek)
+
+	// groups
+	var groups []*svrproto.MixResourceGroup
+	for _, groupItem := range currentRes.Groups {
+		groups = append(groups, &svrproto.MixResourceGroup{
+			Path: groupItem.Path,
+			MediaType: func() svrproto.ResourceMediaType {
+				if groupItem.MediaType == moduletypes.ResourceMediaType_audio {
+					return svrproto.ResourceMediaType_audio
+				}
+				return svrproto.ResourceMediaType_video
+			}(),
+			PersistentLoop: groupItem.PersistentLoop,
+		})
+	}
 
 	reply := &svrproto.ResourceCurrentReply{
 		Resource: &svrproto.Resource{
-			Path:       resourceCurrentMsg.Resource.Path,
-			Seek:       resourceCurrentMsg.Resource.Seek,
-			End:        resourceCurrentMsg.Resource.End,
-			Unique:     resourceCurrentMsg.Resource.Unique,
-			CreateTime: currentRes.CreateTime,
-			StartTime:  currentRes.StartTime,
-			EndTime:    currentRes.EndTime,
+			Path:            resourceCurrentMsg.Resource.Path,
+			Seek:            resourceCurrentMsg.Resource.Seek,
+			End:             resourceCurrentMsg.Resource.End,
+			Unique:          resourceCurrentMsg.Resource.Unique,
+			CreateTime:      currentRes.CreateTime,
+			StartTime:       currentRes.StartTime,
+			EndTime:         currentRes.EndTime,
+			MixResourceType: currentRes.MixResourceType,
+			Groups:          groups,
 		},
 		Duration:       resourceCurrentMsg.Duration,
 		DurationFormat: fmt.Sprintf("%d:%d:%d", uint64(resourceDuration.Hours()), uint64(resourceDuration.Minutes())%60, uint64(resourceDuration.Seconds())%60),
@@ -258,15 +359,32 @@ func (p *Provider) ResourceSeek(ctx context.Context, args *svrproto.ResourceSeek
 		return nil, fmt.Errorf("%s", resourceSeek.Error)
 	}
 
+	// groups
+	var groups []*svrproto.MixResourceGroup
+	for _, groupItem := range seekRes.Groups {
+		groups = append(groups, &svrproto.MixResourceGroup{
+			Path: groupItem.Path,
+			MediaType: func() svrproto.ResourceMediaType {
+				if groupItem.MediaType == moduletypes.ResourceMediaType_audio {
+					return svrproto.ResourceMediaType_audio
+				}
+				return svrproto.ResourceMediaType_video
+			}(),
+			PersistentLoop: groupItem.PersistentLoop,
+		})
+	}
+
 	reply := &svrproto.ResourceSeekReply{
 		Resource: &svrproto.Resource{
-			Path:       resourceSeek.Resource.Path,
-			Unique:     resourceSeek.Resource.Unique,
-			Seek:       resourceSeek.Resource.Seek,
-			End:        resourceSeek.Resource.End,
-			CreateTime: seekRes.CreateTime,
-			StartTime:  seekRes.StartTime,
-			EndTime:    seekRes.EndTime,
+			Path:            resourceSeek.Resource.Path,
+			Unique:          resourceSeek.Resource.Unique,
+			Seek:            resourceSeek.Resource.Seek,
+			End:             resourceSeek.Resource.End,
+			CreateTime:      seekRes.CreateTime,
+			StartTime:       seekRes.StartTime,
+			EndTime:         seekRes.EndTime,
+			MixResourceType: seekRes.MixResourceType,
+			Groups:          groups,
 		},
 	}
 

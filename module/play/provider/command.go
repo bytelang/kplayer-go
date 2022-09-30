@@ -380,7 +380,7 @@ func startCommand() *cobra.Command {
 			}
 
 			// module option
-			moduleOptions := []module.ModuleOption{}
+			var moduleOptions []module.ModuleOption
 			if cmd.Flag(FlagGenerateCache).Value.String() == FlagYesValue {
 				moduleOptions = append(moduleOptions, module.ModuleOptionGenerateCache)
 			}
@@ -413,10 +413,12 @@ func startCommand() *cobra.Command {
 			}()
 
 			go func() {
-				(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm,
-					cfg.Auth.AuthOn,
-					cfg.Auth.Token,
-				)
+				if cfg.Play.Rpc.On {
+					(svrCreator).(kpserver.ServerCreator).StartServer(serverStopChan, mm,
+						cfg.Auth.AuthOn,
+						cfg.Auth.Token,
+					)
+				}
 			}()
 
 			// start core

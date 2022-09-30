@@ -563,6 +563,20 @@
     }
   },
   "definitions": {
+    "RPCProtoMixResourceGroup": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "mediaType": {
+          "$ref": "#/definitions/RPCProtoResourceMediaType"
+        },
+        "persistentLoop": {
+          "type": "boolean"
+        }
+      }
+    },
     "RPCProtoOutput": {
       "type": "object",
       "properties": {
@@ -823,6 +837,15 @@
         "endTime": {
           "type": "string",
           "format": "uint64"
+        },
+        "mixResourceType": {
+          "type": "boolean"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RPCProtoMixResourceGroup"
+          }
         }
       },
       "title": "res"
@@ -843,6 +866,15 @@
         "end": {
           "type": "string",
           "format": "int64"
+        },
+        "mixResourceType": {
+          "type": "boolean"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RPCProtoMixResourceGroup"
+          }
         }
       },
       "title": "add"
@@ -901,6 +933,15 @@
           }
         }
       }
+    },
+    "RPCProtoResourceMediaType": {
+      "type": "string",
+      "enum": [
+        "none",
+        "video",
+        "audio"
+      ],
+      "default": "none"
     },
     "RPCProtoResourceRemoveReply": {
       "type": "object",

@@ -102,6 +102,9 @@ func messageConsumer(action int, body string) {
 	}
 
 	go func() {
+		subscribeMutex.Lock()
+		defer subscribeMutex.Unlock()
+
 		for _, item := range subscribeCollector {
 			item <- *message
 		}
@@ -118,4 +121,11 @@ func SubscribeMessage(name string) (chan kpproto.KPMessage, error) {
 
 	subscribeCollector[name] = make(chan kpproto.KPMessage, 500)
 	return subscribeCollector[name], nil
+}
+
+func CancelSubscribeMessage(name string) {
+	subscribeMutex.Lock()
+	defer subscribeMutex.Unlock()
+
+	delete(subscribeCollector, name)
 }

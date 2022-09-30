@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"github.com/bytelang/kplayer/types"
 	"github.com/bytelang/kplayer/types/config"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/manifoldco/promptui"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/types/known/anypb"
 	"io/ioutil"
 	"os"
 	"path"
@@ -67,10 +69,14 @@ func exportConfigFile(cfg *config.KPConfig, path string) error {
 }
 
 func getDefaultConfig() *config.KPConfig {
+	res := &config.SingleResource{
+		Path: "/video/exmaple.mp4",
+	}
+	pbs, _ := ptypes.MarshalAny(res)
 	return &config.KPConfig{
 		Version: ConfigVersion,
 		Resource: config.Resource{
-			Lists:      []string{"/video/example.mp4"},
+			Lists:      []*anypb.Any{pbs},
 			Extensions: []string{"mp4", "flv"},
 		},
 		Play: config.Play{
@@ -146,7 +152,11 @@ func initInteractionConfig() (*config.KPConfig, error) {
 					filePath := item.Name()
 					if _, ok := allowExtension[path.Ext(filePath)]; ok {
 						path.Join()
-						cfg.Resource.Lists = append(cfg.Resource.Lists, path.Join(line, filePath))
+						res := &config.SingleResource{
+							Path: path.Join(line, filePath),
+						}
+						pbs, _ := ptypes.MarshalAny(res)
+						cfg.Resource.Lists = append(cfg.Resource.Lists, pbs)
 					}
 				}
 			}
