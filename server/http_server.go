@@ -27,8 +27,6 @@ import (
 	"net/http"
 )
 
-const AUTHORIZATION_METADATA_KEY = "Authorization"
-
 type httpServer struct {
 	authOn    bool
 	authToken string
@@ -74,7 +72,7 @@ func (h *httpServer) StartServer(stopChan chan bool, mm module.ModuleManager, au
 			if !exist {
 				return nil, autherror.AuthTokenNotExists
 			}
-			token := md.Get(AUTHORIZATION_METADATA_KEY)
+			token := md.Get(server.AUTHORIZATION_METADATA_KEY)
 			if h.authOn && token[0] != h.authToken {
 				return nil, status.Error(codes.Unauthenticated, autherror.AuthTokenInvalid.Error())
 			}
@@ -142,7 +140,7 @@ func (h *httpServer) StartServer(stopChan chan bool, mm module.ModuleManager, au
 			runtime.WithErrorHandler(protoErrorHandle),
 			runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
 				switch key {
-				case AUTHORIZATION_METADATA_KEY:
+				case server.AUTHORIZATION_METADATA_KEY:
 					return key, true
 				}
 				return "", false
@@ -166,7 +164,7 @@ func (h *httpServer) StartServer(stopChan chan bool, mm module.ModuleManager, au
 
 			// validate auth token
 			if h.authOn {
-				if r.Header.Get(AUTHORIZATION_METADATA_KEY) != h.authToken {
+				if r.Header.Get(server.AUTHORIZATION_METADATA_KEY) != h.authToken {
 					conn.WriteMessage(websocket.TextMessage, []byte("Connection forbidden. auth token invalid"))
 					return
 				}
@@ -226,8 +224,8 @@ func (h *httpServer) StartServer(stopChan chan bool, mm module.ModuleManager, au
 		}
 	}()
 
-	log.WithFields(log.Fields{"address": playModule.GetRPCParams().Address, "port": playModule.GetRPCParams().GrpcPort}).Info("grpc server listening")
-	log.WithFields(log.Fields{"address": playModule.GetRPCParams().Address, "port": playModule.GetRPCParams().HttpPort}).Info("http server listening")
+	log.WithFields(log.Fields{"address": playModule.GetRPCParams().Address, "port": playModule.GetRPCParams().GrpcPort, "token": h.authOn}).Info("grpc server listening")
+	log.WithFields(log.Fields{"address": playModule.GetRPCParams().Address, "port": playModule.GetRPCParams().HttpPort, "token": h.authOn}).Info("http server listening")
 
 	<-stopChan
 	grpcSvc.Stop()

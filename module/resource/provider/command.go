@@ -8,6 +8,7 @@ import (
 	kpserver "github.com/bytelang/kplayer/types/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc/metadata"
 	"strconv"
 )
 
@@ -223,7 +224,8 @@ func CurrentCommand() *cobra.Command {
 			}
 
 			resourceClient := kpserver.NewResourceGreeterClient(conn)
-			reply, err := resourceClient.ResourceCurrent(context.Background(), &kpserver.ResourceCurrentArgs{})
+			ctx := metadata.NewOutgoingContext(context.Background(), metadata.Pairs(kpserver.AUTHORIZATION_METADATA_KEY, clientCtx.Config.Auth.Token))
+			reply, err := resourceClient.ResourceCurrent(ctx, &kpserver.ResourceCurrentArgs{})
 			if err != nil {
 				log.Error(err)
 				return nil
