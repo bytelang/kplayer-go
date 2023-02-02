@@ -7,11 +7,12 @@ option go_package = "github.com/bytelang/kplayer/types/server";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "resource.proto";
+import "validate/validate.proto";
 
 // plugin
 message Plugin {
-  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
-  string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+  string path = 1 [(validate.rules).string.min_len = 1];
+  string unique = 2 [(validate.rules).string.min_len = 1];
   uint64 create_time = 3 [(gogoproto.jsontag) = "create_time"];
   uint64 loaded_time = 4 [(gogoproto.jsontag) = "loaded_time"];
   map<string, string> params = 5;
@@ -26,8 +27,8 @@ message PluginListReply {
 
 // add
 message PluginAddArgs {
-  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
-  string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
+  string path = 1 [(validate.rules).string.min_len = 1];
+  string unique = 2 [(validate.rules).string.min_len = 1];
   map<string, string> params = 5;
 }
 message PluginAddReplay {

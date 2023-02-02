@@ -40,6 +40,10 @@ func NewHttpServer() *httpServer {
 
 var _ server.ServerCreator = &httpServer{}
 
+type Validator interface {
+	Validate() error
+}
+
 func (h *httpServer) StartServer(stopChan chan bool, mm module.ModuleManager, authOn bool, authToken string) {
 	h.authToken = authToken
 	h.authOn = authOn
@@ -59,8 +63,10 @@ func (h *httpServer) StartServer(stopChan chan bool, mm module.ModuleManager, au
 		}),
 	}
 	reqValidatorInterceptor := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-		if err := kptypes.ValidateStructor(req); err != nil {
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+		if p, ok := req.(Validator); ok {
+			if err := p.Validate(); err != nil {
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
 		}
 
 		if len(h.authToken) != 0 {

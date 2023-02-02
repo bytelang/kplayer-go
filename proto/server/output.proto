@@ -6,15 +6,16 @@ option go_package = "github.com/bytelang/kplayer/types/server";
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "validate/validate.proto";
 
 message Output {
-  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+  string path = 1 [(validate.rules).string.min_len = 1];
   string unique = 2;
 }
 
 // add
 message OutputAddArgs {
-  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
+  string path = 1 [(validate.rules).string.min_len = 1];
   string unique = 2;
 }
 message OutputAddReply {
@@ -23,7 +24,7 @@ message OutputAddReply {
 
 // remove
 message OutputRemoveArgs {
-  string unique = 1;
+  string unique = 1 [(validate.rules).string.min_len = 1];
 }
 message OutputRemoveReply {
   Output output = 1;

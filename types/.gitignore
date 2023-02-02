@@ -3,5 +3,7 @@ core/proto/*.pb.go
 core/proto/msg/*.pb.go
 core/proto/prompt/*.pb.go
 server/*.pb.go
+server/*.pb.validate.go
+server/*.pb.gw.go
 module/*.pb.go
 api/*.pb.go

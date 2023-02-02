@@ -6,6 +6,7 @@ option go_package = "github.com/bytelang/kplayer/types/server";
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "validate/validate.proto";
 
 enum ResourceMediaType{
   none = 0;
@@ -21,9 +22,9 @@ message MixResourceGroup {
 
 // res
 message Resource {
-  string path = 1 [(gogoproto.moretags) = "validate:\"required\""];
-  string unique = 2 [(gogoproto.moretags) = "validate:\"required\""];
-  int64 seek = 3 [(gogoproto.moretags) = "validate:\"number\""];
+  string path = 1 [(validate.rules).string.min_len = 1];
+  string unique = 2 [(validate.rules).string.min_len = 1];
+  int64 seek = 3 [(validate.rules).int64.gt = 0];
   int64 end = 4 [(gogoproto.moretags) = "validate:\"number\""];
   uint64 create_time = 5 [(gogoproto.jsontag) = "create_time"];
   uint64 start_time = 6 [(gogoproto.jsontag) = "start_time"];

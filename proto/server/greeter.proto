@@ -48,6 +48,17 @@ service PlayGreeter {
       get: "/play/information"
     };
   }
+  rpc PlayGetEncodeConfig(PlayEncodeConfigArgs) returns (PlayEncodeConfigReplay){
+    option (google.api.http) = {
+      get: "/play/encode"
+    };
+  }
+  rpc PlayEncodeSetAvgQuality(PlayEncodeSetAvgQualityArgs) returns (PlayEncodeSetAvgQualityReplay){
+    option (google.api.http) = {
+      post: "/play/encode/avg_quality"
+      body:"*"
+    };
+  }
 }
 
 service OutputGreeter {

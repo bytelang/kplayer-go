@@ -155,3 +155,67 @@ func (p *Provider) GetRPCParams() config.Server {
 func (p *Provider) GetCacheOn() bool {
 	return p.cacheOn
 }
+
+func (p *Provider) PlayGetEncodeConfig(ctx context.Context, args *svrproto.PlayEncodeConfigArgs) (*svrproto.PlayEncodeConfigReplay, error) {
+	coreKplayer := core.GetLibKplayerInstance()
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_OUTPUT_OPTION, &prompt.EventPromptPlayerOutputOption{}); err != nil {
+		return nil, err
+	}
+
+	// register prompt
+	outputOptionMsg := &msg.EventMessagePlayerOutputOption{}
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_OUTPUT_OPTION, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, outputOptionMsg)
+		return true
+	})
+	defer keeperCtx.Close()
+
+	if err := p.RegisterKeeperChannel(keeperCtx); err != nil {
+		return nil, err
+	}
+
+	// wait context
+	keeperCtx.Wait()
+	if len(outputOptionMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", outputOptionMsg.Error)
+	}
+
+	reply := &svrproto.PlayEncodeConfigReplay{
+		VideoWidth:         outputOptionMsg.VideoScaleWidth,
+		VideoHeight:        outputOptionMsg.VideoScaleHeight,
+		VideoFps:           outputOptionMsg.VideoFps,
+		AudioChannelLayout: outputOptionMsg.AudioChannelLayout,
+		AudioSampleRate:    outputOptionMsg.AudioSampleRate,
+		BitRate:            outputOptionMsg.VideoBitrate,
+		AvgQuality:         outputOptionMsg.VideoQuality,
+	}
+	return reply, nil
+}
+
+func (p *Provider) PlayEncodeSetAvgQuality(ctx context.Context, args *svrproto.PlayEncodeSetAvgQualityArgs) (*svrproto.PlayEncodeSetAvgQualityReplay, error) {
+	coreKplayer := core.GetLibKplayerInstance()
+	if err := coreKplayer.SendPrompt(kpproto.EventPromptAction_EVENT_PROMPT_ACTION_PLAYER_SET_QUALITY, &prompt.EventPromptPlayerSetQuality{Quality: args.AvgQuality}); err != nil {
+		return nil, err
+	}
+
+	// register prompt
+	setQualityMsg := &msg.EventMessagePlayerSetQuality{}
+	keeperCtx := module.NewKeeperContext(kptypes.GetRandString(), kpproto.EventMessageAction_EVENT_MESSAGE_ACTION_PLAYER_SET_QUALITY, func(msg string) bool {
+		kptypes.UnmarshalProtoMessage(msg, setQualityMsg)
+		return true
+	})
+	defer keeperCtx.Close()
+
+	if err := p.RegisterKeeperChannel(keeperCtx); err != nil {
+		return nil, err
+	}
+
+	// wait context
+	keeperCtx.Wait()
+	if len(setQualityMsg.Error) != 0 {
+		return nil, fmt.Errorf("%s", setQualityMsg.Error)
+	}
+
+	reply := &svrproto.PlayEncodeSetAvgQualityReplay{}
+	return reply, nil
+}

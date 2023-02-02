@@ -7,6 +7,7 @@ option go_package = "github.com/bytelang/kplayer/types/server";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "resource.proto";
+import "validate/validate.proto";
 
 
 message PlayStopArgs {
@@ -45,4 +46,22 @@ message PlayInformationReply {
   string license_version = 4;
   string start_time = 5;
   uint64 start_time_timestamp = 6;
+}
+
+message PlayEncodeConfigArgs{
+}
+message PlayEncodeConfigReplay{
+  int32  video_width = 1;
+  int32  video_height = 2;
+  uint64 video_fps = 3;
+  int32  audio_channel_layout = 4;
+  int32  audio_sample_rate = 5;
+  int64  bit_rate = 6;
+  uint64 avg_quality = 7;
+}
+
+message PlayEncodeSetAvgQualityArgs{
+  int64 avg_quality = 1 [(validate.rules).int64 = {gte: 1, lte: 20}];
+}
+message PlayEncodeSetAvgQualityReplay{
 }
