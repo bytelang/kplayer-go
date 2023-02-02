@@ -50,5 +50,5 @@ message Encode {
   uint32 audio_channels = 5 [(gogoproto.moretags) = "validate:\"gt=0\" mapstructure:\"audio_channels\""];
   uint32 audio_sample_rate = 6 [(gogoproto.moretags) = "validate:\"gt=0,oneof=48000 44100\" mapstructure:\"audio_sample_rate\""];
   uint32 bit_rate = 7 [(gogoproto.moretags) = "validate:\"gte=0\" mapstructure:\"bit_rate\""];
-  uint32 avg_quality = 8 [(gogoproto.moretags) = "validate:\"gte=0,lt=20\" mapstructure:\"avg_quality\""];
+  uint32 avg_quality = 8 [(gogoproto.moretags) = "validate:\"gte=0,lte=30\" mapstructure:\"avg_quality\""];
 }

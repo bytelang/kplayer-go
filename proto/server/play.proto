@@ -61,7 +61,7 @@ message PlayEncodeConfigReplay{
 }
 
 message PlayEncodeSetAvgQualityArgs{
-  int64 avg_quality = 1 [(validate.rules).int64 = {gte: 1, lte: 20}];
+  int64 avg_quality = 1 [(validate.rules).int64 = {gte: 1, lte: 30}];
 }
 message PlayEncodeSetAvgQualityReplay{
 }
