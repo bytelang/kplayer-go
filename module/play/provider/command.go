@@ -359,6 +359,9 @@ func startCommand() *cobra.Command {
 			}
 			coreKplayer.SetCacheOn(cfg.Play.CacheOn)
 			coreKplayer.SetSkipInvalidResource(cfg.Play.SkipInvalidResource)
+			if cfg.Play.CacheUncheck {
+				coreKplayer.SetCacheUncheckSource()
+			}
 
 			serverStopChan := make(chan bool)
 

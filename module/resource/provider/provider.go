@@ -254,7 +254,7 @@ func (p *Provider) ParseMessage(message *kpproto.KPMessage) {
 			p.currentIndex = p.currentIndex + 1
 			if p.currentIndex >= len(p.inputs.resources) {
 				p.currentIndex = 0
-				log.Infof("running mode on [%s]. will a new loop will take place...", strings.ToLower(p.playProvider.GetPlayModel().String()))
+				log.Debug("running mode on [%s]. will a new loop will take place...", strings.ToLower(p.playProvider.GetPlayModel().String()))
 			}
 		case config.PLAY_MODEL_QUEUE:
 			p.currentIndex = p.currentIndex + 1
