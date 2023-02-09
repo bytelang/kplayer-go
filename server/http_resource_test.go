@@ -59,22 +59,7 @@ func TestResourceAdd(t *testing.T) {
 	}
 
 	// remove
-	{
-		req, err := http.NewRequest("DELETE", Host+"resource/remove/resource-1", nil)
-		assertError(t, err)
-
-		resp, err := getClient().Do(req)
-		assertError(t, err)
-
-		body, err := ioutil.ReadAll(resp.Body)
-		assertError(t, err)
-
-		if resp.StatusCode != http.StatusOK {
-			t.Fatal(string(body))
-		}
-
-		t.Log(string(body))
-	}
+	defer removeResource("resource-1", t)
 
 	// validate
 	{
@@ -95,7 +80,7 @@ func TestResourceAdd(t *testing.T) {
 
 		resourcePath := gjson.Parse(string(body)).Get("resources.0.path").String()
 		if resourcePath == "short.flv" {
-			t.Fatal("add resource failed")
+			t.Fatal("add resource failed", string(body))
 		}
 	}
 }
@@ -160,22 +145,7 @@ func TestMixResourceAdd(t *testing.T) {
 	}
 
 	// remove
-	{
-		req, err := http.NewRequest("DELETE", Host+"resource/remove/resource-1", nil)
-		assertError(t, err)
-
-		resp, err := getClient().Do(req)
-		assertError(t, err)
-
-		body, err := ioutil.ReadAll(resp.Body)
-		assertError(t, err)
-
-		if resp.StatusCode != http.StatusOK {
-			t.Fatal(string(body))
-		}
-
-		t.Log(string(body))
-	}
+	removeResource("resource-1", t)
 
 	// validate
 	{
@@ -248,6 +218,7 @@ func TestResourceSeekStart(t *testing.T) {
 }
 
 func TestMixResourceSeekUnique(t *testing.T) {
+	defer removeResource("resource-1", t)
 	{
 		postData := struct {
 			Unique          string                   `json:"unique"`
@@ -322,6 +293,9 @@ func TestMixResourceSeekUnique(t *testing.T) {
 
 func TestMixResourceSeekStart(t *testing.T) {
 	TestMixResourceSeekUnique(t)
+	defer func() {
+		removeResource("resource-1", t)
+	}()
 
 	uniqueName, preSeek := getCurrentResourceSeek(t)
 	if preSeek <= 5 {
@@ -453,5 +427,25 @@ func TestResourceSeekDuration(t *testing.T) {
 		if seek > 5 {
 			t.Fatalf("seek failed. seek: %d", seek)
 		}
+	}
+}
+
+func removeResource(unique string, t *testing.T) {
+	// remove
+	{
+		req, err := http.NewRequest("DELETE", Host+"resource/remove/"+unique, nil)
+		assertError(t, err)
+
+		resp, err := getClient().Do(req)
+		assertError(t, err)
+
+		body, err := ioutil.ReadAll(resp.Body)
+		assertError(t, err)
+
+		if resp.StatusCode != http.StatusOK {
+			t.Fatal(string(body))
+		}
+
+		t.Log(string(body))
 	}
 }
