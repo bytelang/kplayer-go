@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  kplayer:
+    image: bytelang/kplayer:latest
+    # Only available on Linux
+    # network_mode: "host"
+    volumes:
+      - $PWD/video:/video
+      - $PWD/config.json:/kplayer/config.json
